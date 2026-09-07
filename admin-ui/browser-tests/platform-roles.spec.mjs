@@ -77,7 +77,7 @@ test('platform role drafts are saved, checked and activated explicitly', async (
   });
   await page.goto('/administration/login');
   await page.getByRole('button', { name: 'Rollen & Rechte', exact: true }).click();
-  await page.getByRole('button', { name: 'Support', exact: true }).click();
+  await page.locator('.rights-roletabs').getByRole('button', { name: 'Support', exact: true }).click();
   await expect(page.getByRole('switch', { name: 'Audit Log ansehen', exact: true })).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: 'test-results/roles-desktop.png', fullPage: true });
