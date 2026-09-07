@@ -52,7 +52,12 @@ test('platform role drafts are saved, checked and activated explicitly', async (
   });
   await page.goto('/administration/login');
   await page.getByRole('button', { name: 'Rollen & Rechte', exact: true }).click();
-  await page.getByRole('checkbox', { name: /Audit Log ansehen/ }).check();
+  await page.screenshot({ path: 'test-results/roles-desktop.png', fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole('button', { name: 'Lokal speichern', exact: true })).toBeVisible();
+  await page.screenshot({ path: 'test-results/roles-mobile.png', fullPage: true });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.getByRole('switch', { name: 'Audit Log ansehen', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Rechte aktivieren', exact: true })).toBeDisabled();
   await page.getByRole('button', { name: 'Lokal speichern', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Entwurf prüfen', exact: true })).toBeEnabled();

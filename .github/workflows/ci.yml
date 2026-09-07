@@ -51,6 +51,12 @@ jobs:
       - run: npx playwright install --with-deps chromium
         working-directory: admin-ui
       - run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: role-design-preview
+          path: admin-ui/test-results/roles-*.png
+          if-no-files-found: ignore
         working-directory: admin-ui
   windows-syntax:
     runs-on: windows-latest

@@ -155,3 +155,9 @@ Administration → Rollen & Rechte verwaltet Plattformrollen. „Lokal speichern
 Administration → Module zeigt die tatsächlich registrierten Module, Versionen und Abhängigkeiten. Kauf, mandantenbezogene Aktivierung und unabhängige Composer-/npm-Auslieferung sind noch nicht implementiert. Datenbankserver bleiben Prüfziele; Provisionierung erfolgt lokal.
 
 Neue Versionspakete sind weiterhin für Neuinstallationen vorgesehen. Der Installer verweigert einen Versionswechsel einer vorhandenen Installation; vorhandene Datenordner nicht löschen oder mit einem neuen Paket überschreiben.
+
+## SQL-Verbindungsdaten
+
+Administration → SQL-Zugangsdaten zeigt Systemadministratoren Host, Port, Datenbank und Anwendungsbenutzer der Plattform und fertig eingerichteter Restaurants. „SQL-Passwort anzeigen“ verlangt das aktuelle Administratorkennwort erneut. Der Abruf ist auf fünf Versuche pro Minute begrenzt und nur über HTTPS oder auf dem lokalen Rechner möglich. Passwörter werden nicht in Listen oder Audit-Einträgen gespeichert und nach 30 Sekunden beziehungsweise beim Verlassen des Fensters ausgeblendet. Gezeigt werden Anwendungszugänge, keine MySQL-Root- oder Provisionierungszugänge.
+
+Die Plattformrollen orientieren sich nun an der Vorlage: Aktionsleiste, Rollenreiter, Gruppenschalter und einzelne Berechtigungszeilen. Neue Rollen können die aktiven Rechte einer bestehenden ungesperrten Rolle als Entwurf übernehmen. Berechtigungscodes selbst werden weiterhin ausschließlich durch Module registriert.

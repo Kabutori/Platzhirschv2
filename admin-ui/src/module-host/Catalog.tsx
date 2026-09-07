@@ -1,28 +1,111 @@
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { Blocks, LockKeyhole } from 'lucide-react';
 import { api } from '../api';
+type Module = {
+  code: string;
+  version: string;
+  dependencies: Record<string, string>;
+  optional_dependencies?: Record<string, string>;
+  permissions: { code: string; label: string; permissions: { code: string; label: string }[] }[];
+};
+const labels: Record<string, { name: string; description: string }> = {
+  identity: { name: 'Identity', description: 'Plattformrollen, Berechtigungen und Rollenzuordnung.' },
+  provisioning: {
+    name: 'Provisioning',
+    description: 'Datenbankserver registrieren und ihre Verbindung und Rechte prüfen.',
+  },
+};
 export default function Catalog() {
-  const q = useQuery({ queryKey: ['installed-modules'], queryFn: () => api('v1/admin/modules') });
+  const q = useQuery({ queryKey: ['installed-modules'], queryFn: () => api<Module[]>('v1/admin/modules') });
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState<string>();
+  const detail = q.data?.find((m) => m.code === selected);
   return (
-    <section className="panel padded">
-      <h2>Installierte Module</h2>
-      <p>
-        Diese Module sind Bestandteil des installierten Releases. Weitere Pakete und Versionen werden beim
-        Release-Bau eingebunden.
-      </p>
-      <p className="notice">
-        Kauf und Aktivierung kostenpflichtiger Restaurantmodule sind noch nicht verfügbar. Bestehende
-        Anwendungsbereiche sind noch nicht vollständig als eigenständige Pakete ausgegliedert.
-      </p>
-      {q.isPending && <p>Module werden geladen …</p>}
+    <>
+      <div className="toolbar">
+        <h2>Module</h2>
+        <input
+          aria-label="Module suchen"
+          placeholder="Modul suchen …"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+      <p className="muted">Installierte Basismodule</p>
+      {q.isPending && <p role="status">Module werden geladen …</p>}
       {q.error && <p role="alert">{q.error.message}</p>}
-      {q.data?.map((m: any) => (
-        <article className="panel padded" key={m.code}>
-          <h3>{m.code}</h3>
-          <p>Version {m.version} · Installiert</p>
-          <p>Abhängigkeiten: {Object.keys(m.dependencies).join(', ') || 'Keine'}</p>
-          <p>{m.permissions.length} registrierte Berechtigungsgruppen</p>
-        </article>
-      ))}
-    </section>
+      <div className="module-cards">
+        {q.data
+          ?.filter((m) => (labels[m.code]?.name || m.code).toLowerCase().includes(search.toLowerCase()))
+          .map((m) => (
+            <article className="panel padded module-card" key={m.code}>
+              <div className="toolbar">
+                <Blocks size={22} />
+                <span className="rights-status">
+                  <LockKeyhole size={12} /> Im Release enthalten
+                </span>
+              </div>
+              <h3>{labels[m.code]?.name || m.code}</h3>
+              <code>v{m.version}</code>
+              <p>{labels[m.code]?.description || 'Registriertes Anwendungsmodul.'}</p>
+              <p className="muted">
+                {m.permissions.reduce((n, f) => n + f.permissions.length, 0)} Berechtigungen ·{' '}
+                {Object.keys(m.dependencies).length} Abhängigkeiten
+              </p>
+              <button
+                aria-expanded={selected === m.code}
+                onClick={() => setSelected(selected === m.code ? undefined : m.code)}
+              >
+                Details {selected === m.code ? 'schließen' : 'anzeigen'}
+              </button>
+            </article>
+          ))}
+      </div>
+      {detail && (
+        <section className="panel padded module-detail">
+          <h2>{labels[detail.code]?.name || detail.code} · Details</h2>
+          <h3>Erforderliche Module</h3>
+          {Object.entries(detail.dependencies).length ? (
+            Object.entries(detail.dependencies).map(([code, version]) => (
+              <p key={code}>
+                <code>
+                  {code} {version}
+                </code>{' '}
+                ·{' '}
+                {q.data?.some((m) => m.code === code && m.version === version)
+                  ? 'Passende Version installiert'
+                  : 'Nicht verfügbar'}
+              </p>
+            ))
+          ) : (
+            <p>Keine weiteren Module erforderlich.</p>
+          )}
+          <h3>Berechtigungsgruppen</h3>
+          {detail.permissions.map((f) => (
+            <section key={f.code}>
+              <h4>{f.label}</h4>
+              {f.permissions.map((p) => (
+                <div className="rights-row" key={p.code}>
+                  <span>{p.label}</span>
+                  <code>{p.code}</code>
+                </div>
+              ))}
+            </section>
+          ))}
+        </section>
+      )}
+      <section className="panel padded module-detail">
+        <h3>Zubuchbare Module</h3>
+        <p>
+          Aktuell sind keine zusätzlichen Module zum Kauf verfügbar. Kauf, mandantenbezogene Aktivierung und
+          deren Migrationen sind noch nicht implementiert.
+        </p>
+        <p className="muted">
+          Basismodule werden zusammen mit dem geprüften Release ausgeliefert. Die vollständige Trennung in
+          unabhängige Composer- und npm-Pakete steht noch aus.
+        </p>
+      </section>
+    </>
   );
 }

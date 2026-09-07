@@ -1,3 +1,4 @@
+import DatabaseAccess from './DatabaseAccess';
 import { identityManifest } from './modules/identity/manifest';
 import ModuleCatalog from './module-host/Catalog';
 const PlatformRoles = lazy(identityManifest.nav[0].screen);
@@ -443,6 +444,7 @@ const systemNav = [
   ['users', 'Benutzer', Users],
   ['roles', 'Rollen & Rechte', ShieldCheck],
   ['modules', 'Module', Code2],
+  ['database-access', 'SQL-Zugangsdaten', ShieldCheck],
   ['audit-log', 'Audit Log', ScrollText],
   ['health', 'System', Activity],
   [provisioningNavigation.key, provisioningNavigation.label, provisioningNavigation.icon],
@@ -562,6 +564,7 @@ function Shell({ user }: { user: Row }) {
     scope === 'system'
       ? systemNav.filter(
           ([key]) =>
+            (key !== 'database-access' || user.role === 'system_admin') &&
             (!platformPagePermission[key] || allowed(user, platformPagePermission[key])) &&
             (key !== provisioningNavigation.key || provisioningVisible) &&
             (key !== 'roles' || identityVisible),
@@ -684,6 +687,7 @@ function Content({
         </Suspense>
       );
     if (page === 'modules') return <ModuleCatalog />;
+    if (page === 'database-access' && user.role === 'system_admin') return <DatabaseAccess />;
     if (page === 'audit-log') return <AuditPage />;
     if (page === 'health') return <Health />;
     if (page === provisioningNavigation.key)

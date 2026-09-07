@@ -867,3 +867,245 @@ dd {
 .portal-restaurant .auth-wrap {
   max-width: 400px;
 }
+/* Roles: action bar, segmented roles, group switches and permission rows from the supplied template. */
+.rights-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.rights-savebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+}
+.rights-actions,
+.rights-rolebar,
+.rights-groups {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.rights-status {
+  padding: 5px 10px;
+  background: rgba(110, 175, 135, 0.13);
+  color: #9fcea9;
+  font-size: 12px;
+  font-weight: 600;
+}
+.rights-status.changed {
+  background: rgba(202, 135, 88, 0.15);
+  color: #e0b292;
+}
+.rights-roletabs {
+  display: flex;
+  flex-wrap: wrap;
+  background: oklch(0.13 0.004 260);
+  border: 1px solid #ffffff0f;
+  padding: 3px;
+}
+.rights-roletabs button {
+  border: 0;
+  background: transparent;
+  padding: 12px 16px;
+}
+.rights-roletabs button[aria-pressed='true'] {
+  background: var(--accent);
+  color: #fff;
+}
+.rights-add {
+  color: var(--accent);
+  background: rgba(190, 108, 82, 0.12);
+}
+.rights-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 10px 6px 6px;
+  background: var(--surface);
+  border: 1px solid #ffffff1a;
+}
+.rights-group.selected {
+  border-color: var(--accent);
+  background: rgba(190, 108, 82, 0.08);
+}
+.rights-group-select {
+  background: transparent;
+  border: 0;
+  padding: 6px 10px;
+  gap: 10px;
+}
+.rights-group-select small {
+  color: var(--muted);
+  font-size: 11px;
+}
+button.rights-switch {
+  min-height: 24px;
+  height: 24px;
+  width: 42px;
+  min-width: 42px;
+  padding: 3px;
+  border: 0;
+  border-radius: 3px;
+  background: #ffffff25;
+  position: relative;
+}
+button.rights-switch span {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  background: #eee;
+  transition: transform 0.15s;
+}
+button.rights-switch[aria-checked='true'] {
+  background: var(--accent);
+}
+button.rights-switch[aria-checked='true'] span {
+  transform: translateX(18px);
+}
+.rights-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rights-search input {
+  flex: 1;
+  min-width: 0;
+}
+.rights-list {
+  overflow: hidden;
+}
+.rights-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #ffffff0f;
+}
+.rights-row:last-child {
+  border-bottom: 0;
+}
+.rights-row strong {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.rights-row code {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.rights-note {
+  font-size: 12px;
+}
+.rights-rename {
+  max-width: 480px;
+}
+.rights-create {
+  margin-top: 20px;
+  max-width: 600px;
+}
+.sql-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 18px;
+}
+.sql-grid code {
+  overflow-wrap: anywhere;
+}
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: #000b;
+  padding: 20px;
+}
+.sql-dialog {
+  width: min(600px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+}
+.sql-dialog .toolbar {
+  justify-content: space-between;
+}
+.sql-fields {
+  display: grid;
+  gap: 12px;
+}
+.sql-fields dt {
+  font-size: 12px;
+  color: var(--muted);
+}
+.sql-fields dd {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sql-fields code {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 650px) {
+  .rights-savebar,
+  .rights-actions {
+    align-items: stretch;
+  }
+  .rights-savebar .rights-actions {
+    width: 100%;
+  }
+  .rights-actions button {
+    flex: 1;
+  }
+  .rights-row {
+    padding: 14px;
+  }
+  .rights-rolebar {
+    align-items: stretch;
+  }
+  .rights-roletabs {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  button.rights-switch span {
+    transition: none;
+  }
+}
+.module-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 16px;
+}
+.module-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.module-card .toolbar {
+  width: 100%;
+  justify-content: space-between;
+}
+.module-card h3,
+.module-card p {
+  margin: 0;
+}
+.module-card > button {
+  margin-top: auto;
+}
+.module-detail {
+  margin-top: 20px;
+}
+.module-detail .rights-row {
+  flex-wrap: wrap;
+}
