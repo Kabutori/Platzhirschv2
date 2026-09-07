@@ -8,7 +8,7 @@ class SupportController
 {
     private function scope(Request $r)
     {
-        abort_unless($r->user()->active, 403);
+        abort_unless($r->user()->hasPermission('support.access'), 403);
         return DB::table('support_tickets')->when(
             !$r->user()->isSystem(),
             fn($q) => $q->where('tenant_id', $r->user()->tenant_id),
@@ -35,6 +35,7 @@ class SupportController
     }
     public function create(Request $r)
     {
+        abort_unless($r->user()->hasPermission('support.access'), 403);
         $data = $r->validate([
             'subject' => 'required|string|max:200',
             'body' => 'required|string|max:10000',

@@ -6,6 +6,7 @@ use App\Http\Controllers\{
     RestaurantController,
     SupportController,
     WidgetController,
+    RoleController,
 };
 
 Route::get('/', fn() => redirect('/admin/'));
@@ -60,6 +61,11 @@ Route::prefix('api')->group(function () {
             Route::post('reservations', [RestaurantController::class, 'saveReservation']);
             Route::patch('reservations/{id}', [RestaurantController::class, 'saveReservation']);
             Route::post('reservations/{id}/cancel', [RestaurantController::class, 'cancel']);
+            Route::get('roles', [RoleController::class, 'index']);
+            Route::post('roles', [RoleController::class, 'save']);
+            Route::patch('roles/{id}', [RoleController::class, 'save']);
+            Route::delete('roles/{id}', [RoleController::class, 'delete']);
+            Route::patch('team/{id}', [RestaurantController::class, 'updateTeam']);
             Route::get('team', [RestaurantController::class, 'team']);
             Route::post('team', [RestaurantController::class, 'createTeam']);
             Route::get('widget', [WidgetController::class, 'list']);

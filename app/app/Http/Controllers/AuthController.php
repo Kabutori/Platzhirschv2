@@ -87,11 +87,7 @@ class AuthController
             ...$u->toArray(),
             'mfa_enabled' => (bool) $u->mfa_secret,
             'scopes' => $u->isSystem() ? ['system', 'customer'] : ['customer'],
-            'permissions' => $u->isSystem()
-                ? ['*']
-                : ($u->canManage()
-                    ? ['restaurant.manage', 'reservation.manage']
-                    : ['reservation.manage']),
+            'permissions' => $u->permissions(),
         ];
     }
     public function logout(Request $r)

@@ -425,7 +425,8 @@ const restaurantNav = [
   ['hours', 'Öffnungszeiten', Clock],
   ['special-days', 'Sondertage', CalendarDays],
   ['widget', 'Widget', Code2],
-  ['team', 'Team & Rollen', Users],
+  ['team', 'Team', Users],
+  ['restaurant-roles', 'Rollen & Rechte', ShieldCheck],
   ['profile', 'Restaurant-Profil', Building2],
   ['support', 'Support', MessageSquare],
   ['account', 'Mein Konto', Settings],
@@ -473,9 +474,28 @@ function Authenticated() {
     );
   return <Shell user={me.data} />;
 }
+function allowed(user: Row, permission: string) {
+  return user.permissions?.includes('*') || user.permissions?.includes(permission);
+}
+const pagePermission: Record<string, string> = {
+  overview: 'reservation.read',
+  reservations: 'reservation.read',
+  'table-plan': 'reservation.read',
+  tables: 'restaurant.configure',
+  rooms: 'restaurant.configure',
+  hours: 'restaurant.configure',
+  'special-days': 'restaurant.configure',
+  widget: 'widget.manage',
+  team: 'team.manage',
+  'restaurant-roles': 'roles.manage',
+  profile: 'restaurant.profile',
+  support: 'support.access',
+};
 function Shell({ user }: { user: Row }) {
   const [scope, setScope] = useState(user.role === 'system_admin' ? 'system' : 'restaurant');
-  const [page, setPage] = useState(user.role === 'system_admin' ? 'dashboard' : 'overview');
+  const [page, setPage] = useState(
+    user.role === 'system_admin' ? 'dashboard' : allowed(user, 'reservation.read') ? 'overview' : 'account',
+  );
   const [tenant, setTenant] = useState('');
   const [mobile, setMobile] = useState(false);
   const tenants = useQuery({
@@ -488,11 +508,7 @@ function Shell({ user }: { user: Row }) {
   const nav =
     scope === 'system'
       ? systemNav
-      : restaurantNav.filter(
-          ([key]) =>
-            user.role !== 'staff' ||
-            ['overview', 'reservations', 'table-plan', 'support', 'account'].includes(key),
-        );
+      : restaurantNav.filter(([key]) => !pagePermission[key] || allowed(user, pagePermission[key]));
   const title = nav.find(([key]) => key === page)?.[1] || 'Platzhirsch';
   function changeScope() {
     const next = scope === 'system' ? 'restaurant' : 'system';
@@ -630,6 +646,9 @@ function Content({
   user: Row;
   go: (page: string) => void;
 }) {
+  if (scope === 'restaurant' && pagePermission[page] && !allowed(user, pagePermission[page]))
+    return <Empty>Für diesen Bereich fehlt dir die Berechtigung.</Empty>;
+  if (page === 'restaurant-roles') return <RestaurantRoles tenant={tenant} />;
   if (page === 'account') return <Account user={user} />;
   if (page === 'support') return <Support tenant={tenant} user={user} />;
   if (scope === 'system') {
@@ -641,7 +660,7 @@ function Content({
     if (page === 'health') return <Health />;
   }
   if (['overview', 'reservations', 'table-plan'].includes(page))
-    return <Reservations tenant={tenant} mode={page} go={go} />;
+    return <Reservations tenant={tenant} mode={page} go={go} user={user} />;
   if (page === 'widget') return <Widget tenant={tenant} />;
   if (page === 'team') return <UsersPage tenant={tenant} team />;
   if (page === 'profile') return <Profile tenant={tenant} />;
@@ -875,6 +894,12 @@ function Tenants() {
 function UsersPage({ tenant, team = false }: { tenant?: string; team?: boolean }) {
   const path = team ? 'v1/restaurant/team' : 'v1/admin/users';
   const q = useData(path, tenant);
+  const roleOptions = useQuery({
+    queryKey: ['team-roles', tenant],
+    queryFn: () => api('v1/restaurant/roles', 'GET', undefined, tenant),
+    enabled: team,
+  });
+  const [editing, setEditing] = useState<Row | null>(null);
   const tenants = useQuery({
     queryKey: ['user-tenants'],
     queryFn: () => api('v1/admin/tenants'),
@@ -892,6 +917,15 @@ function UsersPage({ tenant, team = false }: { tenant?: string; team?: boolean }
       required: true,
       options: pick(team ? ['restaurant_admin', 'staff'] : ['system_admin', 'restaurant_admin', 'staff']),
     },
+    ...(team
+      ? [
+          {
+            key: 'restaurant_role_id',
+            label: 'Eigene Mitarbeiterrolle (leer: Standard)',
+            options: roleOptions.data?.roles?.map((r: Row) => ({ value: r.id, label: r.name })) || [],
+          },
+        ]
+      : []),
     ...(!team
       ? [
           {
@@ -930,7 +964,13 @@ function UsersPage({ tenant, team = false }: { tenant?: string; team?: boolean }
             columns={[
               { key: 'name', label: 'Name' },
               { key: 'email', label: 'E-Mail' },
-              { key: 'role', label: 'Rolle', render: (r) => labels[r.role] },
+              {
+                key: 'role',
+                label: 'Rolle',
+                render: (r) =>
+                  roleOptions.data?.roles?.find((role: Row) => role.id === r.restaurant_role_id)?.name ||
+                  labels[r.role],
+              },
               { key: 'tenant_id', label: 'Restaurant-ID' },
               { key: 'active', label: 'Status', render: (r) => <Badge value={r.active} /> },
             ]}
@@ -965,18 +1005,142 @@ function UsersPage({ tenant, team = false }: { tenant?: string; team?: boolean }
                       </button>
                     </>
                   )
-                : undefined
+                : (r) => <button onClick={() => setEditing(r)}>Bearbeiten</button>
             }
           />
         )}
       </section>
+      {editing && (
+        <Modal title="Teammitglied bearbeiten" close={() => setEditing(null)}>
+          <Form
+            fields={[
+              ...fields.filter((f) => !['email', 'password'].includes(f.key)),
+              { key: 'active', label: 'Zugang aktiv', type: 'checkbox' },
+            ]}
+            initial={editing}
+            onSave={async (data) => {
+              await api(
+                path + '/' + editing.id,
+                'PATCH',
+                {
+                  ...data,
+                  restaurant_role_id: data.restaurant_role_id ? Number(data.restaurant_role_id) : null,
+                },
+                tenant,
+              );
+              setEditing(null);
+              await qc.invalidateQueries();
+            }}
+          />
+        </Modal>
+      )}
       {open && (
         <Modal title="Benutzer anlegen" close={() => setOpen(false)}>
           <Form
             fields={fields}
             onSave={async (data) => {
-              await api(path, 'POST', { ...data, tenant_id: data.tenant_id || null }, tenant);
+              await api(
+                path,
+                'POST',
+                {
+                  ...data,
+                  tenant_id: data.tenant_id || null,
+                  restaurant_role_id: data.restaurant_role_id ? Number(data.restaurant_role_id) : null,
+                },
+                tenant,
+              );
               setOpen(false);
+              await qc.invalidateQueries();
+            }}
+          />
+        </Modal>
+      )}
+    </>
+  );
+}
+function RestaurantRoles({ tenant }: { tenant?: string }) {
+  const q = useData('v1/restaurant/roles', tenant);
+  const qc = useQueryClient();
+  const [form, setForm] = useState<Row | null>(null);
+  const [error, setError] = useState<unknown>();
+  return (
+    <>
+      <div className="toolbar">
+        <p className="muted">
+          Eigene Mitarbeiterrollen gelten nur für dieses Restaurant. Administratoren verwalten weiterhin Team
+          und Rollen.
+        </p>
+        <button className="primary" onClick={() => setForm({})}>
+          Rolle anlegen
+        </button>
+      </div>
+      <ErrorBox error={error} />
+      {q.isPending ? (
+        <Loading />
+      ) : q.error ? (
+        <ErrorBox error={q.error} />
+      ) : (
+        <section className="panel">
+          <DataTable
+            rows={q.data.roles}
+            columns={[
+              { key: 'name', label: 'Rolle' },
+              {
+                key: 'permissions',
+                label: 'Berechtigungen',
+                render: (r) =>
+                  r.permissions.map((permission: string) => q.data.catalog[permission]).join(', ') ||
+                  'Kein Zugriff',
+              },
+            ]}
+            actions={(r) => (
+              <>
+                <button onClick={() => setForm(r)}>Bearbeiten</button>
+                <button
+                  onClick={async () => {
+                    if (!confirm('Unbenutzte Rolle löschen?')) return;
+                    try {
+                      await api('v1/restaurant/roles/' + r.id, 'DELETE', undefined, tenant);
+                      await qc.invalidateQueries();
+                    } catch (e) {
+                      setError(e);
+                    }
+                  }}
+                >
+                  Löschen
+                </button>
+              </>
+            )}
+          />
+        </section>
+      )}
+      {form && q.data && (
+        <Modal title={form.id ? 'Rolle bearbeiten' : 'Rolle anlegen'} close={() => setForm(null)}>
+          <Form
+            fields={[
+              { key: 'name', label: 'Rollenname', required: true },
+              ...Object.entries(q.data.catalog).map(([key, label]) => ({
+                key,
+                label: String(label),
+                type: 'checkbox',
+              })),
+            ]}
+            initial={{
+              name: form.name || '',
+              ...Object.fromEntries((form.permissions || []).map((key: string) => [key, true])),
+            }}
+            onSave={async (data) => {
+              await api(
+                'v1/restaurant/roles' + (form.id ? '/' + form.id : ''),
+                form.id ? 'PATCH' : 'POST',
+                {
+                  name: data.name,
+                  version: form.version,
+                  permissions: Object.keys(q.data.catalog).filter((key) => data[key]),
+                },
+                tenant,
+              );
+              setForm(null);
               await qc.invalidateQueries();
             }}
           />
@@ -1216,7 +1380,17 @@ function localInput(utc: string, tz: string) {
   const p = Object.fromEntries(parts.map((v) => [v.type, v.value]));
   return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`;
 }
-function Reservations({ tenant, mode, go }: { tenant?: string; mode: string; go: (s: string) => void }) {
+function Reservations({
+  tenant,
+  mode,
+  go,
+  user,
+}: {
+  tenant?: string;
+  mode: string;
+  go: (s: string) => void;
+  user: Row;
+}) {
   const [date, setDate] = useState(today());
   const q = useData('v1/restaurant/reservations?date=' + date, tenant);
   const tables = useData('v1/restaurant/tables', tenant);
@@ -1262,7 +1436,13 @@ function Reservations({ tenant, mode, go }: { tenant?: string; mode: string; go:
       label: 'Status',
       required: true,
       default: 'confirmed',
-      options: pick(['confirmed', 'seated', 'completed', 'cancelled', 'no_show']),
+      options: pick([
+        'confirmed',
+        'seated',
+        'completed',
+        'no_show',
+        ...(allowed(user, 'reservation.cancel') ? ['cancelled'] : []),
+      ]),
     },
     { key: 'notes', label: 'Notizen', type: 'textarea' },
   ];
@@ -1315,11 +1495,15 @@ function Reservations({ tenant, mode, go }: { tenant?: string; mode: string; go:
           <button onClick={() => setDate(today())}>Heute</button>
         </div>
         <div className="button-row">
-          <button onClick={download}>
+          <button disabled={!allowed(user, 'reservation.export')} onClick={download}>
             <Download size={16} />
             CSV
           </button>
-          <button className="primary" onClick={() => setForm({ request_key: crypto.randomUUID() })}>
+          <button
+            disabled={!allowed(user, 'reservation.write')}
+            className="primary"
+            onClick={() => setForm({ request_key: crypto.randomUUID() })}
+          >
             <Plus size={16} />
             Reservierung
           </button>
@@ -1372,7 +1556,12 @@ function Reservations({ tenant, mode, go }: { tenant?: string; mode: string; go:
                     live
                       .filter((r) => r.table_id === table.id)
                       .map((r) => (
-                        <button className="booking-block" key={r.id} onClick={() => edit(r)}>
+                        <button
+                          disabled={!allowed(user, 'reservation.write')}
+                          className="booking-block"
+                          key={r.id}
+                          onClick={() => edit(r)}
+                        >
                           <strong>
                             {clock(r.starts_at, tz)}–{clock(r.ends_at, tz)}
                           </strong>
@@ -1418,8 +1607,8 @@ function Reservations({ tenant, mode, go }: { tenant?: string; mode: string; go:
             ]}
             actions={(r) => (
               <>
-                <button onClick={() => edit(r)}>Bearbeiten</button>
-                {r.status !== 'cancelled' && (
+                {allowed(user, 'reservation.write') && <button onClick={() => edit(r)}>Bearbeiten</button>}
+                {allowed(user, 'reservation.cancel') && r.status !== 'cancelled' && (
                   <button className="danger-text" onClick={() => cancel(r)}>
                     Stornieren
                   </button>

@@ -21,7 +21,7 @@ class RestaurantController
     }
     public function updateProfile(Request $r)
     {
-        abort_unless($r->user()->canManage(), 403);
+        abort_unless($r->user()->hasPermission('restaurant.profile'), 403);
         $data = $r->validate([
             'name' => 'required|string|max:120',
             'email' => 'required|email|max:254',
@@ -35,12 +35,17 @@ class RestaurantController
     }
     public function index(Request $r, string $resource)
     {
+        abort_unless(
+            $r->user()->hasPermission('reservation.read') ||
+                $r->user()->hasPermission('restaurant.configure'),
+            403,
+        );
         abort_unless(isset(self::RESOURCES[$resource]), 404);
         return DB::connection('tenant')->table(self::RESOURCES[$resource])->orderBy('id')->get();
     }
     public function save(Request $r, string $resource, ?int $id = null)
     {
-        abort_unless($r->user()->canManage(), 403);
+        abort_unless($r->user()->hasPermission('restaurant.configure'), 403);
         abort_unless(isset(self::RESOURCES[$resource]), 404);
         $rules = match ($resource) {
             'rooms' => [
@@ -94,7 +99,7 @@ class RestaurantController
     }
     public function delete(Request $r, string $resource, int $id)
     {
-        abort_unless($r->user()->canManage(), 403);
+        abort_unless($r->user()->hasPermission('restaurant.configure'), 403);
         abort_unless(isset(self::RESOURCES[$resource]), 404);
         $db = DB::connection('tenant');
         abort_if(
@@ -113,6 +118,7 @@ class RestaurantController
     }
     public function reservations(Request $r)
     {
+        abort_unless($r->user()->hasPermission('reservation.read'), 403);
         $r->validate(['date' => 'required|date_format:Y-m-d']);
         $tenant = $r->attributes->get('tenant');
         $day = CarbonImmutable::parse($r->input('date'), $tenant->timezone)->startOfDay();
@@ -127,7 +133,12 @@ class RestaurantController
     }
     public function saveReservation(Request $r, ReservationService $service, ?int $id = null)
     {
+        abort_unless($r->user()->hasPermission('reservation.write'), 403);
         $data = $r->validate(self::reservationRules());
+        abort_if(
+            ($data['status'] ?? '') === 'cancelled' && !$r->user()->hasPermission('reservation.cancel'),
+            403,
+        );
         $tenant = $r->attributes->get('tenant');
         $result = $service->save($data, $tenant->timezone, $id);
         Audit::record($id ? 'reservation.updated' : 'reservation.created', $result->id, $tenant->id);
@@ -151,6 +162,7 @@ class RestaurantController
     }
     public function cancel(Request $r, int $id)
     {
+        abort_unless($r->user()->hasPermission('reservation.cancel'), 403);
         $db = DB::connection('tenant');
         $db->transaction(function () use ($db, $id) {
             $reservation = $db->table('reservations')->find($id);
@@ -169,30 +181,82 @@ class RestaurantController
     }
     public function team(Request $r)
     {
-        abort_unless($r->user()->canManage(), 403);
+        abort_unless($r->user()->hasPermission('team.manage'), 403);
         return User::where('tenant_id', $r->attributes->get('tenant')->id)
             ->orderBy('name')
             ->get();
     }
     public function createTeam(Request $r)
     {
-        abort_unless($r->user()->canManage(), 403);
+        abort_unless($r->user()->hasPermission('team.manage'), 403);
         $data = $r->validate([
             'name' => 'required|string|max:120',
             'email' => 'required|email|max:254|unique:users,email',
             'password' => 'required|string|min:12|max:128',
             'role' => ['required', Rule::in(['restaurant_admin', 'staff'])],
+            'restaurant_role_id' => 'nullable|integer',
         ]);
-        $user = User::create([
-            ...$data,
-            'email' => strtolower($data['email']),
-            'tenant_id' => $r->attributes->get('tenant')->id,
+        return DB::transaction(function () use ($r, $data) {
+            $this->validateRole($data, $r->attributes->get('tenant')->id);
+            $user = User::create([
+                ...$data,
+                'email' => strtolower($data['email']),
+                'tenant_id' => $r->attributes->get('tenant')->id,
+            ]);
+            Audit::record('team.created', $user->id, $user->tenant_id);
+            return response()->json($user, 201);
+        });
+    }
+    private function validateRole(array $data, int $tenant): void
+    {
+        if (empty($data['restaurant_role_id'])) {
+            return;
+        }
+        abort_unless(
+            ($data['role'] ?? 'staff') === 'staff',
+            422,
+            'Eigene Rollen gelten nur für Mitarbeiter.',
+        );
+        abort_unless(
+            DB::table('restaurant_roles')
+                ->where('tenant_id', $tenant)
+                ->where('id', $data['restaurant_role_id'])
+                ->lockForUpdate()
+                ->exists(),
+            422,
+            'Rolle gehört nicht zu diesem Restaurant.',
+        );
+    }
+    public function updateTeam(Request $r, int $id)
+    {
+        abort_unless($r->user()->hasPermission('team.manage'), 403);
+        $tenant = $r->attributes->get('tenant')->id;
+        $data = $r->validate([
+            'name' => 'sometimes|required|string|max:120',
+            'active' => 'sometimes|boolean',
+            'role' => ['required', Rule::in(['restaurant_admin', 'staff'])],
+            'restaurant_role_id' => 'nullable|integer',
         ]);
-        Audit::record('team.created', $user->id, $user->tenant_id);
-        return response()->json($user, 201);
+        return DB::transaction(function () use ($r, $tenant, $id, $data) {
+            $this->validateRole($data, $tenant);
+            $user = User::where('tenant_id', $tenant)->lockForUpdate()->findOrFail($id);
+            abort_if(
+                $user->id === $r->user()->id &&
+                    (($data['active'] ?? true) === false ||
+                        $data['role'] !== $user->role ||
+                        !empty($data['restaurant_role_id'])),
+                422,
+                'Eigene Administratorrechte können hier nicht entzogen werden.',
+            );
+            $user->update([...$data, 'restaurant_role_id' => $data['restaurant_role_id'] ?? null]);
+            DB::table('sessions')->where('user_id', $id)->delete();
+            Audit::record('team.updated', $id, $tenant);
+            return $user;
+        });
     }
     public function export(Request $r)
     {
+        abort_unless($r->user()->hasPermission('reservation.export'), 403);
         $rows = $this->reservations($r);
         Audit::record('reservation.exported', $r->input('date'), $r->attributes->get('tenant')->id);
         return response()->streamDownload(

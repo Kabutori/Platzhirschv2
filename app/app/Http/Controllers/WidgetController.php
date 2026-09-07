@@ -8,14 +8,14 @@ class WidgetController
 {
     public function list(Request $r)
     {
-        abort_unless($r->user()->canManage(), 403);
+        abort_unless($r->user()->hasPermission('widget.manage'), 403);
         return DB::table('widget_clients')
             ->where('tenant_id', $r->attributes->get('tenant')->id)
             ->get(['id', 'origins', 'expires_at', 'created_at', 'duration_minutes', 'accent']);
     }
     public function create(Request $r)
     {
-        abort_unless($r->user()->canManage(), 403);
+        abort_unless($r->user()->hasPermission('widget.manage'), 403);
         $data = $r->validate([
             'origins' => 'required|array|min:1|max:10',
             'origins.*' => 'required|url:http,https|max:250',
@@ -68,7 +68,7 @@ class WidgetController
     }
     public function revoke(Request $r, int $id)
     {
-        abort_unless($r->user()->canManage(), 403);
+        abort_unless($r->user()->hasPermission('widget.manage'), 403);
         abort_unless(
             DB::table('widget_clients')
                 ->where('tenant_id', $r->attributes->get('tenant')->id)

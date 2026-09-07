@@ -273,9 +273,160 @@ class RestaurantTest extends TestCase
     public function test_widget_preflight_obeys_the_same_origin_allowlist(): void
     {
         $token = $this->widgetToken();
-        $this->withHeaders(['Origin' => 'https://attacker.example', 'Access-Control-Request-Method' => 'POST'])
-            ->optionsJson('/api/widget/' . $token)->assertForbidden()->assertHeaderMissing('Access-Control-Allow-Origin');
-        $this->withHeader('Origin', 'https://restaurant.example')->optionsJson('/api/widget/' . $token)
-            ->assertOk()->assertHeader('Access-Control-Allow-Origin', 'https://restaurant.example');
+        $this->withHeaders([
+            'Origin' => 'https://attacker.example',
+            'Access-Control-Request-Method' => 'POST',
+        ])
+            ->optionsJson('/api/widget/' . $token)
+            ->assertForbidden()
+            ->assertHeaderMissing('Access-Control-Allow-Origin');
+        $this->withHeader('Origin', 'https://restaurant.example')
+            ->optionsJson('/api/widget/' . $token)
+            ->assertOk()
+            ->assertHeader('Access-Control-Allow-Origin', 'https://restaurant.example');
+    }
+
+    private function customRole(array $permissions): int
+    {
+        return $this->postJson('/api/v1/restaurant/roles', [
+            'name' => 'Custom role',
+            'permissions' => $permissions,
+        ])
+            ->assertOk()
+            ->json('id');
+    }
+    public function test_custom_read_only_role_cannot_write_export_or_configure(): void
+    {
+        $id = $this->customRole(['reservation.read']);
+        $this->user->update(['role' => 'staff', 'restaurant_role_id' => $id]);
+        $this->getJson('/api/v1/restaurant/reservations?date=' . now()->format('Y-m-d'))->assertOk();
+        $this->getJson('/api/v1/restaurant/export?date=' . now()->format('Y-m-d'))->assertForbidden();
+        $this->postJson('/api/v1/restaurant/reservations', $this->payload())->assertForbidden();
+        $this->postJson('/api/v1/restaurant/rooms', [])->assertForbidden();
+        $this->getJson('/api/v1/restaurant/widget')->assertForbidden();
+        $this->getJson('/api/v1/restaurant/team')->assertForbidden();
+        $this->getJson('/api/v1/restaurant/roles')->assertForbidden();
+        $this->postJson('/api/v1/support', [])->assertForbidden();
+    }
+    public function test_role_cannot_grant_platform_or_team_administration(): void
+    {
+        foreach (['*', 'team.manage', 'roles.manage', 'system_admin'] as $permission) {
+            $this->postJson('/api/v1/restaurant/roles', [
+                'name' => 'Escalation',
+                'permissions' => [$permission],
+            ])->assertUnprocessable();
+        }
+        $this->postJson('/api/v1/restaurant/roles', [
+            'name' => 'Missing read',
+            'permissions' => ['reservation.write'],
+        ])->assertUnprocessable();
+    }
+    public function test_cancellation_right_cannot_be_bypassed_by_reservation_patch(): void
+    {
+        $role = $this->customRole(['reservation.read', 'reservation.write']);
+        $payload = $this->payload();
+        $id = $this->postJson('/api/v1/restaurant/reservations', $payload)->assertCreated()->json('id');
+        $this->user->update(['role' => 'staff', 'restaurant_role_id' => $role]);
+        $this->postJson('/api/v1/restaurant/reservations/' . $id . '/cancel')->assertForbidden();
+        $this->patchJson('/api/v1/restaurant/reservations/' . $id, [
+            ...$payload,
+            'status' => 'cancelled',
+            'version' => 1,
+        ])->assertForbidden();
+        $this->patchJson('/api/v1/restaurant/reservations/' . $id, [
+            ...$payload,
+            'guest_name' => 'Allowed',
+            'version' => 1,
+        ])->assertOk();
+    }
+    public function test_role_updates_use_version_and_assigned_roles_cannot_be_deleted(): void
+    {
+        $id = $this->customRole(['reservation.read']);
+        $this->patchJson('/api/v1/restaurant/roles/' . $id, [
+            'name' => 'Reader',
+            'permissions' => [],
+            'version' => 1,
+        ])->assertOk();
+        $this->patchJson('/api/v1/restaurant/roles/' . $id, [
+            'name' => 'Stale',
+            'permissions' => ['reservation.read'],
+            'version' => 1,
+        ])->assertConflict();
+        $user = $this->postJson('/api/v1/restaurant/team', [
+            'name' => 'Reader',
+            'email' => 'reader@example.test',
+            'password' => 'Long-test-password',
+            'role' => 'staff',
+            'restaurant_role_id' => $id,
+        ])
+            ->assertCreated()
+            ->json('id');
+        $this->deleteJson('/api/v1/restaurant/roles/' . $id)->assertConflict();
+        $this->patchJson('/api/v1/restaurant/team/' . $user, [
+            'role' => 'staff',
+            'restaurant_role_id' => null,
+        ])->assertOk();
+        $this->deleteJson('/api/v1/restaurant/roles/' . $id)->assertNoContent();
+    }
+    public function test_foreign_roles_cannot_be_assigned_or_modified(): void
+    {
+        $other = Tenant::create([
+            'name' => 'Other',
+            'email' => 'other@example.test',
+            'status' => 'active',
+            'database_name' => 'other',
+            'database_user' => 'other',
+            'database_password' => 'test-only',
+        ]);
+        $id = DB::table('restaurant_roles')->insertGetId([
+            'tenant_id' => $other->id,
+            'name' => 'Other role',
+            'permissions' => '["reservation.read"]',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $this->postJson('/api/v1/restaurant/team', [
+            'name' => 'Foreign',
+            'email' => 'foreign@example.test',
+            'password' => 'Long-test-password',
+            'role' => 'staff',
+            'restaurant_role_id' => $id,
+        ])->assertUnprocessable();
+        $this->patchJson('/api/v1/restaurant/roles/' . $id, [
+            'name' => 'Foreign',
+            'permissions' => [],
+            'version' => 1,
+        ])->assertNotFound();
+        $this->deleteJson('/api/v1/restaurant/roles/' . $id)->assertNotFound();
+        // Even corrupted data must fail closed during authorization.
+        $this->user->update(['role' => 'staff', 'restaurant_role_id' => $id]);
+        $this->getJson('/api/v1/restaurant/reservations?date=' . now()->format('Y-m-d'))->assertForbidden();
+    }
+    public function test_team_management_cannot_disable_self_or_modify_foreign_accounts(): void
+    {
+        $this->patchJson('/api/v1/restaurant/team/' . $this->user->id, [
+            'role' => 'staff',
+        ])->assertUnprocessable();
+        $this->patchJson('/api/v1/restaurant/team/' . $this->user->id, [
+            'role' => 'restaurant_admin',
+            'active' => false,
+        ])->assertUnprocessable();
+        $system = User::create([
+            'name' => 'System',
+            'email' => 'system@example.test',
+            'password' => 'Long-test-password',
+            'role' => 'system_admin',
+        ]);
+        $this->patchJson('/api/v1/restaurant/team/' . $system->id, ['role' => 'staff'])->assertNotFound();
+    }
+    public function test_role_revocation_is_effective_on_next_request(): void
+    {
+        $id = $this->customRole(['reservation.read']);
+        $this->user->update(['role' => 'staff', 'restaurant_role_id' => $id]);
+        $this->getJson('/api/v1/restaurant/reservations?date=' . now()->format('Y-m-d'))->assertOk();
+        DB::table('restaurant_roles')
+            ->where('id', $id)
+            ->update(['permissions' => '[]']);
+        $this->getJson('/api/v1/restaurant/reservations?date=' . now()->format('Y-m-d'))->assertForbidden();
     }
 }
