@@ -1,3 +1,4 @@
+export const portal = location.pathname.startsWith('/restaurant') ? 'restaurant' : 'administration';
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -13,12 +14,12 @@ export async function api<T = any>(
   tenant?: string,
   signal?: AbortSignal,
 ): Promise<T> {
-  const headers: Record<string, string> = { Accept: 'application/json' };
+  const headers: Record<string, string> = { Accept: 'application/json', 'X-Platzhirsch-Portal': portal };
   if (tenant) headers['X-Tenant-ID'] = tenant;
   if (method !== 'GET') {
     const csrf = await fetch('/api/csrf', {
       credentials: 'same-origin',
-      headers: { Accept: 'application/json' },
+      headers: { Accept: 'application/json', 'X-Platzhirsch-Portal': portal },
       signal,
     });
     if (!csrf.ok) throw new ApiError(csrf.status, 'Sitzung konnte nicht vorbereitet werden.');

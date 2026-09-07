@@ -9,12 +9,19 @@ use App\Http\Controllers\{
     RoleController,
 };
 
-Route::get('/', fn() => redirect('/admin/'));
+Route::get('/', fn() => redirect('/administration/login'));
 Route::get('/admin/{path?}', function () {
     $file = public_path('admin/index.html');
     abort_unless(is_file($file), 503, 'Frontend noch nicht gebaut.');
     return response()->file($file);
 })->where('path', '.*');
+Route::get('/{portal}/{path?}', function () {
+    $file = public_path('admin/index.html');
+    abort_unless(is_file($file), 503, 'Frontend noch nicht gebaut.');
+    return response()->file($file);
+})
+    ->where('portal', 'administration|restaurant')
+    ->where('path', '.*');
 // Same-origin browser API deliberately uses Laravel's web middleware: real sessions + CSRF.
 Route::prefix('api')->group(function () {
     Route::get('csrf', [AuthController::class, 'csrf']);
@@ -36,6 +43,11 @@ Route::prefix('api')->group(function () {
     Route::prefix('v1/admin')
         ->middleware(['auth', 'system'])
         ->group(function () {
+            Route::get('modules', fn() => app(\App\Core\Module\ModuleRegistry::class)->catalog());
+            Route::get(
+                'permissions/families',
+                fn() => app(\App\Core\Module\ModuleRegistry::class)->permissionFamilies(),
+            );
             Route::get('dashboard', [PlatformController::class, 'dashboard']);
             Route::get('tenants', [PlatformController::class, 'tenants']);
             Route::post('tenants', [PlatformController::class, 'createTenant']);

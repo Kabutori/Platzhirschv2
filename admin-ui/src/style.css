@@ -850,3 +850,20 @@ dd {
     margin-top: var(--s5);
   }
 }
+
+/* Separate portal identities from the supplied login templates. */
+.portal-administration {
+  background-color: #171719;
+  background-image:
+    linear-gradient(#ffffff05 1px, transparent 1px), linear-gradient(90deg, #ffffff05 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.portal-administration .auth-wrap {
+  max-width: 380px;
+}
+.portal-restaurant {
+  background: #202023;
+}
+.portal-restaurant .auth-wrap {
+  max-width: 400px;
+}

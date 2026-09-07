@@ -1,3 +1,9 @@
+import { portal } from './api';
+import { Suspense, lazy } from 'react';
+import { provisioningManifest } from './modules/provisioning/manifest';
+import { navigationFor } from './module-host/registry';
+const provisioningNavigation = provisioningManifest.nav[0];
+const DatabaseServers = lazy(provisioningNavigation.screen);
 import React, { useEffect, useRef, useState, FormEvent, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -18,7 +24,6 @@ import {
   LogOut,
   ChevronRight,
   Plus,
-  ArrowLeftRight,
   Search,
   RefreshCw,
   ArrowLeft,
@@ -235,6 +240,7 @@ function Form({
 }
 function Login({ onLogin, setup = false }: { onLogin: () => void; setup?: boolean }) {
   const [mfa, setMfa] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [forgot, setForgot] = useState(false);
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
@@ -262,13 +268,19 @@ function Login({ onLogin, setup = false }: { onLogin: () => void; setup?: boolea
     }
   }
   return (
-    <div className="auth-page">
+    <div className={`auth-page portal-${portal}`}>
       <div className="auth-wrap">
         <div className="brand large">
           <b>P</b>
           <div>
-            <h1>Platzhirsch Plattform</h1>
-            <small>{setup ? 'ERSTEINRICHTUNG' : 'VERWALTUNG & RESTAURANT'}</small>
+            <h1>{portal === 'administration' ? 'Platzhirsch Plattform' : 'Platzhirsch'}</h1>
+            <small>
+              {setup
+                ? 'ERSTEINRICHTUNG'
+                : portal === 'administration'
+                  ? 'SYSTEM-ADMINISTRATION'
+                  : 'RESERVIERUNGSSYSTEM FÜR RESTAURANTS'}
+            </small>
           </div>
         </div>
         <section className="auth-card">
@@ -319,12 +331,20 @@ function Login({ onLogin, setup = false }: { onLogin: () => void; setup?: boolea
                   <label>
                     Passwort
                     <input
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       required
                       autoComplete="current-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
+                    <button
+                      type="button"
+                      className="text"
+                      aria-pressed={showPassword}
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
+                    </button>
                   </label>
                 )}
                 {mfa && !forgot && (
@@ -413,6 +433,7 @@ const systemNav = [
   ['roles', 'Rollen & Rechte', ShieldCheck],
   ['audit-log', 'Audit Log', ScrollText],
   ['health', 'System', Activity],
+  [provisioningNavigation.key, provisioningNavigation.label, provisioningNavigation.icon],
   ['support', 'Support', MessageSquare],
   ['account', 'Mein Konto', Settings],
 ] as const;
@@ -456,7 +477,7 @@ function Authenticated() {
     if (status.error) return <ErrorBox error={status.error} />;
     return (
       <Login
-        setup={status.data?.bootstrapped === false}
+        setup={portal === 'administration' && status.data?.bootstrapped === false}
         onLogin={() => {
           void q.resetQueries();
         }}
@@ -492,29 +513,29 @@ const pagePermission: Record<string, string> = {
   support: 'support.access',
 };
 function Shell({ user }: { user: Row }) {
-  const [scope, setScope] = useState(user.role === 'system_admin' ? 'system' : 'restaurant');
+  const scope = portal === 'administration' ? 'system' : 'restaurant';
   const [page, setPage] = useState(
     user.role === 'system_admin' ? 'dashboard' : allowed(user, 'reservation.read') ? 'overview' : 'account',
   );
-  const [tenant, setTenant] = useState('');
   const [mobile, setMobile] = useState(false);
-  const tenants = useQuery({
-    queryKey: ['tenant-picker'],
-    queryFn: () => api('v1/admin/tenants'),
-    enabled: user.role === 'system_admin',
+  const installedModules = useQuery({
+    queryKey: ['installed-modules'],
+    queryFn: () => api('v1/admin/modules'),
+    enabled: scope === 'system',
   });
+  const provisioningVisible = navigationFor(
+    [provisioningManifest],
+    (installedModules.data || []).filter((m: Row) => m.installed).map((m: Row) => m.code),
+    user.permissions || [],
+    portal,
+  ).some((n) => n.key === provisioningNavigation.key);
   const q = useQueryClient();
   const [error, setError] = useState<unknown>();
   const nav =
     scope === 'system'
-      ? systemNav
+      ? systemNav.filter(([key]) => key !== provisioningNavigation.key || provisioningVisible)
       : restaurantNav.filter(([key]) => !pagePermission[key] || allowed(user, pagePermission[key]));
   const title = nav.find(([key]) => key === page)?.[1] || 'Platzhirsch';
-  function changeScope() {
-    const next = scope === 'system' ? 'restaurant' : 'system';
-    setScope(next);
-    setPage(next === 'system' ? 'dashboard' : 'overview');
-  }
   return (
     <div className="app">
       <aside className={mobile ? 'sidebar open' : 'sidebar'}>
@@ -525,13 +546,12 @@ function Shell({ user }: { user: Row }) {
             <small>{scope === 'system' ? 'Plattform-Verwaltung' : 'Restaurant-Verwaltung'}</small>
           </div>
         </div>
-        {user.role === 'system_admin' && (
-          <button className="scope-switch" onClick={changeScope}>
-            <ArrowLeftRight size={15} />
-            Bereich wechseln
-            <ChevronRight size={14} />
-          </button>
-        )}
+        <a
+          className="scope-switch"
+          href={portal === 'administration' ? '/restaurant/login' : '/administration/login'}
+        >
+          {portal === 'administration' ? 'Restaurantportal öffnen' : 'Administration öffnen'}
+        </a>
         <div className="nav-label">{scope === 'system' ? 'PLATTFORM-VERWALTUNG' : 'DEIN RESTAURANT'}</div>
         <nav aria-label="Hauptnavigation">
           {nav.map(([key, label, Icon]) => (
@@ -586,44 +606,14 @@ function Shell({ user }: { user: Row }) {
             <h1>{title}</h1>
           </div>
           <div className="top-right">
-            {scope === 'restaurant' && user.role === 'system_admin' ? (
-              <select
-                aria-label="Restaurant"
-                value={tenant}
-                onChange={(e) => {
-                  setTenant(e.target.value);
-                }}
-              >
-                <option value="">Restaurant auswählen</option>
-                {tenants.data?.data
-                  ?.filter((t: Row) => t.status === 'active')
-                  .map((t: Row) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name}
-                    </option>
-                  ))}
-              </select>
-            ) : (
-              <span className="muted">
-                {new Intl.DateTimeFormat('de-DE', { dateStyle: 'long' }).format(new Date())}
-              </span>
-            )}
+            <span className="muted">
+              {new Intl.DateTimeFormat('de-DE', { dateStyle: 'long' }).format(new Date())}
+            </span>
           </div>
         </header>
         <main>
           <ErrorBox error={error} />
-          {scope === 'restaurant' && user.role === 'system_admin' && !tenant ? (
-            <Empty>Wähle oben ein Restaurant aus.</Empty>
-          ) : (
-            <Content
-              key={scope + page + tenant}
-              scope={scope}
-              page={page}
-              tenant={tenant || undefined}
-              user={user}
-              go={setPage}
-            />
-          )}
+          <Content key={scope + page} scope={scope} page={page} user={user} go={setPage} />
         </main>
         <footer className="page-footer">
           <span>PLATZHIRSCH</span>
@@ -658,6 +648,12 @@ function Content({
     if (page === 'roles') return <Roles />;
     if (page === 'audit-log') return <AuditPage />;
     if (page === 'health') return <Health />;
+    if (page === provisioningNavigation.key)
+      return (
+        <Suspense fallback={<Loading />}>
+          <DatabaseServers />
+        </Suspense>
+      );
   }
   if (['overview', 'reservations', 'table-plan'].includes(page))
     return <Reservations tenant={tenant} mode={page} go={go} user={user} />;
@@ -1468,7 +1464,7 @@ function Reservations({
     try {
       const response = await fetch('/api/v1/restaurant/export?date=' + date, {
         credentials: 'same-origin',
-        headers: tenant ? { 'X-Tenant-ID': tenant } : {},
+        headers: { 'X-Platzhirsch-Portal': portal, ...(tenant ? { 'X-Tenant-ID': tenant } : {}) },
       });
       if (!response.ok) throw new Error('Export fehlgeschlagen.');
       const url = URL.createObjectURL(await response.blob());

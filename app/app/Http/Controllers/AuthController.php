@@ -59,6 +59,13 @@ class AuthController
         $hash = $user?->password ?? '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi';
         $valid = Hash::check($data['password'], $hash);
         abort_unless($user && $valid && $user->active, 401, 'Anmeldung fehlgeschlagen.');
+        $portal = $r->attributes->get('portal');
+        abort_if(
+            ($portal === 'administration' && !$user->isSystem()) ||
+                ($portal === 'restaurant' && ($user->isSystem() || !$user->tenant_id)),
+            401,
+            'Anmeldung fehlgeschlagen.',
+        );
         if ($user->mfa_secret) {
             if (empty($data['mfa_code'])) {
                 return ['mfa_required' => true];
@@ -86,7 +93,7 @@ class AuthController
         return [
             ...$u->toArray(),
             'mfa_enabled' => (bool) $u->mfa_secret,
-            'scopes' => $u->isSystem() ? ['system', 'customer'] : ['customer'],
+            'scopes' => $u->isSystem() ? ['system'] : ['customer'],
             'permissions' => $u->permissions(),
         ];
     }
@@ -94,8 +101,13 @@ class AuthController
     {
         Audit::record('auth.logout');
         Auth::logout();
-        $r->session()->invalidate();
-        $r->session()->regenerateToken();
+        if ($r->attributes->get('portal')) {
+            $r->session()->forget('mfa_pending_' . $r->attributes->get('portal'));
+            $r->session()->regenerate();
+        } else {
+            $r->session()->invalidate();
+            $r->session()->regenerateToken();
+        }
         return response()->noContent();
     }
     public function forgot(Request $r)
@@ -128,7 +140,10 @@ class AuthController
         abort_unless(Hash::check($r->input('password'), $r->user()->password), 403);
         abort_if($r->user()->mfa_secret, 409, 'MFA ist bereits aktiv.');
         $secret = Totp::secret();
-        $r->session()->put('mfa_pending', ['secret' => $secret, 'expires' => time() + 600]);
+        $r->session()->put('mfa_pending_' . ($r->attributes->get('portal') ?? 'web'), [
+            'secret' => $secret,
+            'expires' => time() + 600,
+        ]);
         return [
             'secret' => $secret,
             'uri' =>
@@ -142,12 +157,12 @@ class AuthController
     public function confirmMfa(Request $r)
     {
         $r->validate(['code' => 'required|string']);
-        $pending = $r->session()->get('mfa_pending');
+        $pending = $r->session()->get('mfa_pending_' . ($r->attributes->get('portal') ?? 'web'));
         abort_unless($pending && $pending['expires'] > time(), 422);
         $step = Totp::verify($pending['secret'], $r->input('code'));
         abort_if($step === false, 422, 'Code ungültig.');
         $r->user()->update(['mfa_secret' => $pending['secret'], 'mfa_last_step' => $step]);
-        $r->session()->forget('mfa_pending');
+        $r->session()->forget('mfa_pending_' . ($r->attributes->get('portal') ?? 'web'));
         Audit::record('auth.mfa_enabled');
         return ['message' => 'Zwei-Faktor-Anmeldung aktiviert.'];
     }

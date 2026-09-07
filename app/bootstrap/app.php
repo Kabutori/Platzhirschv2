@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'system' => App\Http\Middleware\SystemAdmin::class,
             'tenant' => App\Http\Middleware\TenantContext::class,
         ]);
+        $middleware->prepend(App\Http\Middleware\PortalContext::class);
         $middleware->append(App\Http\Middleware\SecurityHeaders::class);
         $middleware->redirectGuestsTo(fn() => '/admin/');
     })

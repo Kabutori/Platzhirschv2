@@ -8,6 +8,11 @@ class TenantContext
     {
         $user = $request->user();
         abort_unless($user && $user->active, 403);
+        abort_if(
+            $user->isSystem() && $request->attributes->get('portal'),
+            403,
+            'Bitte im Restaurantportal anmelden.',
+        );
         // Only a platform administrator may select a tenant. Restaurant users cannot override it.
         $id = $user->isSystem() ? $request->header('X-Tenant-ID') : $user->tenant_id;
         abort_unless($id && ctype_digit((string) $id), 422, 'Bitte ein Restaurant auswählen.');
