@@ -1,0 +1,51 @@
+name: Windows installation package (preview)
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Package version
+        required: true
+        default: '0.1.0-preview.1'
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_mysql, pdo_sqlite, mbstring, intl, openssl
+          tools: composer:v2
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare runtime directories
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force app/storage/logs,app/storage/framework/sessions,app/storage/framework/views,app/storage/framework/cache,app/bootstrap/cache | Out-Null
+      - run: composer install --no-interaction --prefer-dist
+        working-directory: app
+      - run: composer test
+        working-directory: app
+      - run: composer audit --locked
+        working-directory: app
+      - run: composer install --no-dev --no-interaction --classmap-authoritative
+        working-directory: app
+      - run: npm ci
+        working-directory: admin-ui
+      - run: npm run build
+        working-directory: admin-ui
+      - run: ./tools/Check-PowerShell.ps1
+        shell: powershell
+      - name: Package signed manufacturer dependencies
+        env:
+          PACKAGE_VERSION: ${{ inputs.version }}
+        shell: pwsh
+        run: ./tools/Build-WindowsRelease.ps1 -Version $env:PACKAGE_VERSION
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Platzhirsch-Windows-Preview
+          path: dist/*.zip
+          retention-days: 14

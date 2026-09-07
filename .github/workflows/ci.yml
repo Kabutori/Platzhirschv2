@@ -1,0 +1,54 @@
+name: Application checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_mysql, pdo_sqlite, mbstring, intl, openssl
+          tools: composer:v2
+          coverage: none
+      - name: Prepare writable runtime directories
+        run: mkdir -p app/storage/logs app/storage/framework/{sessions,views,cache} app/bootstrap/cache
+      - run: composer install --no-interaction --prefer-dist
+        working-directory: app
+      - name: PHP syntax
+        run: find app/app app/config app/database app/routes app/tests -name '*.php' -print0 | xargs -0 -n1 php -l
+      - run: composer test
+        working-directory: app
+      - run: composer audit --locked
+        working-directory: app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: composer-lock
+          path: app/composer.lock
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: admin-ui/package-lock.json
+      - run: npm ci
+        working-directory: admin-ui
+      - run: npm run build
+        working-directory: admin-ui
+      - run: npm audit --omit=dev --audit-level=high
+        working-directory: admin-ui
+  windows-syntax:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse installer with Windows PowerShell 5.1
+        shell: powershell
+        run: ./tools/Check-PowerShell.ps1
