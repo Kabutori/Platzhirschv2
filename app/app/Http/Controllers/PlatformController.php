@@ -151,18 +151,41 @@ class PlatformController
         $data = $r->validate([
             'name' => 'sometimes|required|string|max:120',
             'active' => 'sometimes|boolean',
+            'platform_role_id' =>
+                $user->role === 'platform_staff' ? 'sometimes|required|integer' : 'prohibited',
+            'expected_platform_role_id' => 'required_with:platform_role_id|integer',
         ]);
-        abort_if(
-            $user->id === $r->user()->id && isset($data['active']) && !$data['active'],
-            422,
-            'Eigenes Konto kann nicht gesperrt werden.',
-        );
-        $user->update($data);
-        if (!$user->active) {
-            DB::table('sessions')->where('user_id', $user->id)->delete();
-        }
-        Audit::record('user.updated', $user->id, $user->tenant_id);
-        return $user;
+        return DB::transaction(function () use ($r, $user, $data) {
+            $user = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            abort_if(
+                $user->id === $r->user()->id && isset($data['active']) && !$data['active'],
+                422,
+                'Eigenes Konto kann nicht gesperrt werden.',
+            );
+            if (isset($data['platform_role_id'])) {
+                abort_unless(
+                    $user->role === 'platform_staff' &&
+                        $user->platform_role_id == $data['expected_platform_role_id'],
+                    409,
+                    'Rollenzuordnung wurde geändert. Bitte neu laden.',
+                );
+                abort_unless(
+                    app(\App\Modules\Identity\PublicApi\RoleDirectory::class)->assignable(
+                        $data['platform_role_id'],
+                    ),
+                    422,
+                    'Aktive Plattformrolle auswählen.',
+                );
+                Audit::record('user.platform_role_changed', $user->id);
+            }
+            unset($data['expected_platform_role_id']);
+            $user->update($data);
+            if (!$user->active) {
+                DB::table('sessions')->where('user_id', $user->id)->delete();
+            }
+            Audit::record('user.updated', $user->id, $user->tenant_id);
+            return $user;
+        });
     }
     public function invite(Request $r, User $user)
     {

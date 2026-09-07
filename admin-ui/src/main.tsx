@@ -1092,6 +1092,7 @@ function UsersPage({ tenant, team = false, user }: { tenant?: string; team?: boo
                 ? (r) =>
                     user.role !== 'system_admin' ? null : (
                       <>
+                        <button onClick={() => setEditing(r)}>Bearbeiten</button>
                         <button
                           onClick={async () => {
                             try {
@@ -1125,10 +1126,17 @@ function UsersPage({ tenant, team = false, user }: { tenant?: string; team?: boo
         )}
       </section>
       {editing && (
-        <Modal title="Teammitglied bearbeiten" close={() => setEditing(null)}>
+        <Modal
+          title={team ? 'Teammitglied bearbeiten' : 'Benutzer bearbeiten'}
+          close={() => setEditing(null)}
+        >
           <Form
             fields={[
-              ...fields.filter((f) => !['email', 'password'].includes(f.key)),
+              ...fields.filter((f) =>
+                team
+                  ? !['email', 'password'].includes(f.key)
+                  : f.key === 'name' || (f.key === 'platform_role_id' && editing.role === 'platform_staff'),
+              ),
               { key: 'active', label: 'Zugang aktiv', type: 'checkbox' },
             ]}
             initial={editing}
@@ -1138,7 +1146,14 @@ function UsersPage({ tenant, team = false, user }: { tenant?: string; team?: boo
                 'PATCH',
                 {
                   ...data,
-                  restaurant_role_id: data.restaurant_role_id ? Number(data.restaurant_role_id) : null,
+                  ...(team
+                    ? { restaurant_role_id: data.restaurant_role_id ? Number(data.restaurant_role_id) : null }
+                    : editing.role === 'platform_staff'
+                      ? {
+                          platform_role_id: Number(data.platform_role_id),
+                          expected_platform_role_id: editing.platform_role_id,
+                        }
+                      : {}),
                 },
                 tenant,
               );
