@@ -1,0 +1,17 @@
+app/vendor/
+app/.env
+app/storage/**/*.log
+app/storage/framework/**
+!app/storage/framework/.gitkeep
+app/bootstrap/cache/*.php
+admin-ui/node_modules/
+app/public/admin/
+app/public/widget.js
+dist/
+*.local.json
+*.key
+*.pfx
+node_modules/
+app/.phpunit.cache/
+admin-ui/test-results/
+admin-ui/playwright-report/

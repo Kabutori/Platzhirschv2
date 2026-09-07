@@ -1,0 +1,16 @@
+<?php
+namespace App\Providers;
+use Illuminate\Support\ServiceProvider;
+use App\Core\Module\ModuleRegistry;
+class ModuleHostServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        $this->app->singleton(ModuleRegistry::class);
+        $this->app->bind(\App\Contracts\Module\AuditSink::class, \App\Services\ModuleAuditSink::class);
+    }
+    public function boot(): void
+    {
+        $this->app->booted(fn() => $this->app->make(ModuleRegistry::class)->validate(['provisioning']));
+    }
+}
