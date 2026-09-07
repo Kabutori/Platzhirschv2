@@ -64,6 +64,19 @@ $headers.Remove('X-Setup-Token')
 $null=Call-Api POST 'v1/admin/auth/login' @{email='admin@example.test';password=$password}
 $csrf=Call-Api GET 'csrf'
 $headers['X-CSRF-TOKEN']=$csrf.token
+# Exercise the installed module and actual PDO/MySQL path, without logging credentials.
+$modules=Call-Api GET 'v1/admin/modules'
+if(-not($modules|Where-Object {$_.code -eq 'provisioning'})){throw 'Provisioning-Modul fehlt.'}
+$dbServer=Call-Api POST 'v1/admin/database-servers' @{name='CI local database';host='127.0.0.1';port=3308;region='CI';purpose='test';database='platzhirsch_platform';username='ph_app';password=$state.appPassword;tls_required=$false}
+if($dbServer.PSObject.Properties.Name -contains 'password'){throw 'Serverantwort enthaelt ein Passwortfeld.'}
+$probe=Call-Api POST "v1/admin/database-servers/$($dbServer.id)/test" @{check='connection'}
+if(-not $probe.ok -or $probe.code -ne 'connected'){throw 'Reale Datenbank-Verbindungspruefung fehlgeschlagen.'}
+$probe=Call-Api POST "v1/admin/database-servers/$($dbServer.id)/test" @{check='permissions'}
+if($probe.ok -or $probe.code -ne 'permission_denied'){throw 'Eingeschraenkte Datenbankrechte wurden nicht korrekt erkannt.'}
+foreach($portalPath in @('/administration/login','/restaurant/login')) {
+    $portalPage=Invoke-WebRequest -Uri "$base$portalPath" -UseBasicParsing
+    if($portalPage.StatusCode -ne 200 -or $portalPage.Content -notmatch 'id="root"'){throw 'Portal-Seite nicht erreichbar.'}
+}
 $tenant=Call-Api POST 'v1/admin/tenants' @{name='CI Restaurant';email='restaurant@example.test';timezone='Europe/Berlin'} 202
 $active=$false
 for($i=0;$i -lt 90;$i++) {

@@ -331,6 +331,7 @@ function Login({ onLogin, setup = false }: { onLogin: () => void; setup?: boolea
                   <label>
                     Passwort
                     <input
+                      aria-label="Passwort"
                       type={showPassword ? 'text' : 'password'}
                       required
                       autoComplete="current-password"
@@ -380,6 +381,12 @@ function Login({ onLogin, setup = false }: { onLogin: () => void; setup?: boolea
             </form>
           )}
         </section>
+        <a
+          className="text"
+          href={portal === 'administration' ? '/restaurant/login' : '/administration/login'}
+        >
+          {portal === 'administration' ? 'Zum Restaurantportal' : 'Zur Administration'}
+        </a>
         <p className="security">
           <span />
           Zugriff wird protokolliert · Geschützte Verbindung empfohlen
