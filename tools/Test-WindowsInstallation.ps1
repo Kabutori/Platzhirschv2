@@ -132,3 +132,29 @@ foreach($key in @('rootPassword','appPassword','provisionPassword','setupToken',
 $rows=Call-Api GET "v1/restaurant/reservations?date=$date"
 if(@($rows).Count -ne 3){throw 'Reservierungen nach Wiederholung nicht erhalten.'}
 Write-Host 'Windows-Integration bestanden: Installation, Bootstrap, Login, MySQL-Provisionierung, Buchung, Konflikt, Storno, gleichzeitige Widget-Buchungen, Worker, Scheduler und Wiederholung.'
+
+# Offline snapshot restores application, all schemas, MySQL accounts and keys together.
+$snapshotScript=Join-Path $PackagePath 'installer\Snapshot-Platzhirsch.ps1'
+$backup=@(& $snapshotScript -Mode Backup -InstallPath $target -Destination 'C:\ph-backups' -Confirm:$false)[-1]
+if(-not(Test-Path "$backup\snapshot.json")){throw 'Vollstaendige Sicherung fehlt.'}
+$afterBackup=$booking.Clone();$afterBackup.starts_at="${date}T14:00";$afterBackup.request_key=[Guid]::NewGuid().ToString()
+$null=Call-Api POST 'v1/restaurant/reservations' $afterBackup 201
+# A corrupt file must be rejected before any services or live data are changed.
+$marker="$backup\files\installation.json"
+$original=[IO.File]::ReadAllBytes($marker)
+[IO.File]::AppendAllText($marker,'corrupt')
+$rejected=$false
+try {& $snapshotScript -Mode Restore -InstallPath $target -Destination $backup -Confirm:$false|Out-Null}catch{$rejected=$true}
+finally{[IO.File]::WriteAllBytes($marker,$original)}
+if(-not $rejected){throw 'Beschaedigte Sicherung wurde akzeptiert.'}
+$null=Call-Api GET 'bootstrap-status'
+$rows=Call-Api GET "v1/restaurant/reservations?date=$date"
+if(@($rows).Count -ne 4){throw 'Abgewiesene Wiederherstellung hat Daten veraendert.'}
+$null=& $snapshotScript -Mode Restore -InstallPath $target -Destination $backup -Confirm:$false
+$rows=Call-Api GET "v1/restaurant/reservations?date=$date"
+if(@($rows).Count -ne 3){throw 'Wiederherstellung hat den Buchungsstand nicht zurueckgesetzt.'}
+$restored=Get-Content "$target\installation.json" -Raw|ConvertFrom-Json
+foreach($key in @('rootPassword','appPassword','provisionPassword','setupToken','appKey')){if($state.$key -ne $restored.$key){throw 'Schluessel nach Wiederherstellung veraendert.'}}
+$health=Call-Api GET 'v1/admin/health'
+if($health.failed_jobs -ne 0){throw 'Queue nach Wiederherstellung fehlerhaft.'}
+Write-Host 'Snapshot-Test bestanden: Sicherung, Beschaedigungspruefung, Wiederherstellung, IIS/MySQL-Start, Mandantenzugriff und Schluesselerhalt.'
