@@ -1,0 +1,126 @@
+name: Windows installation package (preview)
+on:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'admin-ui/**'
+      - 'widget-embed/**'
+      - 'installer/**'
+      - 'tools/**'
+      - 'docs/**'
+      - 'Install.bat'
+      - '.github/workflows/windows-package.yml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Package version
+        required: true
+        default: '0.1.0-preview.1'
+permissions:
+  contents: read
+concurrency:
+  group: windows-package-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  package:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_mysql, pdo_sqlite, mbstring, intl, openssl, fileinfo, curl, zip, sodium
+          tools: composer:v2
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare runtime directories
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force app/storage/logs,app/storage/framework/sessions,app/storage/framework/views,app/storage/framework/cache,app/bootstrap/cache | Out-Null
+      - run: composer install --no-interaction --prefer-dist
+        working-directory: app
+      - run: composer test
+        working-directory: app
+      - run: composer audit --locked
+        working-directory: app
+      - run: composer install --no-dev --no-interaction --classmap-authoritative
+        working-directory: app
+      - run: npm ci
+        working-directory: admin-ui
+      - run: npm run build
+        working-directory: admin-ui
+      - run: npm audit --omit=dev --audit-level=high
+        working-directory: admin-ui
+      - run: npx playwright install chromium
+        working-directory: admin-ui
+      - run: npx playwright test
+        working-directory: admin-ui
+      - run: ./tools/Check-PowerShell.ps1
+        shell: powershell
+      - name: Package signed manufacturer dependencies
+        env:
+          PACKAGE_VERSION: ${{ inputs.version || format('0.1.0-preview.{0}', github.run_number) }}
+        shell: pwsh
+        run: ./tools/Build-WindowsRelease.ps1 -Version $env:PACKAGE_VERSION
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Platzhirsch-Windows-Preview
+          path: dist/*.zip
+          retention-days: 14
+          if-no-files-found: error
+  installation:
+    needs: package
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: Platzhirsch-Windows-Preview
+          path: package-download
+      - name: Extract installation package
+        shell: powershell
+        run: |
+          $zip = Get-ChildItem package-download -Filter '*.zip' | Select-Object -First 1
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [IO.Compression.ZipFile]::ExtractToDirectory($zip.FullName, 'C:\ph-package')
+      - name: Install and test IIS, MySQL and application
+        shell: powershell
+        run: ./tools/Test-WindowsInstallation.ps1 -PackagePath C:\ph-package
+  publish:
+    needs: [package, installation]
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Platzhirsch-Windows-Preview
+          path: package-download
+      - name: Publish tested Windows preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_COMMIT: ${{ github.sha }}
+          RELEASE_TAG: windows-preview-${{ github.run_number }}-${{ github.run_attempt }}
+          CHECK_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          cd package-download
+          sha256sum ./*.zip > SHA256SUMS.txt
+          cat > release-notes.md <<'NOTES'
+          Windows-Vorschau für Platzhirsch. Noch keine Produktionsfreigabe des vollständigen Konzepts.
+
+          Das Asset Platzhirsch-…-windows-x64.zip herunterladen, vollständig entpacken und Install.bat als Administrator ausführen. Die automatisch angebotenen Source-code-Archive enthalten keine Laufzeitpakete.
+
+          Geprüft: PHP-Funktionstests, Frontend-Build, Widget-Browsertests und vollständige Erstinstallation auf Windows Server 2022 und 2025 mit IIS, MySQL, Administrator-Einrichtung, Mandanten-Provisionierung, Buchung und Wiederholung des Installers. Ein tatsächlicher Windows-Neustart und Backup/Restore sind noch nicht abgenommen.
+          NOTES
+          printf '\nPrüflauf: %s\nBuild-Commit: %s\n' "$CHECK_URL" "$RELEASE_COMMIT" >> release-notes.md
+          gh release create "$RELEASE_TAG" ./*.zip SHA256SUMS.txt --target "$RELEASE_COMMIT" --prerelease --title "Platzhirsch Windows-Vorschau $RELEASE_TAG" --notes-file release-notes.md
