@@ -50,12 +50,16 @@ $base='http://127.0.0.1:8378'
 $session=New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $headers=@{Accept='application/json'}
 function Call-Api([string]$Method,[string]$Path,$Body=$null,[int]$Expected=200) {
+    # WebRequestSession retains custom headers between requests; the current
+    # request dictionary alone must determine which portal is selected.
+    $session.Headers.Remove('X-Platzhirsch-Portal')
     $options=@{Uri="$base/api/$Path";Method=$Method;WebSession=$session;Headers=$headers;UseBasicParsing=$true;TimeoutSec=30}
     if($null -ne $Body){$options.ContentType='application/json';$options.Body=$Body|ConvertTo-Json -Depth 10 -Compress}
     try {$response=Invoke-WebRequest @options}
     catch {
         if($_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq $Expected){return $null}
-        throw "API-Test fehlgeschlagen: $Method $Path, erwartet $Expected"
+        $actual=if($_.Exception.Response){[int]$_.Exception.Response.StatusCode}else{0}
+        throw "API-Test fehlgeschlagen: $Method $Path, erwartet $Expected, HTTP $actual"
     }
     if([int]$response.StatusCode -ne $Expected){throw "API-Status fuer $Method $Path ist $($response.StatusCode), erwartet $Expected"}
     if($response.Content){return $response.Content|ConvertFrom-Json}
