@@ -18,7 +18,7 @@ class User extends Authenticatable
     }
     public function isSystem(): bool
     {
-        return $this->role === 'system_admin' && $this->tenant_id === null;
+        return in_array($this->role, ['system_admin', 'platform_staff'], true) && $this->tenant_id === null;
     }
     public function permissions(): array
     {
@@ -26,7 +26,11 @@ class User extends Authenticatable
             return [];
         }
         if ($this->isSystem()) {
-            return ['*'];
+            return $this->role === 'system_admin'
+                ? ['*']
+                : app(\App\Modules\Identity\PublicApi\RoleDirectory::class)->permissions(
+                    $this->platform_role_id,
+                );
         }
         if ($this->role === 'restaurant_admin') {
             return [...array_keys(\App\Services\Permissions::CATALOG), 'team.manage', 'roles.manage'];
@@ -53,6 +57,6 @@ class User extends Authenticatable
     }
     public function canManage(): bool
     {
-        return $this->active && ($this->isSystem() || $this->role === 'restaurant_admin');
+        return $this->active && ($this->role === 'system_admin' || $this->role === 'restaurant_admin');
     }
 }

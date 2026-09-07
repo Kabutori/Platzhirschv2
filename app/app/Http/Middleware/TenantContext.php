@@ -9,7 +9,7 @@ class TenantContext
         $user = $request->user();
         abort_unless($user && $user->active, 403);
         abort_if(
-            $user->isSystem() && $request->attributes->get('portal'),
+            $user->isSystem() && ($request->attributes->get('portal') || $user->role !== 'system_admin'),
             403,
             'Bitte im Restaurantportal anmelden.',
         );

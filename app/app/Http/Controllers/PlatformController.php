@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 
 class PlatformController
 {
-    public function dashboard()
+    public function dashboard(Request $r)
     {
         return [
             'tenants_total' => Tenant::count(),
@@ -17,7 +17,9 @@ class PlatformController
             'tenants_pending' => Tenant::where('status', 'provisioning')->count(),
             'users_total' => User::count(),
             'open_tickets' => DB::table('support_tickets')->where('status', '!=', 'closed')->count(),
-            'recent_audit' => DB::table('audit_entries')->latest('id')->limit(10)->get(),
+            'recent_audit' => $r->user()->hasPermission('platform.audit.read')
+                ? DB::table('audit_entries')->latest('id')->limit(10)->get()
+                : [],
         ];
     }
     public function tenants(Request $r)
@@ -47,6 +49,38 @@ class PlatformController
             ProvisionTenant::dispatch($tenant->id);
             Audit::record('tenant.created', $tenant->id, $tenant->id);
             return response()->json($tenant, 202);
+        });
+    }
+    public function demoTenant(Request $r)
+    {
+        $r->merge(['email' => strtolower((string) $r->input('email'))]);
+        $data = $r->validate([
+            'name' => 'required|string|max:120',
+            'owner_name' => 'required|string|max:120',
+            'email' => 'required|email|max:254|unique:users,email',
+            'password' => 'required|string|min:12|max:128|confirmed',
+        ]);
+        return DB::transaction(function () use ($data) {
+            $suffix = bin2hex(random_bytes(12));
+            $tenant = Tenant::create([
+                'name' => $data['name'],
+                'email' => strtolower($data['email']),
+                'timezone' => 'Europe/Berlin',
+                'is_demo' => true,
+                'database_name' => 'ph_t_' . $suffix,
+                'database_user' => 'phu_' . $suffix,
+                'database_password' => bin2hex(random_bytes(32)),
+            ]);
+            User::create([
+                'name' => $data['owner_name'],
+                'email' => strtolower($data['email']),
+                'password' => $data['password'],
+                'role' => 'restaurant_admin',
+                'tenant_id' => $tenant->id,
+            ]);
+            ProvisionTenant::dispatch($tenant->id);
+            Audit::record('tenant.demo_created', $tenant->id, $tenant->id);
+            return response()->json(['tenant' => $tenant, 'login_url' => '/restaurant/login'], 202);
         });
     }
     public function updateTenant(Request $r, Tenant $tenant)
@@ -81,24 +115,39 @@ class PlatformController
     }
     public function createUser(Request $r)
     {
+        abort_unless($r->user()->role === 'system_admin', 403);
         $data = $r->validate([
             'name' => 'required|string|max:120',
             'email' => 'required|email|max:254|unique:users,email',
-            'role' => ['required', Rule::in(['system_admin', 'restaurant_admin', 'staff'])],
+            'role' => ['required', Rule::in(['system_admin', 'platform_staff', 'restaurant_admin', 'staff'])],
             'tenant_id' => 'nullable|exists:tenants,id',
+            'platform_role_id' => 'nullable|integer',
             'password' => 'required|string|min:12|max:128',
         ]);
         abort_if(
-            ($data['role'] === 'system_admin') === !empty($data['tenant_id']),
+            in_array($data['role'], ['system_admin', 'platform_staff'], true) === !empty($data['tenant_id']),
             422,
             'Rolle und Restaurant passen nicht zusammen.',
         );
+        if ($data['role'] === 'platform_staff') {
+            abort_unless(
+                !empty($data['platform_role_id']) &&
+                    app(\App\Modules\Identity\PublicApi\RoleDirectory::class)->assignable(
+                        $data['platform_role_id'],
+                    ),
+                422,
+                'Aktive Plattformrolle auswählen.',
+            );
+        } else {
+            unset($data['platform_role_id']);
+        }
         $user = User::create([...$data, 'email' => strtolower($data['email'])]);
         Audit::record('user.created', $user->id, $user->tenant_id);
         return response()->json($user, 201);
     }
     public function updateUser(Request $r, User $user)
     {
+        abort_unless($r->user()->role === 'system_admin', 403);
         $data = $r->validate([
             'name' => 'sometimes|required|string|max:120',
             'active' => 'sometimes|boolean',
@@ -117,6 +166,7 @@ class PlatformController
     }
     public function invite(Request $r, User $user)
     {
+        abort_unless($r->user()->role === 'system_admin', 403);
         abort_if(
             config('mail.default') === 'log',
             422,

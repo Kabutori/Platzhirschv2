@@ -233,7 +233,7 @@ GRANT SELECT ON platzhirsch_platform.* TO 'ph_provision'@'127.0.0.1';
     $principal=New-ScheduledTaskPrincipal -UserId 'S-1-5-19' -LogonType ServiceAccount
     $settings=New-ScheduledTaskSettingsSet -StartWhenAvailable -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1) -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew
     foreach($queue in @('default','provisioning')){
-        $action=New-ScheduledTaskAction -Execute "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -Argument "-NoLogo -NoProfile -File `"$InstallPath\tasks\Worker.ps1`" -InstallPath `"$InstallPath`" -Queue $queue"
+        $action=New-ScheduledTaskAction -Execute "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -Argument "-NoLogo -NoProfile -ExecutionPolicy Bypass -File `"$InstallPath\tasks\Worker.ps1`" -InstallPath `"$InstallPath`" -Queue $queue"
         Register-ScheduledTask -TaskName "Platzhirsch-$queue" -Action $action -Trigger (New-ScheduledTaskTrigger -AtStartup) -Principal $principal -Settings $settings -Force|Out-Null
         Start-ScheduledTask -TaskName "Platzhirsch-$queue"
     }

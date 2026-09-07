@@ -63,6 +63,43 @@ class ProvisionTenant implements ShouldQueue
             if ($code !== 0) {
                 throw new \RuntimeException('Tenant migration failed');
             }
+            if ($tenant->is_demo) {
+                $connection = DB::connection('tenant');
+                $connection->transaction(function () use ($connection) {
+                    $room = $connection->table('rooms')->where('name', 'Testraum')->value('id');
+                    if (!$room) {
+                        $room = $connection->table('rooms')->insertGetId([
+                            'name' => 'Testraum',
+                            'color' => 'terracotta',
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                    foreach ([2, 4, 6] as $index => $capacity) {
+                        $name = 'Testtisch ' . ($index + 1);
+                        if (!$connection->table('dining_tables')->where('name', $name)->exists()) {
+                            $connection->table('dining_tables')->insert([
+                                'name' => $name,
+                                'room_id' => $room,
+                                'capacity' => $capacity,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        }
+                    }
+                    for ($day = 1; $day <= 7; $day++) {
+                        if (!$connection->table('opening_hours')->where('weekday', $day)->exists()) {
+                            $connection->table('opening_hours')->insert([
+                                'weekday' => $day,
+                                'opens' => '10:00',
+                                'closes' => '23:00',
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        }
+                    }
+                });
+            }
             // Web credentials may edit data but may not change the schema.
             $pdo->exec("REVOKE CREATE,ALTER,INDEX,DROP,REFERENCES ON `$grantName`.* FROM $account");
             $tenant->update(['status' => 'active']);

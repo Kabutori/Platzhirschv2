@@ -1,3 +1,6 @@
+import { identityManifest } from './modules/identity/manifest';
+import ModuleCatalog from './module-host/Catalog';
+const PlatformRoles = lazy(identityManifest.nav[0].screen);
 import { portal } from './api';
 import { Suspense, lazy } from 'react';
 import { provisioningManifest } from './modules/provisioning/manifest';
@@ -82,6 +85,7 @@ const labels: Record<string, string> = {
   normal: 'Normal',
   high: 'Hoch',
   system_admin: 'System-Administrator',
+  platform_staff: 'Plattform-Mitarbeiter',
   restaurant_admin: 'Restaurant-Administrator',
   staff: 'Mitarbeiter',
 };
@@ -438,6 +442,7 @@ const systemNav = [
   ['tenants', 'Mandanten', Building2],
   ['users', 'Benutzer', Users],
   ['roles', 'Rollen & Rechte', ShieldCheck],
+  ['modules', 'Module', Code2],
   ['audit-log', 'Audit Log', ScrollText],
   ['health', 'System', Activity],
   [provisioningNavigation.key, provisioningNavigation.label, provisioningNavigation.icon],
@@ -519,6 +524,17 @@ const pagePermission: Record<string, string> = {
   profile: 'restaurant.profile',
   support: 'support.access',
 };
+const platformPagePermission: Record<string, string> = {
+  dashboard: 'platform.dashboard.read',
+  tenants: 'platform.tenants.read',
+  users: 'platform.users.read',
+  roles: 'platform.roles.manage',
+  modules: 'platform.modules.read',
+  'audit-log': 'platform.audit.read',
+  health: 'platform.health.read',
+  support: 'support.access',
+  'database-servers': 'provisioning.servers.read',
+};
 function Shell({ user }: { user: Row }) {
   const scope = portal === 'administration' ? 'system' : 'restaurant';
   const [page, setPage] = useState(
@@ -531,16 +547,22 @@ function Shell({ user }: { user: Row }) {
     enabled: scope === 'system',
   });
   const provisioningVisible = navigationFor(
-    [provisioningManifest],
+    [provisioningManifest, identityManifest],
     (installedModules.data || []).filter((m: Row) => m.installed).map((m: Row) => m.code),
     user.permissions || [],
     portal,
   ).some((n) => n.key === provisioningNavigation.key);
+  const identityVisible = installedModules.data?.some((m: Row) => m.code === 'identity' && m.installed);
   const q = useQueryClient();
   const [error, setError] = useState<unknown>();
   const nav =
     scope === 'system'
-      ? systemNav.filter(([key]) => key !== provisioningNavigation.key || provisioningVisible)
+      ? systemNav.filter(
+          ([key]) =>
+            (!platformPagePermission[key] || allowed(user, platformPagePermission[key])) &&
+            (key !== provisioningNavigation.key || provisioningVisible) &&
+            (key !== 'roles' || identityVisible),
+        )
       : restaurantNav.filter(([key]) => !pagePermission[key] || allowed(user, pagePermission[key]));
   const title = nav.find(([key]) => key === page)?.[1] || 'Platzhirsch';
   return (
@@ -650,9 +672,15 @@ function Content({
   if (page === 'support') return <Support tenant={tenant} user={user} />;
   if (scope === 'system') {
     if (page === 'dashboard') return <Dashboard go={go} />;
-    if (page === 'tenants') return <Tenants />;
-    if (page === 'users') return <UsersPage />;
-    if (page === 'roles') return <Roles />;
+    if (page === 'tenants') return <Tenants user={user} />;
+    if (page === 'users') return <UsersPage user={user} />;
+    if (page === 'roles')
+      return (
+        <Suspense fallback={<Loading />}>
+          <PlatformRoles />
+        </Suspense>
+      );
+    if (page === 'modules') return <ModuleCatalog />;
     if (page === 'audit-log') return <AuditPage />;
     if (page === 'health') return <Health />;
     if (page === provisioningNavigation.key)
@@ -665,7 +693,7 @@ function Content({
   if (['overview', 'reservations', 'table-plan'].includes(page))
     return <Reservations tenant={tenant} mode={page} go={go} user={user} />;
   if (page === 'widget') return <Widget tenant={tenant} />;
-  if (page === 'team') return <UsersPage tenant={tenant} team />;
+  if (page === 'team') return <UsersPage tenant={tenant} team user={user} />;
   if (page === 'profile') return <Profile tenant={tenant} />;
   return <RestaurantResource resource={page} tenant={tenant} />;
 }
@@ -778,10 +806,12 @@ function AuditPage() {
     </section>
   );
 }
-function Tenants() {
+function Tenants({ user }: { user: Row }) {
   const q = useData('v1/admin/tenants');
   const qc = useQueryClient();
   const [form, setForm] = useState<Row | null>(null);
+  const [demo, setDemo] = useState(false);
+  const [demoNotice, setDemoNotice] = useState('');
   const [search, setSearch] = useState('');
   const [error, setError] = useState<unknown>();
   useEffect(() => {
@@ -815,12 +845,56 @@ function Tenants() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <button className="primary" onClick={() => setForm({})}>
+        <button className="primary" disabled={user.role !== 'system_admin'} onClick={() => setForm({})}>
           <Plus size={16} />
           Mandant anlegen
         </button>
+        <button disabled={user.role !== 'system_admin'} onClick={() => setDemo(true)}>
+          Testrestaurant einrichten
+        </button>
       </div>
       <ErrorBox error={error} />
+      {demoNotice && (
+        <p className="notice">
+          {demoNotice} <a href="/restaurant/login">Restaurant-Login öffnen</a>
+        </p>
+      )}
+      {demo && (
+        <Modal title="Testrestaurant einrichten" close={() => setDemo(false)}>
+          <p>
+            Erstellt einen eigenen Restaurantzugang, einen Testraum, drei Tische und tägliche Öffnungszeiten
+            von 10 bis 23 Uhr.
+          </p>
+          <Form
+            fields={[
+              { key: 'name', label: 'Restaurantname', default: 'Mein Testrestaurant', required: true },
+              { key: 'owner_name', label: 'Name des Restaurant-Administrators', required: true },
+              { key: 'email', label: 'Login-E-Mail', type: 'email', required: true },
+              {
+                key: 'password',
+                label: 'Login-Passwort (mindestens 12 Zeichen)',
+                type: 'password',
+                required: true,
+              },
+              {
+                key: 'password_confirmation',
+                label: 'Passwort wiederholen',
+                type: 'password',
+                required: true,
+              },
+            ]}
+            label="Testrestaurant erstellen"
+            onSave={async (data) => {
+              await api('v1/admin/test-restaurant', 'POST', data);
+              setDemo(false);
+              setDemoNotice(
+                'Testrestaurant wird eingerichtet. Sobald der Status Aktiv ist, kannst du dich mit deiner Login-E-Mail und deinem gewählten Passwort anmelden.',
+              );
+              await qc.invalidateQueries();
+            }}
+          />
+        </Modal>
+      )}
       <section className="panel">
         {q.isPending ? (
           <Loading />
@@ -848,25 +922,29 @@ function Tenants() {
                 render: (r) => new Date(r.created_at).toLocaleDateString('de-DE'),
               },
             ]}
-            actions={(r) => (
-              <>
-                <button onClick={() => setForm(r)}>Bearbeiten</button>
-                {r.status === 'failed' ? (
-                  <button onClick={() => action(r, '/retry', 'POST')}>Erneut einrichten</button>
-                ) : (
-                  ['active', 'blocked'].includes(r.status) && (
-                    <button
-                      onClick={() => {
-                        if (confirm(r.status === 'active' ? 'Restaurant sperren?' : 'Restaurant freigeben?'))
-                          action(r, '', 'PATCH', { status: r.status === 'active' ? 'blocked' : 'active' });
-                      }}
-                    >
-                      {r.status === 'active' ? 'Sperren' : 'Freigeben'}
-                    </button>
-                  )
-                )}
-              </>
-            )}
+            actions={(r) =>
+              user.role !== 'system_admin' ? null : (
+                <>
+                  <button onClick={() => setForm(r)}>Bearbeiten</button>
+                  {r.status === 'failed' ? (
+                    <button onClick={() => action(r, '/retry', 'POST')}>Erneut einrichten</button>
+                  ) : (
+                    ['active', 'blocked'].includes(r.status) && (
+                      <button
+                        onClick={() => {
+                          if (
+                            confirm(r.status === 'active' ? 'Restaurant sperren?' : 'Restaurant freigeben?')
+                          )
+                            action(r, '', 'PATCH', { status: r.status === 'active' ? 'blocked' : 'active' });
+                        }}
+                      >
+                        {r.status === 'active' ? 'Sperren' : 'Freigeben'}
+                      </button>
+                    )
+                  )}
+                </>
+              )
+            }
           />
         )}
       </section>
@@ -894,7 +972,7 @@ function Tenants() {
     </>
   );
 }
-function UsersPage({ tenant, team = false }: { tenant?: string; team?: boolean }) {
+function UsersPage({ tenant, team = false, user }: { tenant?: string; team?: boolean; user: Row }) {
   const path = team ? 'v1/restaurant/team' : 'v1/admin/users';
   const q = useData(path, tenant);
   const roleOptions = useQuery({
@@ -902,11 +980,16 @@ function UsersPage({ tenant, team = false }: { tenant?: string; team?: boolean }
     queryFn: () => api('v1/restaurant/roles', 'GET', undefined, tenant),
     enabled: team,
   });
+  const platformRoles = useQuery({
+    queryKey: ['platform-roles'],
+    queryFn: () => api('v1/admin/platform-roles'),
+    enabled: !team && user.role === 'system_admin',
+  });
   const [editing, setEditing] = useState<Row | null>(null);
   const tenants = useQuery({
     queryKey: ['user-tenants'],
     queryFn: () => api('v1/admin/tenants'),
-    enabled: !team,
+    enabled: !team && user.role === 'system_admin',
   });
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -918,8 +1001,24 @@ function UsersPage({ tenant, team = false }: { tenant?: string; team?: boolean }
       key: 'role',
       label: 'Rolle',
       required: true,
-      options: pick(team ? ['restaurant_admin', 'staff'] : ['system_admin', 'restaurant_admin', 'staff']),
+      options: pick(
+        team
+          ? ['restaurant_admin', 'staff']
+          : ['system_admin', 'platform_staff', 'restaurant_admin', 'staff'],
+      ),
     },
+    ...(!team
+      ? [
+          {
+            key: 'platform_role_id',
+            label: 'Plattformrolle (für Plattform-Mitarbeiter)',
+            options:
+              platformRoles.data?.roles
+                ?.filter((r: Row) => !r.locked && r.activated_at)
+                .map((r: Row) => ({ value: r.id, label: r.name })) || [],
+          },
+        ]
+      : []),
     ...(team
       ? [
           {
@@ -933,7 +1032,7 @@ function UsersPage({ tenant, team = false }: { tenant?: string; team?: boolean }
       ? [
           {
             key: 'tenant_id',
-            label: 'Restaurant (leer für System-Administrator)',
+            label: 'Restaurant (leer für Plattformkonten)',
             options: tenants.data?.data?.map((t: Row) => ({ value: t.id, label: t.name })) || [],
           },
         ]
@@ -950,7 +1049,11 @@ function UsersPage({ tenant, team = false }: { tenant?: string; team?: boolean }
     <>
       <div className="toolbar">
         <p className="muted">Personen und ihre Zugriffsbereiche</p>
-        <button className="primary" onClick={() => setOpen(true)}>
+        <button
+          className="primary"
+          disabled={!team && user.role !== 'system_admin'}
+          onClick={() => setOpen(true)}
+        >
           <Plus size={16} />
           Benutzer anlegen
         </button>
@@ -979,35 +1082,36 @@ function UsersPage({ tenant, team = false }: { tenant?: string; team?: boolean }
             ]}
             actions={
               !team
-                ? (r) => (
-                    <>
-                      <button
-                        onClick={async () => {
-                          try {
-                            await api('v1/admin/users/' + r.id + '/invite', 'POST');
-                            alert('Einrichtungslink versendet.');
-                          } catch (e) {
-                            setError(e);
-                          }
-                        }}
-                      >
-                        Einladungslink
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (!confirm(r.active ? 'Zugang sperren?' : 'Zugang freigeben?')) return;
-                          try {
-                            await api('v1/admin/users/' + r.id, 'PATCH', { active: !r.active });
-                            await q.refetch();
-                          } catch (e) {
-                            setError(e);
-                          }
-                        }}
-                      >
-                        {r.active ? 'Sperren' : 'Freigeben'}
-                      </button>
-                    </>
-                  )
+                ? (r) =>
+                    user.role !== 'system_admin' ? null : (
+                      <>
+                        <button
+                          onClick={async () => {
+                            try {
+                              await api('v1/admin/users/' + r.id + '/invite', 'POST');
+                              alert('Einrichtungslink versendet.');
+                            } catch (e) {
+                              setError(e);
+                            }
+                          }}
+                        >
+                          Einladungslink
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!confirm(r.active ? 'Zugang sperren?' : 'Zugang freigeben?')) return;
+                            try {
+                              await api('v1/admin/users/' + r.id, 'PATCH', { active: !r.active });
+                              await q.refetch();
+                            } catch (e) {
+                              setError(e);
+                            }
+                          }}
+                        >
+                          {r.active ? 'Sperren' : 'Freigeben'}
+                        </button>
+                      </>
+                    )
                 : (r) => <button onClick={() => setEditing(r)}>Bearbeiten</button>
             }
           />
@@ -1048,6 +1152,7 @@ function UsersPage({ tenant, team = false }: { tenant?: string; team?: boolean }
                 {
                   ...data,
                   tenant_id: data.tenant_id || null,
+                  platform_role_id: data.platform_role_id ? Number(data.platform_role_id) : null,
                   restaurant_role_id: data.restaurant_role_id ? Number(data.restaurant_role_id) : null,
                 },
                 tenant,
@@ -1148,43 +1253,6 @@ function RestaurantRoles({ tenant }: { tenant?: string }) {
             }}
           />
         </Modal>
-      )}
-    </>
-  );
-}
-function Roles() {
-  const q = useData('v1/admin/roles');
-  return (
-    <>
-      <p className="muted">
-        Diese Systemrollen sind fest definiert. Berechtigungen werden auf dem Server geprüft.
-      </p>
-      {q.isPending ? (
-        <Loading />
-      ) : q.error ? (
-        <ErrorBox error={q.error} />
-      ) : (
-        <div className="role-grid">
-          {q.data.map((r: Row) => (
-            <section className="panel role" key={r.code}>
-              <ShieldCheck size={24} />
-              <h2>{r.name}</h2>
-              <code>{r.code}</code>
-              <ul>
-                {r.permissions.map((p: string) => (
-                  <li key={p}>
-                    {p === '*'
-                      ? 'Vollständiger Plattformzugriff'
-                      : p === 'restaurant.manage'
-                        ? 'Restaurant, Team und Einrichtung verwalten'
-                        : 'Reservierungen lesen und bearbeiten'}
-                  </li>
-                ))}
-              </ul>
-              <Badge value="Systemrolle" />
-            </section>
-          ))}
-        </div>
       )}
     </>
   );
@@ -2026,7 +2094,7 @@ function Support({ tenant, user }: { tenant?: string; user: Row }) {
                     default: 'open',
                     options: pick(['open', 'in_progress', 'closed']),
                   },
-                  ...(user.role === 'system_admin'
+                  ...(portal === 'administration'
                     ? [
                         {
                           key: 'internal',
@@ -2081,7 +2149,7 @@ function Support({ tenant, user }: { tenant?: string; user: Row }) {
                 options: pick(['low', 'normal', 'high']),
                 required: true,
               },
-              ...(user.role === 'system_admin'
+              ...(portal === 'administration'
                 ? [
                     {
                       key: 'tenant_id',

@@ -49,6 +49,7 @@ Route::prefix('api')->group(function () {
                 fn() => app(\App\Core\Module\ModuleRegistry::class)->permissionFamilies(),
             );
             Route::get('dashboard', [PlatformController::class, 'dashboard']);
+            Route::post('test-restaurant', [PlatformController::class, 'demoTenant']);
             Route::get('tenants', [PlatformController::class, 'tenants']);
             Route::post('tenants', [PlatformController::class, 'createTenant']);
             Route::patch('tenants/{tenant}', [PlatformController::class, 'updateTenant']);

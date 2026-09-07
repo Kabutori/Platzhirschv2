@@ -7,6 +7,6 @@ class Tenant extends Model
     protected $hidden = ['database_name', 'database_user', 'database_password'];
     protected function casts(): array
     {
-        return ['database_password' => 'encrypted'];
+        return ['database_password' => 'encrypted', 'is_demo' => 'boolean'];
     }
 }

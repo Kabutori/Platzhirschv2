@@ -26,6 +26,10 @@ const messages: Record<string, string> = {
   permission_check_failed: 'Rechteprüfung fehlgeschlagen',
 };
 export default function Servers() {
+  const me = useQuery({ queryKey: ['v1/admin/auth/me', undefined], queryFn: () => api('v1/admin/auth/me') });
+  const permits = (permission: string) =>
+    me.data?.permissions?.includes('*') || me.data?.permissions?.includes(permission);
+
   const q = useQuery({
     queryKey: ['database-servers'],
     queryFn: () => api<{ servers: Server[]; notice: string }>('v1/admin/database-servers'),
@@ -90,6 +94,7 @@ export default function Servers() {
         <h2>Datenbankverbindungen</h2>
         <button
           className="primary"
+          disabled={!permits('provisioning.servers.manage')}
           onClick={() => edit({ port: 3306, purpose: 'test', region: 'EU', tls_required: true })}
         >
           Server hinzufügen
@@ -114,11 +119,13 @@ export default function Servers() {
             {server.tls_required ? 'TLS erforderlich' : 'TLS nicht erzwungen'}
           </p>
           <div className="toolbar">
-            <button onClick={() => edit(server)}>Bearbeiten</button>
+            <button disabled={!permits('provisioning.servers.manage')} onClick={() => edit(server)}>
+              Bearbeiten
+            </button>
             {['connection', 'permissions'].map((check) => (
               <button
                 key={check}
-                disabled={!!testing[server.id + ':' + check]}
+                disabled={!permits('provisioning.servers.test') || !!testing[server.id + ':' + check]}
                 onClick={() => test(server, check)}
               >
                 {testing[server.id + ':' + check]

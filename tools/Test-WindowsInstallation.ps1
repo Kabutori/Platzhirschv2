@@ -10,8 +10,14 @@ if($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_ENVIRONMENT -ne 'github-hosted
 $target='C:\ph-ci'
 if(Test-Path $target){throw 'Testziel existiert bereits.'}
 $installer=Join-Path $PackagePath 'installer\Install-Platzhirsch.ps1'
-& powershell.exe -NoLogo -NoProfile -File $installer -InstallPath $target -NoBrowser -Unattended
-$installExit=$LASTEXITCODE
+$previousPolicy=$env:PSExecutionPolicyPreference
+try {
+    $env:PSExecutionPolicyPreference='Restricted'
+    & cmd.exe /d /c "`"$PackagePath\Install.bat`" -InstallPath $target -NoBrowser -Unattended"
+    $installExit=$LASTEXITCODE
+} finally {
+    $env:PSExecutionPolicyPreference=$previousPolicy
+}
 if(Test-Path "$target\installation.json") {
     $state=Get-Content "$target\installation.json" -Raw|ConvertFrom-Json
     foreach($key in @('rootPassword','appPassword','provisionPassword','setupToken','appKey')) {Write-Output "::add-mask::$($state.$key)"}
@@ -77,6 +83,28 @@ foreach($portalPath in @('/administration/login','/restaurant/login')) {
     $portalPage=Invoke-WebRequest -Uri "$base$portalPath" -UseBasicParsing
     if($portalPage.StatusCode -ne 200 -or $portalPage.Content -notmatch 'id="root"'){throw 'Portal-Seite nicht erreichbar.'}
 }
+$demo=Call-Api POST 'v1/admin/test-restaurant' @{name='CI Demo';owner_name='Demo Owner';email='demo-owner@example.test';password=$password;password_confirmation=$password} 202
+$demoId=$demo.tenant.id
+$demoReady=$false
+for($attempt=0;$attempt -lt 60;$attempt++) {
+    $demoList=Call-Api GET 'v1/admin/tenants'
+    $demoRow=$demoList.data|Where-Object {$_.id -eq $demoId}
+    if($demoRow.status -eq 'active'){$demoReady=$true;break}
+    if($demoRow.status -eq 'failed'){throw 'Demo-Provisionierung fehlgeschlagen.'}
+    Start-Sleep -Seconds 2
+}
+if(-not $demoReady){throw 'Demo-Provisionierung nicht abgeschlossen.'}
+$headers['X-Platzhirsch-Portal']='restaurant'
+$null=Call-Api POST 'v1/admin/auth/login' @{email='demo-owner@example.test';password=$password}
+$csrf=Call-Api GET 'csrf';$headers['X-CSRF-TOKEN']=$csrf.token
+$demoTables=Call-Api GET 'v1/restaurant/tables'
+if(@($demoTables).Count -ne 3){throw 'Demo-Tische fehlen.'}
+$demoHours=Call-Api GET 'v1/restaurant/hours'
+if(@($demoHours).Count -ne 7){throw 'Demo-Oeffnungszeiten fehlen.'}
+$null=Call-Api GET 'v1/admin/tenants' $null 403
+$null=Call-Api POST 'v1/admin/auth/logout' $null 204
+$headers.Remove('X-Platzhirsch-Portal')
+$csrf=Call-Api GET 'csrf';$headers['X-CSRF-TOKEN']=$csrf.token
 $tenant=Call-Api POST 'v1/admin/tenants' @{name='CI Restaurant';email='restaurant@example.test';timezone='Europe/Berlin'} 202
 $active=$false
 for($i=0;$i -lt 90;$i++) {
