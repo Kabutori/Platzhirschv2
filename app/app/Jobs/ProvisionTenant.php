@@ -36,6 +36,9 @@ class ProvisionTenant implements ShouldQueue
         if (!preg_match('/^ph_t_[a-f0-9]{24}$/D', $name) || !preg_match('/^phu_[a-f0-9]{24}$/D', $user)) {
             throw new \RuntimeException('Invalid identifier');
         }
+        // GRANT/REVOKE treat underscores as wildcards even in backtick-quoted
+        // schema names. Delegate privileges for exactly this tenant database.
+        $grantName = str_replace('_', '\\_', $name);
         try {
             $pdo = DB::connection('provision')->getPdo();
             $account = $pdo->quote($user) . "@'127.0.0.1'";
@@ -49,7 +52,7 @@ class ProvisionTenant implements ShouldQueue
                     $pdo->quote($tenant->database_password),
             );
             $pdo->exec(
-                "GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,ALTER,INDEX,DROP,REFERENCES ON `$name`.* TO $account",
+                "GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,ALTER,INDEX,DROP,REFERENCES ON `$grantName`.* TO $account",
             );
             $database->connect($tenant);
             $code = Artisan::call('migrate', [
@@ -61,7 +64,7 @@ class ProvisionTenant implements ShouldQueue
                 throw new \RuntimeException('Tenant migration failed');
             }
             // Web credentials may edit data but may not change the schema.
-            $pdo->exec("REVOKE CREATE,ALTER,INDEX,DROP,REFERENCES ON `$name`.* FROM $account");
+            $pdo->exec("REVOKE CREATE,ALTER,INDEX,DROP,REFERENCES ON `$grantName`.* FROM $account");
             $tenant->update(['status' => 'active']);
             Audit::record('tenant.provisioned', $tenant->id, $tenant->id);
         } finally {
