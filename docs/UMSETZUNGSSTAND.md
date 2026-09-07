@@ -14,7 +14,7 @@ Dieses Dokument beschreibt ausschließlich den Quellcode dieses Repositories. Di
 - Restaurantprofil, Räume, Tische, wöchentliche Öffnungszeiten und Sondertage.
 - Reservierungen erstellen, bearbeiten und stornieren; Kapazitätsprüfung, Öffnungszeitenprüfung, zeitzonenbezogene Eingabe, Speicherung in UTC, transaktionale Tischsperren und Prüfung auf zeitliche Überschneidungen.
 - Reservierungsübersicht, Tageskennzahlen, Belegungsansicht je Tisch, CSV-Export mit Schutz gegen Tabellenformeln.
-- Buchungslinks mit Ablaufdatum und Widerruf, öffentliche Buchungsseite und öffentliche eingeschränkte Buchungs-API. Noch kein Shadow-DOM-Embed.
+- Buchungslinks mit Ablaufdatum und Widerruf, öffentliche Buchungsseite und öffentliche eingeschränkte Buchungs-API. Shadow-DOM-Embed mit Verfügbarkeitsabfrage, konfigurierbarer Buchungsdauer und Akzentfarbe; keine Gästedaten in der öffentlichen Verfügbarkeitsantwort.
 - Support-Tickets, Nachrichten und interne Notizen mit Mandantengrenzen.
 - React/TypeScript-Oberfläche in Anlehnung an die gelieferten Prototypen, dunkles sharp/flat-Design, lokal ausgelieferte Schriften, Formularvalidierung, Lade-/Fehler-/Leerzustände.
 - Windows-Installer-Quellcode: BAT-Einstieg, PowerShell 5.1, IIS/FastCGI, PHP NTS, eigene MySQL-Instanz, lokale Erstinstallation, gesonderte HTTPS-Freigabe und Backup-Skript.
@@ -28,11 +28,11 @@ Die vollständige Anwendung aus allen Konzeptphasen ist mit diesem ersten Stand 
 - Produktive Modulregistrierung, Modul-Marktplatz, Kauf/Aktivierung/Versionsmanagement und unabhängige Modul-Repositories.
 - Abos, rechtlich geprüfte Rechnungen, Zahlungsanbieter, automatische Abrechnung und Testphasenpolitik.
 - Mehrere Datenbankserver, Cluster-Resolver, Umzug/Massenmigration von Mandanten.
-- Shadow-DOM-Widget und konfigurierbare Widget-Designs, automatische Buchungs-E-Mails/SMS.
+- Weitere Widget-Designvorlagen und automatische Buchungs-E-Mails/SMS.
 - Öffentliche Marketing-Website, öffentliche Selbstregistrierung, E-Mail-Verifikation, Rechtstexte und deren Gestaltung.
 - Odoo-, Wetter- und weitergehende Reporting-Integrationen; PDF/XLSX/SQL/XML-Exporte.
 - Vollständiger Update-/Rollback-/Restore-Automat, signierter eigener Installer, Zertifikatserneuerung, externe Backup-Ablage und Monitoring-Alarmierung.
-- Vollständige visuelle 1:1-Abnahme, Bildschirmleser-/Tastatur-Abnahme, browserbasierte E2E-Suite und mobile Detailabnahme.
+- Vollständige visuelle 1:1-Abnahme, Bildschirmleser-/Tastatur-Abnahme, durchgängige browserbasierte Admin-E2E-Suite und mobile Detailabnahme; drei isolierte Widget-Browsertests sind vorhanden.
 
 ## Technische Entscheidungen und Abweichungen
 
@@ -50,10 +50,14 @@ Die vollständige Anwendung aus allen Konzeptphasen ist mit diesem ersten Stand 
 
 ## Verifikationsgrenze
 
+- [CI-Lauf 34140460564](https://github.com/Kabutori/Platzhirschv2/actions/runs/34140460564), Commit `f384b64a5ff6f731776db1ccf81d6d39d5e8132c`: 21 PHP-Tests / 97 Assertions, alle drei Chromium-Widget-Tests, Frontend-Build und PowerShell-Syntaxprüfung erfolgreich. Widget-Tests verwenden API-Mocks; sie ersetzen keinen echten IIS-/MySQL-Test.
+- Der Paket-Workflow installiert das gebaute Paket auf wegwerfbaren GitHub-Testmaschinen mit Windows Server 2022 und 2025. Er prüft Bootstrap, Login, asynchrone MySQL-Provisionierung, Reservierungen, parallele öffentliche Buchungsanfragen, Worker, Scheduler und Wiederholung mit unveränderten Schlüsseln. Maßgeblich ist das Ergebnis des jeweiligen Laufs. Die ersten Versuche fanden eine gesperrte IIS-Konfigurationssektion; die Korrektur wird erneut geprüft.
+- Der Veröffentlichungsjob stellt nur nach erfolgreichen Browser- und beiden Windows-Installationstests eine öffentliche Vorschau unter GitHub Releases bereit. Die Actions-Artefakte werden vorher hochgeladen und können daher zu einem fehlgeschlagenen Installationstest gehören.
+
 - Der React-/TypeScript-Produktionsbuild wurde in der Arbeitsumgebung erfolgreich ausgeführt.
 - PHP und PowerShell sind lokal nicht verfügbar. Die Laufzeitprüfungen wurden daher über GitHub Actions ausgeführt.
 - Nach Korrektur der Testbenutzer-Vorbereitung ist der [CI-Lauf 34129420659](https://github.com/Kabutori/Platzhirschv2/actions/runs/34129420659) für Commit `acb4ea8ca6397a8f749345d0695099430ad871e6` vollständig grün: PHP 8.5.10, 17 Tests / 64 Assertions, PHP-Syntax, Composer-Sicherheitsprüfung, Frontend-Produktionsbuild, npm-Sicherheitsprüfung und Windows-PowerShell-5.1-Syntaxprüfung. Die dort erzeugte Composer-Lockdatei wird unverändert übernommen; das heruntergeladene ZIP wurde gegen den von GitHub gelieferten SHA-256-Wert geprüft.
-- Quellcode öffentlich auf Branch `codex/windows-application`, [Entwurfs-PR #1](https://github.com/Kabutori/Platzhirschv2/pull/1). Keine Zusammenführung nach `main`, kein gebautes Windows-Release und keine Produktionsfreigabe. Spätere Commits benötigen eigene erfolgreiche Prüfläufe.
+- Quellcode öffentlich auf Branch `codex/windows-application`, [Entwurfs-PR #1](https://github.com/Kabutori/Platzhirschv2/pull/1). Keine Zusammenführung nach `main`, keine Produktionsfreigabe. Windows-Vorschaupakete wurden gebaut; ältere Pakete sind nicht automatisch für die Installation abgenommen. Spätere Commits benötigen eigene erfolgreiche Prüfläufe.
 - SQLite-Funktionstests prüfen Geschäftsregeln und Zugriffsgrenzen, aber beweisen weder MySQL-DDL noch konkurrierende InnoDB-Sperrsemantik. Dafür ist ein gesonderter echter MySQL-Paralleltest erforderlich.
 - Ein gebautes ZIP beweist noch keine erfolgreiche Windows-Installation. Ein vollständiger VM-Test mit Neustart, Wiederaufnahme, Mandanten-Provisionierung, Login, Buchung, Backup und isoliertem Restore ist Pflicht vor Freigabe.
 

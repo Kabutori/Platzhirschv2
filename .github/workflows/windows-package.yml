@@ -47,6 +47,12 @@ jobs:
         working-directory: admin-ui
       - run: npm run build
         working-directory: admin-ui
+      - run: npm audit --omit=dev --audit-level=high
+        working-directory: admin-ui
+      - run: npx playwright install chromium
+        working-directory: admin-ui
+      - run: npx playwright test
+        working-directory: admin-ui
       - run: ./tools/Check-PowerShell.ps1
         shell: powershell
       - name: Package signed manufacturer dependencies
@@ -82,3 +88,34 @@ jobs:
       - name: Install and test IIS, MySQL and application
         shell: powershell
         run: ./tools/Test-WindowsInstallation.ps1 -PackagePath C:\ph-package
+  publish:
+    needs: [package, installation]
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Platzhirsch-Windows-Preview
+          path: package-download
+      - name: Publish tested Windows preview
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_COMMIT: ${{ github.sha }}
+          RELEASE_TAG: windows-preview-${{ github.run_number }}-${{ github.run_attempt }}
+          CHECK_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          cd package-download
+          sha256sum ./*.zip > SHA256SUMS.txt
+          cat > release-notes.md <<'NOTES'
+          Windows-Vorschau für Platzhirsch. Noch keine Produktionsfreigabe des vollständigen Konzepts.
+
+          Das Asset Platzhirsch-…-windows-x64.zip herunterladen, vollständig entpacken und Install.bat als Administrator ausführen. Die automatisch angebotenen Source-code-Archive enthalten keine Laufzeitpakete.
+
+          Geprüft: PHP-Funktionstests, Frontend-Build, Widget-Browsertests und vollständige Erstinstallation auf Windows Server 2022 und 2025 mit IIS, MySQL, Administrator-Einrichtung, Mandanten-Provisionierung, Buchung und Wiederholung des Installers. Ein tatsächlicher Windows-Neustart und Backup/Restore sind noch nicht abgenommen.
+          NOTES
+          printf '\nPrüflauf: %s\nBuild-Commit: %s\n' "$CHECK_URL" "$RELEASE_COMMIT" >> release-notes.md
+          gh release create "$RELEASE_TAG" ./*.zip SHA256SUMS.txt --target "$RELEASE_COMMIT" --prerelease --title "Platzhirsch Windows-Vorschau $RELEASE_TAG" --notes-file release-notes.md

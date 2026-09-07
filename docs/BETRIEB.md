@@ -10,11 +10,17 @@ Entwicklungsstand 0.1.0. Kein bereits abgenommenes Komplettprodukt. Vor jeder In
 
 Zielplattformen: Windows Server 2025/2022, x64. Windows 11 Pro/Enterprise besitzt einen separaten Feature-Aktivierungspfad, ist aber kein freigegebener Produktionsserver. Installation benötigt Administratorrechte, IIS-Komponentenquelle und ausreichend freien Speicher (mindestens 10 GB empfohlen). Der Installer nutzt standardmäßig `C:\Platzhirsch`, Web-Port 8378 und MySQL-Port 3308. Installationspfade sind absichtlich auf sichere einfache Verzeichnisse ohne Leerzeichen begrenzt.
 
+## Fertiges Paket herunterladen
+
+Unter [GitHub Releases](https://github.com/Kabutori/Platzhirschv2/releases) eine Windows-Vorschau öffnen und unter **Assets** die Datei `Platzhirsch-…-windows-x64.zip` herunterladen. Vollständig entpacken und `Install.bat` als Administrator ausführen. Die automatisch angebotenen „Source code“-Archive enthalten keine gebauten Laufzeitkomponenten. Wenn noch keine Vorschau vorhanden ist, sind die Installationstests noch nicht vollständig erfolgreich abgeschlossen.
+
+Die Datei `SHA256SUMS.txt` enthält die Prüfsumme des ZIPs; unter PowerShell mit `Get-FileHash -Algorithm SHA256 .\Platzhirsch-…-windows-x64.zip` vergleichen. Vorschauen sind Entwicklungsstände, keine Freigabe aller Konzeptanforderungen.
+
 ## Paket bauen
 
-1. Im GitHub-Repository den Workflow **Windows installation package (preview)** ausführen (nach Übernahme des Workflows auf den Standardbranch über Actions verfügbar).
+1. Änderungen am Anwendungs-PR starten den Workflow **Windows installation package (preview)** automatisch. Nach Übernahme des Workflows auf den Standardbranch kann er zusätzlich manuell unter Actions ausgeführt werden.
 2. Der Workflow installiert PHP-Abhängigkeiten, führt Funktionstests aus, baut die UI und lädt Herstellerpakete herunter. PHP wird gegen einen fest hinterlegten SHA-256-Wert geprüft, Microsoft-/Oracle-MSI bzw. EXE gegen deren Authenticode-Signaturen.
-3. Das Workflow-Artefakt enthält das eigentliche `Platzhirsch-...-windows-x64.zip`. Dieses entpacken und nicht direkt aus dem ZIP ausführen.
+3. Nur nach erfolgreichen Installationstests auf Windows Server 2022 und 2025 wird die Vorschau unter Releases veröffentlicht. Das vorher erzeugte Workflow-Artefakt enthält das eigentliche `Platzhirsch-...-windows-x64.zip`. Dieses entpacken und nicht direkt aus dem ZIP ausführen.
 4. Jeder Paketinhalt wird im Release-Manifest mit SHA-256 aufgeführt. Dieses Manifest schützt gegen Beschädigung, ersetzt aber keine Signatur des eigenen Release-Pakets. Nur Artefakte des eigenen verifizierten GitHub-Prüflaufs verwenden.
 
 Die Quellcode-ZIP-Datei von GitHub allein ist **kein** fertiges Installationspaket. Der Installer stoppt ohne Release-Manifest und gebaute Anwendung. Es wird kein ungeprüftes `main` heruntergeladen und auf dem Zielserver kompiliert.
@@ -42,7 +48,7 @@ Die Standardinstallation öffnet keine Firewall-Regel und bindet HTTP nur an 127
 3. Plattform → Benutzer: Restaurant-Administrator mit Mandanten-ID anlegen. Anfangspasswort über einen sicheren Kanal übergeben oder nach SMTP-Konfiguration einen Einrichtungslink senden.
 4. Bereich wechseln → Restaurant auswählen. Räume und Tische anlegen; Öffnungszeiten hinterlegen.
 5. Eine Reservierung erstellen. Außerhalb der Öffnungszeiten oder bei Überschneidung lehnt der Server die Buchung ab.
-6. Optional einen Buchungslink erstellen und auf der Restaurant-Website verlinken. Eine bereits vorhandene Tischbelegung wird bei der Buchung geprüft, nicht vorab mit Gästedaten öffentlich ausgegeben.
+6. Unter Widget einen Buchungslink oder Einbettungscode erstellen: Website-Ursprünge, Gültigkeit, Buchungsdauer und optionale Akzentfarbe festlegen. Den einmal angezeigten Code auf der Website einfügen. Das Widget kapselt seine Gestaltung in einem Shadow DOM und bietet nach Datum/Uhrzeit und Gästezahl passende freie Tische an. Die endgültige Buchung prüft die Verfügbarkeit erneut transaktional. Server und Website benötigen für die öffentliche Einbettung HTTPS.
 
 ## HTTPS und Netzwerkzugriff
 

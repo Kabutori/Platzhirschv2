@@ -61,6 +61,34 @@ $booking.request_key=[Guid]::NewGuid().ToString()
 $null=Call-Api POST 'v1/restaurant/reservations' $booking 409
 $null=Call-Api POST "v1/restaurant/reservations/$($reservation.id)/cancel" @{} 204
 $null=Call-Api POST 'v1/restaurant/reservations' $booking 201
+$widget=Call-Api POST 'v1/restaurant/widget' @{origins=@('https://restaurant.example');duration_minutes=90;months=1} 201
+# Stateless requests avoid session locking: both IIS requests may execute concurrently.
+Add-Type -AssemblyName System.Net.Http
+$client=New-Object System.Net.Http.HttpClient
+$client.Timeout=[TimeSpan]::FromSeconds(30)
+$client.DefaultRequestHeaders.Add('Origin','https://restaurant.example')
+$client.DefaultRequestHeaders.Add('Accept','application/json')
+$requests=@();$responses=@()
+try {
+    foreach($n in 1..2) {
+        $body=@{table_id=$table.id;guest_name="Concurrent guest $n";email="guest$n@example.test";party_size=2;starts_at="${date}T20:00";consent=$true;request_key=[Guid]::NewGuid().ToString()}|ConvertTo-Json -Compress
+        $request=New-Object System.Net.Http.HttpRequestMessage([System.Net.Http.HttpMethod]::Post,"$base/api/widget/$($widget.token)")
+        $request.Content=New-Object System.Net.Http.StringContent($body,[Text.Encoding]::UTF8,'application/json')
+        $requests+=,$request
+    }
+    $pending=@($requests|ForEach-Object {$client.SendAsync($_)})
+    $statuses=@()
+    foreach($task in $pending) {
+        $response=$task.GetAwaiter().GetResult();$responses+=,$response
+        $statuses+=[int]$response.StatusCode
+        if(($response.Headers.GetValues('Access-Control-Allow-Origin') -join '') -ne 'https://restaurant.example'){throw 'Widget-CORS-Header fehlt bei MySQL-Buchung.'}
+    }
+    if(($statuses|Sort-Object) -join ',' -ne '200,409'){throw "Gleichzeitige Buchung ist nicht eindeutig: $($statuses -join ',')"}
+} finally {
+    foreach($response in $responses){$response.Dispose()}
+    foreach($request in $requests){$request.Dispose()}
+    $client.Dispose()
+}
 $health=Call-Api GET 'v1/admin/health'
 if($health.failed_jobs -ne 0){throw 'Fehlgeschlagene Queue-Jobs vorhanden.'}
 if(-not $health.scheduler_last_seen){throw 'Scheduler hat keinen Heartbeat geschrieben.'}
@@ -75,5 +103,5 @@ foreach($key in @('rootPassword','appPassword','provisionPassword','setupToken',
     if($state.$key -ne $again.$key){throw 'Wiederholte Installation hat einen Schluessel geaendert.'}
 }
 $rows=Call-Api GET "v1/restaurant/reservations?date=$date"
-if(@($rows).Count -ne 2){throw 'Reservierungen nach Wiederholung nicht erhalten.'}
-Write-Host 'Windows-Integration bestanden: Installation, Bootstrap, Login, MySQL-Provisionierung, Buchung, Konflikt, Storno, Worker, Scheduler und Wiederholung.'
+if(@($rows).Count -ne 3){throw 'Reservierungen nach Wiederholung nicht erhalten.'}
+Write-Host 'Windows-Integration bestanden: Installation, Bootstrap, Login, MySQL-Provisionierung, Buchung, Konflikt, Storno, gleichzeitige Widget-Buchungen, Worker, Scheduler und Wiederholung.'
