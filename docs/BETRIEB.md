@@ -88,7 +88,7 @@ Danach als Administrator `C:\Platzhirsch\runtime\php\php.exe C:\Platzhirsch\app\
 ## Logs und Fehler
 
 - Installer: verständliche Phasenausgabe und Exitcode; ein dauerhaftes redigiertes Installer-Protokoll fehlt noch.
-- PHP: `logs\php.log`.
+- PHP: `app\storage\logs\php.log` (für die IIS-Anwendungsidentität schreibbar).
 - MySQL: `logs\mysql.log`.
 - Anwendung: `app\storage\logs\laravel-*.log`.
 - Fehlgeschlagene Queue-Aufgaben: zentrale Tabelle `failed_jobs` (enthält interne Fehlerdetails, Zugriff begrenzen).

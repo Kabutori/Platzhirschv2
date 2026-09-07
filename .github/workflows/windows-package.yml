@@ -84,7 +84,8 @@ jobs:
         shell: powershell
         run: |
           $zip = Get-ChildItem package-download -Filter '*.zip' | Select-Object -First 1
-          Expand-Archive -LiteralPath $zip.FullName -DestinationPath C:\ph-package
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [IO.Compression.ZipFile]::ExtractToDirectory($zip.FullName, 'C:\ph-package')
       - name: Install and test IIS, MySQL and application
         shell: powershell
         run: ./tools/Test-WindowsInstallation.ps1 -PackagePath C:\ph-package

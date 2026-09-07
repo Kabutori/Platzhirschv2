@@ -47,7 +47,7 @@ function Wait-Health([string]$Url,[int]$Attempts=40) {
         catch{if($_.Exception.Response){$lastStatus="HTTP $([int]$_.Exception.Response.StatusCode)"}}
         Start-Sleep -Seconds 2
     }
-    throw "Gesundheitspruefung fehlgeschlagen: $Url ($lastStatus). Siehe IIS-Protokoll und logs\php.log."
+    throw "Gesundheitspruefung fehlgeschlagen: $Url ($lastStatus). Siehe IIS-Protokoll und app\storage\logs\php.log."
 }
 try {
     Write-Phase 'Release und Voraussetzungen pruefen'
@@ -119,11 +119,11 @@ extension=openssl
 extension=pdo_mysql
 extension=sodium
 extension=zip
-zend_extension=opcache
+; PHP 8.5 includes OPcache in the binary; no separate DLL is loaded.
 date.timezone=Europe/Berlin
 display_errors=Off
 log_errors=On
-error_log="$logs\php.log"
+error_log="$app\storage\logs\php.log"
 expose_php=Off
 cgi.force_redirect=0
 fastcgi.impersonate=0

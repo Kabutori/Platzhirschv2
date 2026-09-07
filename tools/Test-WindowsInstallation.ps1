@@ -31,7 +31,7 @@ if($installExit -ne 0){
             }
         }
     }
-    foreach($path in @("$target\logs\php.log","$target\app\storage\logs\laravel*.log",'C:\inetpub\logs\LogFiles\W3SVC*\*.log')) {
+    foreach($path in @("$target\logs\php.log","$target\app\storage\logs\*.log",'C:\inetpub\logs\LogFiles\W3SVC*\*.log')) {
         Get-ChildItem $path -ErrorAction SilentlyContinue|ForEach-Object {Write-Host "Diagnostic log: $($_.Name)";Get-Content $_.FullName -Tail 30}
     }
     throw "Erstinstallation fehlgeschlagen, Exitcode $installExit"
