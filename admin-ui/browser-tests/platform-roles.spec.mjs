@@ -21,13 +21,38 @@ test('platform role drafts are saved, checked and activated explicitly', async (
     else if (path.endsWith('/csrf')) body = { token: 'csrf' };
     else if (path.endsWith('/platform-roles'))
       body = {
-        roles: [role],
+        roles: [
+          {
+            ...role,
+            id: 1,
+            name: 'System Administrator',
+            locked: true,
+            permissions: ['*'],
+            draft_permissions: ['*'],
+          },
+          role,
+        ],
         families: [
           {
             module: 'identity',
             code: 'system',
             label: 'System',
             permissions: [{ code: 'platform.audit.read', label: 'Audit Log ansehen' }],
+          },
+          {
+            module: 'identity',
+            code: 'platform',
+            label: 'Plattformverwaltung',
+            permissions: [
+              { code: 'platform.tenants.read', label: 'Mandanten ansehen' },
+              { code: 'platform.users.read', label: 'Benutzer ansehen' },
+            ],
+          },
+          {
+            module: 'provisioning',
+            code: 'infrastructure',
+            label: 'Datenbankserver',
+            permissions: [{ code: 'provisioning.servers.read', label: 'Datenbankserver ansehen' }],
           },
         ],
       };
@@ -52,9 +77,13 @@ test('platform role drafts are saved, checked and activated explicitly', async (
   });
   await page.goto('/administration/login');
   await page.getByRole('button', { name: 'Rollen & Rechte', exact: true }).click();
+  await page.getByRole('button', { name: 'Support', exact: true }).click();
+  await expect(page.getByRole('switch', { name: 'Audit Log ansehen', exact: true })).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: 'test-results/roles-desktop.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole('button', { name: 'Lokal speichern', exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await page.screenshot({ path: 'test-results/roles-mobile.png', fullPage: true });
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.getByRole('switch', { name: 'Audit Log ansehen', exact: true }).click();
