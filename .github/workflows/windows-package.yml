@@ -59,3 +59,25 @@ jobs:
           path: dist/*.zip
           retention-days: 14
           if-no-files-found: error
+  installation:
+    needs: package
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: Platzhirsch-Windows-Preview
+          path: package-download
+      - name: Extract installation package
+        shell: powershell
+        run: |
+          $zip = Get-ChildItem package-download -Filter '*.zip' | Select-Object -First 1
+          Expand-Archive -LiteralPath $zip.FullName -DestinationPath C:\ph-package
+      - name: Install and test IIS, MySQL and application
+        shell: powershell
+        run: ./tools/Test-WindowsInstallation.ps1 -PackagePath C:\ph-package

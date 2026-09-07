@@ -5,7 +5,8 @@ param(
     [ValidatePattern('^[A-Za-z]:\\[A-Za-z0-9_-]+(?:\\[A-Za-z0-9_-]+)*$')][string]$InstallPath = 'C:\Platzhirsch',
     [ValidateRange(1024,65535)][int]$Port = 8378,
     [ValidateRange(1024,65535)][int]$DatabasePort = 3308,
-    [switch]$NoBrowser
+    [switch]$NoBrowser,
+    [switch]$Unattended
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -64,7 +65,7 @@ try {
         if($state.product -ne 'Platzhirsch'){throw 'Fremde Installation erkannt.'}
         if($state.version -ne $manifest.version){throw 'Versionswechsel benoetigt einen freigegebenen Update-Ablauf. Keine automatische Datenbankmigration.'}
         if($state.port -ne $Port -or $state.databasePort -ne $DatabasePort){throw 'Bei Wiederaufnahme dieselben Ports verwenden.'}
-        if($state.completed){Write-Host 'Diese Version ist bereits installiert. Daten und Schluessel bleiben unveraendert.';Wait-Health "http://127.0.0.1:$Port/up";Write-Host "Einrichtungsschluessel (falls noch nicht eingerichtet): $($state.setupToken)";exit 0}
+        if($state.completed){Write-Host 'Diese Version ist bereits installiert. Daten und Schluessel bleiben unveraendert.';Wait-Health "http://127.0.0.1:$Port/up";if(-not $Unattended){Write-Host "Einrichtungsschluessel (falls noch nicht eingerichtet): $($state.setupToken)"};exit 0}
     } else {
         foreach($p in @($Port,$DatabasePort)){if(Get-NetTCPConnection -State Listen -LocalPort $p -ErrorAction SilentlyContinue){throw "Port $p ist bereits belegt."}}
         if(Get-Service | Where-Object { $_.Name -like '*mysql*' }) {throw 'Bestehende MySQL-Installation erkannt. Automatische Installation nur auf einer separaten Maschine; vorhandene Daten werden nicht veraendert.'}
@@ -127,7 +128,11 @@ opcache.enable=1
 opcache.validate_timestamps=0
 "@
     Write-Utf8 "$runtime\php\php.ini" $phpIni
-    Invoke-Checked $php @('-r','foreach(["pdo_mysql","mbstring","openssl","intl","fileinfo","curl"] as $x){if(!extension_loaded($x)){fwrite(STDERR,$x);exit(1);}}')
+    # Windows PowerShell 5.1 strips embedded quotes in native arguments.
+    # Execute a PHP file instead of passing PHP source through php -r.
+    $checkFile=Join-Path $runtime 'check-extensions.php'
+    Write-Utf8 $checkFile '<?php foreach(["pdo_mysql","mbstring","openssl","intl","fileinfo","curl"] as $x){if(!extension_loaded($x)){fwrite(STDERR,"Missing extension: ".$x);exit(1);}}'
+    try { Invoke-Checked $php @($checkFile) } finally { Remove-Item -LiteralPath $checkFile -Force }
     Write-Phase 'Anwendung bereitstellen und Zugangsdaten schuetzen'
     Copy-Item "$source\payload\app\*" $app -Recurse -Force
     foreach($dir in @('bootstrap\cache','storage\logs','storage\framework\sessions','storage\framework\views','storage\framework\cache','storage\app\private')){New-Item -ItemType Directory -Path "$app\$dir" -Force|Out-Null}
@@ -234,10 +239,10 @@ GRANT SELECT ON platzhirsch_platform.* TO 'ph_provision'@'127.0.0.1';
     Wait-Health "http://127.0.0.1:$Port/admin/"
     $state.completed=$true;Write-Utf8 $marker ($state|ConvertTo-Json)
     Write-Host "`nInstallation abgeschlossen. Nur lokal erreichbar: http://localhost:$Port/admin/" -ForegroundColor Green
-    Write-Host "Einrichtungsschluessel: $($state.setupToken)" -ForegroundColor Yellow
+    if(-not $Unattended){Write-Host "Einrichtungsschluessel: $($state.setupToken)" -ForegroundColor Yellow}
     Write-Host 'Ersten Administrator im Browser anlegen. Diesen Schluessel nicht weitergeben.'
     Write-Host 'Fuer Netzwerkbetrieb: gueltiges TLS-Zertifikat und Enable-PublicAccess.ps1 verwenden.'
-    if(-not $NoBrowser){Start-Process "http://localhost:$Port/admin/"}
+    if(-not $NoBrowser -and -not $Unattended){Start-Process "http://localhost:$Port/admin/"}
     exit 0
 } catch {
     Write-Host "`nInstallation angehalten: $($_.Exception.Message)" -ForegroundColor Red
