@@ -1,4 +1,4 @@
-import DatabaseAccess from './DatabaseAccess';
+const DatabaseAccess = lazy(() => import('./modules/provisioning/DatabaseAccess'));
 import { identityManifest } from './modules/identity/manifest';
 import ModuleCatalog from './module-host/Catalog';
 const PlatformRoles = lazy(identityManifest.nav[0].screen);
@@ -687,7 +687,12 @@ function Content({
         </Suspense>
       );
     if (page === 'modules') return <ModuleCatalog />;
-    if (page === 'database-access' && user.role === 'system_admin') return <DatabaseAccess />;
+    if (page === 'database-access' && user.role === 'system_admin')
+      return (
+        <Suspense fallback={<Loading />}>
+          <DatabaseAccess />
+        </Suspense>
+      );
     if (page === 'audit-log') return <AuditPage />;
     if (page === 'health') return <Health />;
     if (page === provisioningNavigation.key)

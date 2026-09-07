@@ -43,11 +43,6 @@ Route::prefix('api')->group(function () {
     Route::prefix('v1/admin')
         ->middleware(['auth', 'system'])
         ->group(function () {
-            Route::get('database-access', [\App\Http\Controllers\DatabaseAccessController::class, 'index']);
-            Route::post('database-access/{connection}/reveal', [
-                \App\Http\Controllers\DatabaseAccessController::class,
-                'reveal',
-            ])->middleware('throttle:5,1');
             Route::get('modules', fn() => app(\App\Core\Module\ModuleRegistry::class)->catalog());
             Route::get(
                 'permissions/families',
