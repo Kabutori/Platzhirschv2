@@ -56,7 +56,7 @@ try {
     if([int]$os.BuildNumber -lt 20348){throw 'Windows Server 2022/2025 oder Windows 11 Pro/Enterprise erforderlich.'}
     if($Port -eq $DatabasePort){throw 'Web- und Datenbank-Port muessen verschieden sein.'}
     if($InstallPath -in @($env:windir,$env:ProgramFiles,$env:ProgramData,$env:USERPROFILE)){throw 'Eigenes Installationsverzeichnis erforderlich.'}
-    if(-not (Test-Path "$source\release-manifest.json")){throw 'Dies ist ein Quellcode-Checkout, kein gebautes Windows-Release. Zuerst den Windows-Release-Workflow ausfuehren und dessen Installationspaket entpacken.'}
+    if(-not (Test-Path "$source\release-manifest.json")){throw 'Dies ist ein Quellcode-Checkout. Das fertige Platzhirsch-...-windows-x64.zip unter https://github.com/Kabutori/Platzhirschv2/releases herunterladen und vollstaendig entpacken.'}
     $manifest=Get-Content "$source\release-manifest.json" -Raw | ConvertFrom-Json
     foreach($file in $manifest.files){
         $full=[IO.Path]::GetFullPath((Join-Path $source $file.path))
@@ -211,7 +211,10 @@ GRANT SELECT ON platzhirsch_platform.* TO 'ph_provision'@'127.0.0.1';
     Set-ItemProperty IIS:\AppPools\Platzhirsch -Name processModel.idleTimeout -Value ([TimeSpan]::Zero)
     $identity='IIS AppPool\Platzhirsch'
     Add-Access $app $identity 'ReadAndExecute';Add-Access "$runtime\php" $identity 'ReadAndExecute'
-    foreach($dir in @("$app\storage","$app\bootstrap\cache")){Add-Access $dir $identity 'Modify';Add-Access $dir '*S-1-5-19' 'Modify'}
+    Add-Access "$app\storage" $identity 'Modify'
+    Add-Access "$app\storage" '*S-1-5-19' 'Modify'
+    # Executable bootstrap caches are created by the installer. The web identity
+    # must not be able to change PHP configuration later loaded by a privileged worker.
     # Override inherited web access for provisioning credentials.
     Protect-Directory "$app\storage\app\private"
     Add-Access "$app\storage\app\private" '*S-1-5-19' 'ReadAndExecute'
