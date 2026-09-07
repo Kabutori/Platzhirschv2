@@ -12,7 +12,15 @@ Copy-Item "$root\Install.bat" $out
 Copy-Item "$root\installer\*.ps1" "$out\installer"
 Copy-Item "$root\docs\BETRIEB.md" "$out\BETRIEB.md"
 Copy-Item "$root\docs\UMSETZUNGSSTAND.md" "$out\UMSETZUNGSSTAND.md"
-Copy-Item "$root\app\*" "$out\payload\app" -Recurse
+# Package runtime files explicitly: no test databases, logs, developer environment
+# or cached configuration from the build machine may enter an installation.
+foreach($entry in @('app','bootstrap','config','database','public','routes','vendor','artisan','composer.json','composer.lock')) {
+    Copy-Item "$root\app\$entry" "$out\payload\app" -Recurse
+}
+Get-ChildItem "$out\payload\app\bootstrap\cache" -File -Filter '*.php' | Remove-Item
+foreach($directory in @('storage\logs','storage\framework\sessions','storage\framework\views','storage\framework\cache','storage\app\private')) {
+    New-Item -ItemType Directory -Path "$out\payload\app\$directory" -Force | Out-Null
+}
 Copy-Item "$root\app\.env.example" "$out\payload\app\.env.example"
 if(Test-Path "$out\payload\app\.env"){throw 'Release darf keine .env enthalten.'}
 $sources=@(
@@ -29,6 +37,7 @@ foreach($item in $sources){
 }
 $files=@(Get-ChildItem $out -Recurse -File|ForEach-Object{ @{path=[IO.Path]::GetRelativePath($out,$_.FullName).Replace('\','/');sha256=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()} })
 @{version=$Version;sourceCommit=(& git -C $root rev-parse HEAD);createdAt=[DateTime]::UtcNow.ToString('o');files=$files;sources=$sources}|ConvertTo-Json -Depth 6|Set-Content "$out\release-manifest.json" -Encoding utf8NoBOM
-Compress-Archive -Path "$out\*" -DestinationPath "$root\dist\Platzhirsch-$Version-windows-x64.zip"
+# ZipFile includes dotfiles such as .env.example, unlike Compress-Archive.
+[IO.Compression.ZipFile]::CreateFromDirectory($out,"$root\dist\Platzhirsch-$Version-windows-x64.zip",[IO.Compression.CompressionLevel]::Optimal,$false)
 Get-FileHash "$root\dist\Platzhirsch-$Version-windows-x64.zip" -Algorithm SHA256|Format-List
 Write-Host 'Installationspaket erstellt. Dies ist noch keine Produktionsfreigabe.'

@@ -1,5 +1,13 @@
 name: Windows installation package (preview)
 on:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'admin-ui/**'
+      - 'installer/**'
+      - 'tools/**'
+      - 'Install.bat'
+      - '.github/workflows/windows-package.yml'
   workflow_dispatch:
     inputs:
       version:
@@ -11,6 +19,7 @@ permissions:
 jobs:
   package:
     runs-on: windows-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -41,7 +50,7 @@ jobs:
         shell: powershell
       - name: Package signed manufacturer dependencies
         env:
-          PACKAGE_VERSION: ${{ inputs.version }}
+          PACKAGE_VERSION: ${{ inputs.version || format('0.1.0-preview.{0}', github.run_number) }}
         shell: pwsh
         run: ./tools/Build-WindowsRelease.ps1 -Version $env:PACKAGE_VERSION
       - uses: actions/upload-artifact@v4
@@ -49,3 +58,4 @@ jobs:
           name: Platzhirsch-Windows-Preview
           path: dist/*.zip
           retention-days: 14
+          if-no-files-found: error
