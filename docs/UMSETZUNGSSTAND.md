@@ -51,8 +51,9 @@ Die vollständige Anwendung aus allen Konzeptphasen ist mit diesem ersten Stand 
 ## Verifikationsgrenze
 
 - Der React-/TypeScript-Produktionsbuild wurde in der Arbeitsumgebung erfolgreich ausgeführt.
-- PHP und PowerShell sind in dieser Arbeitsumgebung nicht verfügbar. Die Installation zusätzlicher Systempakete wurde von der Umgebung abgewiesen. PHP-Funktionstests, Windows-Syntax und reale Installation sind deshalb nur über die hinzugefügten CI-Workflows bzw. eine separate Windows-VM prüfbar.
-- CI-Ergebnisse stehen im zugehörigen GitHub-Prüflauf; eine Workflow-Datei allein beweist keinen bestandenen Test.
+- PHP und PowerShell sind lokal nicht verfügbar. Die Laufzeitprüfungen wurden daher über GitHub Actions ausgeführt.
+- Nach Korrektur der Testbenutzer-Vorbereitung ist der [CI-Lauf 34129420659](https://github.com/Kabutori/Platzhirschv2/actions/runs/34129420659) für Commit `acb4ea8ca6397a8f749345d0695099430ad871e6` vollständig grün: PHP 8.5.10, 17 Tests / 64 Assertions, PHP-Syntax, Composer-Sicherheitsprüfung, Frontend-Produktionsbuild, npm-Sicherheitsprüfung und Windows-PowerShell-5.1-Syntaxprüfung. Die dort erzeugte Composer-Lockdatei wird unverändert übernommen; das heruntergeladene ZIP wurde gegen den von GitHub gelieferten SHA-256-Wert geprüft.
+- Quellcode öffentlich auf Branch `codex/windows-application`, [Entwurfs-PR #1](https://github.com/Kabutori/Platzhirschv2/pull/1). Keine Zusammenführung nach `main`, kein gebautes Windows-Release und keine Produktionsfreigabe. Spätere Commits benötigen eigene erfolgreiche Prüfläufe.
 - SQLite-Funktionstests prüfen Geschäftsregeln und Zugriffsgrenzen, aber beweisen weder MySQL-DDL noch konkurrierende InnoDB-Sperrsemantik. Dafür ist ein gesonderter echter MySQL-Paralleltest erforderlich.
 - Ein gebautes ZIP beweist noch keine erfolgreiche Windows-Installation. Ein vollständiger VM-Test mit Neustart, Wiederaufnahme, Mandanten-Provisionierung, Login, Buchung, Backup und isoliertem Restore ist Pflicht vor Freigabe.
 
