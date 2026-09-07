@@ -6,6 +6,8 @@ Dieses Dokument beschreibt ausschließlich den Quellcode dieses Repositories. Di
 
 ## Implementiert
 
+- Getrennte Portalanmeldungen und Sitzungen; Plattformrollen mit serverseitiger Rechteprüfung und Modulnavigation. Testrestaurantanlage mit eigenem Login, Raum, drei Tischen und Öffnungszeiten.
+
 - Laravel-Anwendung mit zentraler Plattform-Datenbank und eigenem MySQL-Schema sowie eigenem Datenbankbenutzer je Restaurant.
 - Erstadministrator mit Einmal-Schlüssel, gesperrtem Sentinel und Datenbanktransaktion; kein automatischer Login nach Setup.
 - Session-Anmeldung, Logout, Kontosperren, CSRF-Schutz, Login-Limitierung, Passwort-Reset per konfiguriertem SMTP, TOTP-Einrichtung und Replay-Schutz.
@@ -24,10 +26,10 @@ Dieses Dokument beschreibt ausschließlich den Quellcode dieses Repositories. Di
 
 Die vollständige Anwendung aus allen Konzeptphasen ist mit diesem ersten Stand **nicht** umgesetzt. Insbesondere fehlen:
 
-- Dynamische Berechtigungsfamilien aus externen Modulen, organisationsübergreifender Rollen-Rollout, SSO und Sidebar-Favoriten. Restaurant-Mitarbeiterrollen sind implementiert.
-- Produktive Modulregistrierung, Modul-Marktplatz, Kauf/Aktivierung/Versionsmanagement und unabhängige Modul-Repositories.
+- Organisationsübergreifender Rollen-Rollout, SSO und Sidebar-Favoriten. Plattformrollen mit Entwurf, lokaler Prüfung und Aktivierung sowie registrierte Berechtigungsfamilien der eingebundenen Module sind implementiert.
+- Vollständige Extraktion des Anwendungscodes in eigenständige Composer-/npm-Pakete, Modul-Marktplatz, Kauf und mandantenbezogene Aktivierung einschließlich Migrationen. Registry und UI-Manifest-Anbindung für Provisioning und Identity sind vorhanden.
 - Abos, rechtlich geprüfte Rechnungen, Zahlungsanbieter, automatische Abrechnung und Testphasenpolitik.
-- Mehrere Datenbankserver, Cluster-Resolver, Umzug/Massenmigration von Mandanten.
+- Produktive Zuordnung neuer Restaurants zu externen Datenbankservern, Cluster-Resolver und Umzug/Massenmigration von Mandanten. Erfasste Server können geprüft werden; Restaurants werden weiterhin lokal provisioniert.
 - Weitere Widget-Designvorlagen und automatische Buchungs-E-Mails/SMS.
 - Öffentliche Marketing-Website, öffentliche Selbstregistrierung, E-Mail-Verifikation, Rechtstexte und deren Gestaltung.
 - Odoo-, Wetter- und weitergehende Reporting-Integrationen; PDF/XLSX/SQL/XML-Exporte.

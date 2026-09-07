@@ -6,7 +6,7 @@ Entwicklungsstand 0.1.0. Kein bereits abgenommenes Komplettprodukt. Vor jeder In
 
 ## Was gestartet wird
 
-`Install.bat` startet `installer/Install-Platzhirsch.ps1` mit Windows PowerShell 5.1. Keine globale ExecutionPolicy-Änderung und kein ExecutionPolicy-Bypass. Organisationsrichtlinien können eine Signatur oder Freigabe verlangen; der Installer umgeht sie nicht.
+`Install.bat` startet `installer/Install-Platzhirsch.ps1` mit Windows PowerShell 5.1. Die BAT setzt `-ExecutionPolicy Bypass` ausschließlich für den gestarteten PowerShell-Prozess. Eine vorherige manuelle `Set-ExecutionPolicy`-Eingabe ist nicht erforderlich; die globale Richtlinie bleibt unverändert. Organisationsrichtlinien behalten Vorrang.
 
 Zielplattformen: Windows Server 2025/2022, x64. Windows 11 Pro/Enterprise besitzt einen separaten Feature-Aktivierungspfad, ist aber kein freigegebener Produktionsserver. Installation benötigt Administratorrechte, IIS-Komponentenquelle und ausreichend freien Speicher (mindestens 10 GB empfohlen). Der Installer nutzt standardmäßig `C:\Platzhirsch`, Web-Port 8378 und MySQL-Port 3308. Installationspfade sind absichtlich auf sichere einfache Verzeichnisse ohne Leerzeichen begrenzt.
 
@@ -145,3 +145,13 @@ Es gibt absichtlich keine automatische datenlöschende Deinstallation. Vor manue
 
 - NTFS-Rechte sichern/wiederherstellen: [Microsoft icacls](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls)
 - Kopierparameter und Fehlercodes: [Microsoft Robocopy](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy)
+
+## Testrestaurant und Plattformrollen
+
+Administration → Mandanten → Testrestaurant einrichten erstellt einen getrennten Testmandanten mit frei gewähltem Restaurantadministrator (E-Mail und Passwort), Testraum, drei Tischen und täglichen Öffnungszeiten. Die Bereitstellung läuft als Hintergrundjob; erst bei Status „aktiv“ unter `/restaurant/login` anmelden. Es gibt kein allgemein gültiges Demo-Passwort.
+
+Administration → Rollen & Rechte verwaltet Plattformrollen. „Lokal speichern“ speichert einen Entwurf; „Entwurf prüfen“ prüft dessen registrierte Berechtigungscodes; „Rechte aktivieren“ übernimmt den geprüften Entwurf für folgende Anfragen. Diese Prüfung ist kein verteilter Testserver-Rollout. System Administrator bleibt gesperrt und unveränderbar. Zugewiesene Rollen können nicht gelöscht werden. Plattformmitarbeiter erhalten eine aktivierte Rolle bei der Benutzeranlage; sie erhalten dadurch keinen Restaurantzugriff.
+
+Administration → Module zeigt die tatsächlich registrierten Module, Versionen und Abhängigkeiten. Kauf, mandantenbezogene Aktivierung und unabhängige Composer-/npm-Auslieferung sind noch nicht implementiert. Datenbankserver bleiben Prüfziele; Provisionierung erfolgt lokal.
+
+Neue Versionspakete sind weiterhin für Neuinstallationen vorgesehen. Der Installer verweigert einen Versionswechsel einer vorhandenen Installation; vorhandene Datenordner nicht löschen oder mit einem neuen Paket überschreiben.
