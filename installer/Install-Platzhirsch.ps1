@@ -41,8 +41,13 @@ function Protect-File([string]$Path) {
     Set-Acl -LiteralPath $Path -AclObject $acl
 }
 function Wait-Health([string]$Url,[int]$Attempts=40) {
-    for($i=0;$i -lt $Attempts;$i++){try{$response=Invoke-WebRequest -UseBasicParsing -Uri $Url -TimeoutSec 5;if($response.StatusCode -eq 200){return}}catch{};Start-Sleep -Seconds 2}
-    throw "Gesundheitspruefung fehlgeschlagen: $Url"
+    $lastStatus='keine HTTP-Antwort'
+    for($i=0;$i -lt $Attempts;$i++){
+        try{$response=Invoke-WebRequest -UseBasicParsing -Uri $Url -TimeoutSec 5;$lastStatus="HTTP $($response.StatusCode)";if($response.StatusCode -eq 200){return}}
+        catch{if($_.Exception.Response){$lastStatus="HTTP $([int]$_.Exception.Response.StatusCode)"}}
+        Start-Sleep -Seconds 2
+    }
+    throw "Gesundheitspruefung fehlgeschlagen: $Url ($lastStatus). Siehe IIS-Protokoll und logs\php.log."
 }
 try {
     Write-Phase 'Release und Voraussetzungen pruefen'

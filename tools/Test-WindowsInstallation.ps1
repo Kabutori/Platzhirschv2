@@ -11,7 +11,31 @@ $target='C:\ph-ci'
 if(Test-Path $target){throw 'Testziel existiert bereits.'}
 $installer=Join-Path $PackagePath 'installer\Install-Platzhirsch.ps1'
 & powershell.exe -NoLogo -NoProfile -File $installer -InstallPath $target -NoBrowser -Unattended
-if($LASTEXITCODE -ne 0){throw "Erstinstallation fehlgeschlagen, Exitcode $LASTEXITCODE"}
+$installExit=$LASTEXITCODE
+if(Test-Path "$target\installation.json") {
+    $state=Get-Content "$target\installation.json" -Raw|ConvertFrom-Json
+    foreach($key in @('rootPassword','appPassword','provisionPassword','setupToken','appKey')) {Write-Output "::add-mask::$($state.$key)"}
+}
+if($installExit -ne 0){
+    # Only this fresh, disposable CI installation is inspected, before any guest data exists.
+    try {Invoke-WebRequest -UseBasicParsing 'http://127.0.0.1:8378/up' -TimeoutSec 5|Out-Null}
+    catch {
+        if($_.Exception.Response){
+            Write-Host "IIS health HTTP status: $([int]$_.Exception.Response.StatusCode)"
+            $reader=New-Object IO.StreamReader($_.Exception.Response.GetResponseStream())
+            try {$html=$reader.ReadToEnd()} finally {$reader.Dispose()}
+            [regex]::Matches($html,'HTTP Error [0-9.]+|0x[0-9a-fA-F]{8}')|ForEach-Object {Write-Host $_.Value}
+            foreach($label in @('Config Error','Module','Notification','Handler')) {
+                $match=[regex]::Match($html,"(?is)<th>\s*$label\s*</th>\s*<td>(.*?)</td>")
+                if($match.Success){Write-Host "$label : $([Net.WebUtility]::HtmlDecode(($match.Groups[1].Value -replace '<[^>]+>','')))"}
+            }
+        }
+    }
+    foreach($path in @("$target\logs\php.log","$target\app\storage\logs\laravel*.log",'C:\inetpub\logs\LogFiles\W3SVC*\*.log')) {
+        Get-ChildItem $path -ErrorAction SilentlyContinue|ForEach-Object {Write-Host "Diagnostic log: $($_.Name)";Get-Content $_.FullName -Tail 30}
+    }
+    throw "Erstinstallation fehlgeschlagen, Exitcode $installExit"
+}
 $state=Get-Content "$target\installation.json" -Raw|ConvertFrom-Json
 foreach($key in @('rootPassword','appPassword','provisionPassword','setupToken','appKey')) {Write-Output "::add-mask::$($state.$key)"}
 $password=[Guid]::NewGuid().ToString('N')+'-Aa7!'
