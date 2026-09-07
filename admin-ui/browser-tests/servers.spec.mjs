@@ -48,7 +48,8 @@ test('server checks report failure and editing never preloads a password', async
   await page.getByRole('button', { name: 'Bearbeiten', exact: true }).click();
   await expect(page.getByLabel('Passwort', { exact: false })).toHaveValue('');
   await page.getByRole('button', { name: 'Speichern', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Speichern', exact: true })).toHaveCount(0);
+  await expect.poll(() => requests.length).toBe(2);
+  await expect(page.getByRole('region', { name: 'Server bearbeiten', exact: true })).toHaveCount(0);
   expect(requests[0]).toEqual({ check: 'permissions' });
   expect(requests[1].password).toBe('');
   expect(requests[1].version).toBe(1);

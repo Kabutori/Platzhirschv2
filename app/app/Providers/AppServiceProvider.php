@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('widget', fn(Request $r) => Limit::perMinute(30)->by($r->ip()));
         ResetPassword::createUrlUsing(
             fn($user, $token) => config('app.url') .
-                '/admin/#reset?' .
+                ($user->isSystem() ? '/administration/login#reset?' : '/restaurant/login#reset?') .
                 http_build_query(['token' => $token, 'email' => $user->email]),
         );
     }

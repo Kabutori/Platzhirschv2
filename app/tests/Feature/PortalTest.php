@@ -74,6 +74,19 @@ class PortalTest extends TestCase
             ->getJson('/api/v1/restaurant/profile')
             ->assertForbidden();
     }
+    public function test_password_reset_links_return_to_the_account_portal(): void
+    {
+        [$admin, $owner] = $this->accounts();
+        $notification = new \Illuminate\Auth\Notifications\ResetPassword('test-token');
+        $this->assertStringContainsString(
+            '/administration/login#reset?',
+            $notification->toMail($admin)->actionUrl,
+        );
+        $this->assertStringContainsString(
+            '/restaurant/login#reset?',
+            $notification->toMail($owner)->actionUrl,
+        );
+    }
     public function test_invalid_portal_is_rejected(): void
     {
         $this->withHeader('X-Platzhirsch-Portal', 'unexpected')->getJson('/api/csrf')->assertStatus(400);

@@ -246,13 +246,13 @@ GRANT SELECT ON platzhirsch_platform.* TO 'ph_provision'@'127.0.0.1';
     Write-Phase 'Installation pruefen'
     Wait-Health "http://127.0.0.1:$Port/up"
     Wait-Health "http://127.0.0.1:$Port/api/bootstrap-status"
-    Wait-Health "http://127.0.0.1:$Port/admin/"
+    Wait-Health "http://127.0.0.1:$Port/administration/login"
     $state.completed=$true;Write-Utf8 $marker ($state|ConvertTo-Json)
-    Write-Host "`nInstallation abgeschlossen. Nur lokal erreichbar: http://localhost:$Port/admin/" -ForegroundColor Green
+    Write-Host "`nInstallation abgeschlossen. Nur lokal erreichbar: http://localhost:$Port/administration/login" -ForegroundColor Green
     if(-not $Unattended){Write-Host "Einrichtungsschluessel: $($state.setupToken)" -ForegroundColor Yellow}
     Write-Host 'Ersten Administrator im Browser anlegen. Diesen Schluessel nicht weitergeben.'
     Write-Host 'Fuer Netzwerkbetrieb: gueltiges TLS-Zertifikat und Enable-PublicAccess.ps1 verwenden.'
-    if(-not $NoBrowser -and -not $Unattended){Start-Process "http://localhost:$Port/admin/"}
+    if(-not $NoBrowser -and -not $Unattended){Start-Process "http://localhost:$Port/administration/login"}
     exit 0
 } catch {
     Write-Host "`nInstallation angehalten: $($_.Exception.Message)" -ForegroundColor Red
