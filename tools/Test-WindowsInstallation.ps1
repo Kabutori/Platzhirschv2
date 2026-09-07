@@ -70,7 +70,10 @@ for($i=0;$i -lt 90;$i++) {
     $list=Call-Api GET 'v1/admin/tenants'
     $current=@($list.data|Where-Object {$_.id -eq $tenant.id})[0]
     if($current.status -eq 'active'){$active=$true;break}
-    if($current.status -eq 'failed'){throw 'Mandanten-Provisionierung fehlgeschlagen.'}
+    if($current.status -eq 'failed'){
+        & "$target\runtime\php\php.exe" "$PSScriptRoot\Inspect-CiJobs.php" $target
+        throw 'Mandanten-Provisionierung fehlgeschlagen.'
+    }
     Start-Sleep -Seconds 2
 }
 if(-not $active){throw 'Provisionierungsworker wurde nicht rechtzeitig fertig.'}
