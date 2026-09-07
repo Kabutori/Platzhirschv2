@@ -270,4 +270,12 @@ class RestaurantTest extends TestCase
         $this->deleteJson('/api/v1/restaurant/widget/' . $client->id)->assertNoContent();
         $this->getJson('/api/widget/' . $token)->assertNotFound();
     }
+    public function test_widget_preflight_obeys_the_same_origin_allowlist(): void
+    {
+        $token = $this->widgetToken();
+        $this->withHeaders(['Origin' => 'https://attacker.example', 'Access-Control-Request-Method' => 'POST'])
+            ->optionsJson('/api/widget/' . $token)->assertForbidden()->assertHeaderMissing('Access-Control-Allow-Origin');
+        $this->withHeader('Origin', 'https://restaurant.example')->optionsJson('/api/widget/' . $token)
+            ->assertOk()->assertHeader('Access-Control-Allow-Origin', 'https://restaurant.example');
+    }
 }

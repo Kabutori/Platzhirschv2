@@ -47,7 +47,7 @@
           <label>Datum und Uhrzeit<input name="starts_at" type="datetime-local" required></label>
           <label>Personen<input name="party_size" type="number" min="1" max="50" value="2" required></label>
           <button id="check" type="button">Verfügbare Tische anzeigen</button>
-          <label>Tisch<select name="table_id" required disabled><option value="">Zuerst Verfügbarkeit prüfen</option></select></label>
+          <label>Tisch<select name="table_id" aria-label="Tisch" required disabled><option value="">Zuerst Verfügbarkeit prüfen</option></select></label>
           <label>Dein Name<input name="guest_name" autocomplete="name" maxlength="120" required></label>
           <label>E-Mail<input name="email" type="email" autocomplete="email" maxlength="254" required></label>
           <label>Telefon<input name="phone" type="tel" autocomplete="tel" maxlength="50"></label>
