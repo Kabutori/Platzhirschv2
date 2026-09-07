@@ -12,6 +12,8 @@ Zielplattformen: Windows Server 2025/2022, x64. Windows 11 Pro/Enterprise besitz
 
 ## Fertiges Paket herunterladen
 
+Aktuell geprüft: [Windows-Vorschau 13](https://github.com/Kabutori/Platzhirschv2/releases/tag/windows-preview-13-1). Erstinstallation und Anwendungstest sind auf Windows Server 2022 und 2025 erfolgreich.
+
 Unter [GitHub Releases](https://github.com/Kabutori/Platzhirschv2/releases) eine Windows-Vorschau öffnen und unter **Assets** die Datei `Platzhirsch-…-windows-x64.zip` herunterladen. Vollständig entpacken und `Install.bat` als Administrator ausführen. Die automatisch angebotenen „Source code“-Archive enthalten keine gebauten Laufzeitkomponenten. Wenn noch keine Vorschau vorhanden ist, sind die Installationstests noch nicht vollständig erfolgreich abgeschlossen.
 
 Die Datei `SHA256SUMS.txt` enthält die Prüfsumme des ZIPs; unter PowerShell mit `Get-FileHash -Algorithm SHA256 .\Platzhirsch-…-windows-x64.zip` vergleichen. Vorschauen sind Entwicklungsstände, keine Freigabe aller Konzeptanforderungen.
@@ -35,7 +37,7 @@ Als Administrator im entpackten Installationspaket:
 .\installer\Install-Platzhirsch.ps1 -InstallPath C:\Platzhirsch -Port 8378 -DatabasePort 3308
 ```
 
-Bei gefordertem Neustart meldet das Skript Exitcode 3010. Nach dem Neustart denselben Befehl wiederholen. Bereits erzeugte Daten und Schlüssel bleiben erhalten. Die Wiederaufnahme ist als Codepfad implementiert, aber noch durch Abbruchtests auf Windows nachzuweisen.
+Bei gefordertem Neustart meldet das Skript Exitcode 3010. Nach dem Neustart denselben Befehl wiederholen. Bereits erzeugte Daten und Schlüssel bleiben erhalten. Die Wiederholung einer abgeschlossenen Installation mit unveränderten Schlüsseln und erhaltenen Reservierungen ist auf Server 2022 und 2025 geprüft. Wiederaufnahme nach einem tatsächlichen Abbruch oder Windows-Neustart ist noch separat nachzuweisen.
 
 Am Ende `http://localhost:8378/admin/` öffnen und den angezeigten Einmal-Schlüssel verwenden. Namen, E-Mail und mindestens zwölf Zeichen langes Passwort für den ersten Administrator eingeben. Anschließend normal anmelden und im Bereich „Mein Konto“ TOTP aktivieren. Die Einrichtung nimmt nicht automatisch eine Anmeldung vor.
 
@@ -79,10 +81,10 @@ Danach als Administrator `C:\Platzhirsch\runtime\php\php.exe C:\Platzhirsch\app\
 ## Hintergrundbetrieb und Rechte
 
 - `PlatzhirschMySQL`: eigene MySQL-Windows-Service-Instanz, nur Loopback, LocalService.
-- IIS-Pool `Platzhirsch`: eigene ApplicationPoolIdentity, keine lokalen Administratorrechte, keine Leserechte auf Provisionierungszugänge.
+- IIS-Pool `Platzhirsch`: eigene ApplicationPoolIdentity, keine lokalen Administratorrechte, keine Leserechte auf Provisionierungszugänge und keine Schreibrechte auf die ausführbaren Bootstrap-Caches. Diese erzeugt der Installer als Administrator.
 - Geplante Aufgaben `Platzhirsch-default` und `Platzhirsch-provisioning`: Windows-Starttrigger, LocalService, eigener PowerShell-Überwachungsprozess. Jeder PHP-Prozess bearbeitet höchstens einen Job. Der Elternprozess beendet einen überlangen Job nach 180 Sekunden; erneute Sichtbarkeit in der Queue erst nach 300 Sekunden.
 - `Platzhirsch-Scheduler`: `schedule:run` jede Minute, kein überlappender Start.
-- Der DB-Benutzer der Webanwendung hat nur Plattform-DML. Tenant-Datenbankbenutzer haben nach der Migration nur DML-Rechte im eigenen Schema. Der Provisionierungsbenutzer darf Benutzer und ausschließlich passend benannte Tenant-Schemata provisionieren. Diese MySQL-GRANT-Regeln müssen im Windows-/MySQL-Test nachgewiesen werden.
+- Der DB-Benutzer der Webanwendung hat nur Plattform-DML. Tenant-Datenbankbenutzer haben nach der Migration nur DML-Rechte im eigenen Schema. Der Provisionierungsbenutzer darf Benutzer und ausschließlich passend benannte Tenant-Schemata provisionieren. Provisionierung, Migration und anschließende Buchungen mit diesen Zugängen sind im echten Windows-/MySQL-Test geprüft. Weitere negative Datenbank-Rechteprüfungen stehen aus.
 - Provisionierungszugang: `app\storage\app\private\provision.json`, nicht für IIS lesbar. Der Webprozess besitzt keine DDL-Berechtigung, auch nicht für beliebiges SQL aus der Oberfläche.
 
 ## Logs und Fehler
