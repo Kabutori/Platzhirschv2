@@ -64,7 +64,9 @@ class RestaurantTest extends TestCase
                 'updated_at' => now(),
             ]);
         }
-        $this->actingAs($this->user);
+        // Eloquent does not hydrate database defaults after INSERT. Authenticate
+        // the persisted user just as the real login flow does (active = true).
+        $this->actingAs($this->user->refresh());
     }
     private function payload(string $time = '18:00'): array
     {
@@ -117,6 +119,33 @@ class RestaurantTest extends TestCase
             ->getJson('/api/v1/restaurant/profile')
             ->assertOk()
             ->assertJson(['id' => $this->tenant->id]);
+    }
+    public function test_disabled_user_cannot_access_restaurant(): void
+    {
+        $this->user->update(['active' => false]);
+        $this->getJson('/api/v1/restaurant/profile')->assertForbidden();
+        $this->postJson('/api/v1/restaurant/reservations', $this->payload())->assertForbidden();
+    }
+    public function test_stale_reservation_edit_is_rejected(): void
+    {
+        $payload = $this->payload();
+        $id = $this->postJson('/api/v1/restaurant/reservations', $payload)->assertCreated()->json('id');
+        $this->patchJson('/api/v1/restaurant/reservations/' . $id, [
+            ...$payload,
+            'version' => 1,
+            'guest_name' => 'Updated guest',
+        ])
+            ->assertOk()
+            ->assertJson(['version' => 2]);
+        $this->patchJson('/api/v1/restaurant/reservations/' . $id, [
+            ...$payload,
+            'version' => 1,
+            'guest_name' => 'Stale overwrite',
+        ])->assertConflict();
+        $this->assertSame(
+            'Updated guest',
+            DB::connection('tenant')->table('reservations')->find($id)->guest_name,
+        );
     }
     public function test_staff_cannot_change_configuration_or_promote_accounts(): void
     {
