@@ -52,7 +52,7 @@ $headers=@{Accept='application/json'}
 function Call-Api([string]$Method,[string]$Path,$Body=$null,[int]$Expected=200) {
     # WebRequestSession retains custom headers between requests; the current
     # request dictionary alone must determine which portal is selected.
-    $session.Headers.Remove('X-Platzhirsch-Portal')
+    $null=$session.Headers.Remove('X-Platzhirsch-Portal')
     $options=@{Uri="$base/api/$Path";Method=$Method;WebSession=$session;Headers=$headers;UseBasicParsing=$true;TimeoutSec=30}
     if($null -ne $Body){$options.ContentType='application/json';$options.Body=$Body|ConvertTo-Json -Depth 10 -Compress}
     try {$response=Invoke-WebRequest @options}
