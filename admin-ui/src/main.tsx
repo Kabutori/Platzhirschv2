@@ -544,15 +544,18 @@ function Shell({ user }: { user: Row }) {
   const installedModules = useQuery({
     queryKey: ['installed-modules'],
     queryFn: () => api('v1/admin/modules'),
-    enabled: scope === 'system',
+    enabled: scope === 'system' && allowed(user, 'platform.modules.read'),
   });
+  const installedCodes: string[] =
+    user.installed_modules ||
+    (installedModules.data || []).filter((m: Row) => m.installed).map((m: Row) => m.code);
   const provisioningVisible = navigationFor(
     [provisioningManifest, identityManifest],
-    (installedModules.data || []).filter((m: Row) => m.installed).map((m: Row) => m.code),
+    installedCodes,
     user.permissions || [],
     portal,
   ).some((n) => n.key === provisioningNavigation.key);
-  const identityVisible = installedModules.data?.some((m: Row) => m.code === 'identity' && m.installed);
+  const identityVisible = installedCodes.includes('identity');
   const q = useQueryClient();
   const [error, setError] = useState<unknown>();
   const nav =

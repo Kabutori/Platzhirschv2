@@ -83,6 +83,10 @@ class PlatformRoleTest extends TestCase
         ])->fresh();
         $this->actingAs($support)->getJson('/api/v1/admin/audit-log')->assertOk();
         $this->getJson('/api/v1/support')->assertOk();
+        $this->getJson('/api/v1/admin/auth/me')
+            ->assertOk()
+            ->assertJsonFragment(['installed_modules' => ['provisioning', 'identity']]);
+        $this->getJson('/api/v1/admin/modules')->assertForbidden();
         $this->postJson('/api/v1/admin/platform-roles', [
             'name' => 'Escalation',
             'permissions' => [],

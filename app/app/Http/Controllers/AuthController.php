@@ -95,6 +95,9 @@ class AuthController
             'mfa_enabled' => (bool) $u->mfa_secret,
             'scopes' => $u->isSystem() ? ['system'] : ['customer'],
             'permissions' => $u->permissions(),
+            'installed_modules' => $u->isSystem()
+                ? array_column(app(\App\Core\Module\ModuleRegistry::class)->catalog(), 'code')
+                : [],
         ];
     }
     public function logout(Request $r)
