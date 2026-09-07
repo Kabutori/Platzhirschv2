@@ -8,6 +8,11 @@ param(
 )
 $ErrorActionPreference='Stop';Set-StrictMode -Version Latest
 Import-Module WebAdministration
+$maintenanceMutex=New-Object Threading.Mutex($false,'Global\PlatzhirschMaintenance')
+$maintenanceAcquired=$false
+try {
+    try {$maintenanceAcquired=$maintenanceMutex.WaitOne(0)}catch [Threading.AbandonedMutexException] {$maintenanceAcquired=$true}
+    if(-not $maintenanceAcquired){throw 'Eine andere Sicherung oder Wiederherstellung laeuft bereits.'}
 $root=[IO.Path]::GetFullPath($InstallPath).TrimEnd('\')
 $destinationPath=[IO.Path]::GetFullPath($Destination).TrimEnd('\')
 if($destinationPath -eq $root -or $destinationPath.StartsWith($root+'\',[StringComparison]::OrdinalIgnoreCase) -or $root.StartsWith($destinationPath+'\',[StringComparison]::OrdinalIgnoreCase)){throw 'Sicherung und Installation muessen getrennte Verzeichnisse sein.'}
@@ -33,6 +38,13 @@ function Stop-Application {
     foreach($taskName in $taskNames){Disable-ScheduledTask $taskName|Out-Null;Stop-ScheduledTask $taskName}
     if((Get-Website -Name Platzhirsch).State -eq 'Started'){Stop-Website Platzhirsch}
     if((Get-WebAppPoolState Platzhirsch).Value -eq 'Started'){Stop-WebAppPool Platzhirsch}
+    $idle=$false
+    for($wait=0;$wait -lt 60;$wait++){
+        $running=@($taskNames|Where-Object {(Get-ScheduledTask $_).State -eq 'Running'})
+        if($running.Count -eq 0 -and (Get-WebAppPoolState Platzhirsch).Value -eq 'Stopped'){$idle=$true;break}
+        Start-Sleep -Seconds 1
+    }
+    if(-not $idle){throw 'Hintergrundaufgaben oder IIS konnten nicht rechtzeitig angehalten werden.'}
     # Scheduled-task cancellation can leave child PHP processes alive. Stop only this installation's runtime.
     Get-CimInstance Win32_Process|Where-Object {$_.ExecutablePath -and $_.ExecutablePath.StartsWith($root+'\runtime\php\',[StringComparison]::OrdinalIgnoreCase)}|ForEach-Object {Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue}
     Stop-Service PlatzhirschMySQL
@@ -113,3 +125,5 @@ try {
     }
 }finally{if($stopped -and $safeToStart){Start-Application}}
 Write-Output $snapshotPath
+
+} finally {if($maintenanceAcquired){$maintenanceMutex.ReleaseMutex()};$maintenanceMutex.Dispose()}
