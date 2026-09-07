@@ -7,6 +7,7 @@ on:
       - 'widget-embed/**'
       - 'installer/**'
       - 'tools/**'
+      - 'docs/**'
       - 'Install.bat'
       - '.github/workflows/windows-package.yml'
   workflow_dispatch:

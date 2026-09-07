@@ -96,15 +96,36 @@ Danach als Administrator `C:\Platzhirsch\runtime\php\php.exe C:\Platzhirsch\app\
 - Fehlgeschlagene Queue-Aufgaben: zentrale Tabelle `failed_jobs` (enthält interne Fehlerdetails, Zugriff begrenzen).
 - Systemübersicht: DB-Erreichbarkeit, Warteschlange und letzter Scheduler-Heartbeat. Ein grüner Datenbanktest beweist keine fehlerfreie E-Mail- oder Worker-Funktion.
 
+## Rollen und Team
+
+Restaurant → Rollen & Rechte: Mitarbeiterrollen anlegen, Rechte einzeln auswählen und speichern. Buchungsänderungen, Storno und Export benötigen zusätzlich das Leserecht. Restaurant → Team: Benutzer bearbeiten und die eigene Rolle zuweisen; die Grundrolle bleibt „Mitarbeiter“. Ohne eigene Rolle gelten die bisherigen Mitarbeiterrechte. Administratoren behalten die Team- und Rollenverwaltung. Eigene Administratorrechte können nicht über dieses Formular entzogen werden.
+
+Rollenänderungen wirken ab der nächsten API-Anfrage. Die UI zeigt nur erlaubte Bereiche; der Server prüft jeden Zugriff unabhängig davon. Bereits verwendete Rollen lassen sich erst löschen, wenn die Zuordnungen entfernt wurden. Veraltete gleichzeitige Rollenänderungen werden abgewiesen.
+
 ## Backup und Wiederherstellung
 
+Für eine vollständige Sicherung auf derselben Windows-Installation:
+
 ```powershell
-.\installer\Backup-Platzhirsch.ps1 -InstallPath C:\Platzhirsch -Destination D:\Backups
+.\installer\Snapshot-Platzhirsch.ps1 -Mode Backup -InstallPath C:\Platzhirsch -Destination D:\Backups
 ```
 
-Das Skript exportiert Plattform- und Tenant-Datenbanken mit `--single-transaction`, legt essentielle Konfiguration/Schlüssel dazu und berechnet Prüfsummen. Es exportiert keine MySQL-Systemdatenbank und ist deshalb kein fertiger automatischer Restore. Vor Produktivbetrieb muss ein Restore-Ablauf die DB-Benutzer und Grants aus geschützten Metadaten rekonstruieren, Schlüssel wiederherstellen und die Anwendung prüfen. Eine komplette Rücksicherung ist noch zu implementieren und zu testen.
+Der Befehl hält IIS, Hintergrundaufgaben und MySQL an, kopiert die vollständige Installation einschließlich MySQL-Systemdatenbank, Tenant-Daten, Benutzerzugängen, Anwendung und Schlüsseln, sichert NTFS-Rechte und berechnet SHA-256-Prüfsummen. Anschließend startet er den Betrieb wieder. Für das Kopieren und Prüfen entsteht eine Wartungsunterbrechung. Das Sicherungsverzeichnis ist nur für lokale Administratoren und SYSTEM zugänglich.
 
-Backups enthalten personenbezogene Daten und Zugangsdaten. Verschlüsseltes externes Ziel, Aufbewahrung, Löschregeln und regelmäßige Rücksicherungstests sind Betreiberpflicht. Ein zweiter Ordner auf demselben Datenträger ist kein hinreichender Ausfallschutz.
+Der ausgegebene Sicherungspfad wird zur Wiederherstellung angegeben:
+
+```powershell
+.\installer\Snapshot-Platzhirsch.ps1 -Mode Restore -InstallPath C:\Platzhirsch `
+  -Destination D:\Backups\platzhirsch-20260907-120000-12345678
+```
+
+Die Wiederherstellung prüft zuerst alle Dateien. Sie akzeptiert ausschließlich dieselbe Maschine, denselben Installationspfad, dieselbe Paketversion und unveränderte Ports beziehungsweise öffentliche Anwendungsadresse. Nach Bestätigung sichert sie den aktuellen Stand zusätzlich unter `vor-wiederherstellung-…`, bevor Dateien und Datenbanken auf den gewählten Zeitpunkt zurückgesetzt werden. Schlägt das eigentliche Zurückkopieren oder die Rechtewiederherstellung fehl, bleibt die Anwendung angehalten; die vorherige Sicherung bleibt für die Rückkehr erhalten. Automatisierte Aufrufe können die PowerShell-Bestätigung mit `-Confirm:$false` nach bewusst gewählter Sicherung ausschalten.
+
+Dies ist eine Wiederherstellung der bestehenden Installation, kein Umzug auf eine neue Maschine: IIS-Bindungen, Zertifikatsspeicher, Firewall, Aufgabenregistrierung und MSI-Registrierung liegen außerhalb der kopierten Dateien. Für einen Hardwareausfall ist weiterhin eine vollständige Windows-/VM-Sicherung erforderlich. Das Skript lehnt symbolische Links und Junctions ab.
+
+`Backup-Platzhirsch.ps1` bleibt für zusätzliche logische SQL-Exporte verfügbar. Diese enthalten keine MySQL-Systembenutzer und können nicht an den Snapshot-Restore übergeben werden.
+
+Backups enthalten personenbezogene Daten und Zugangsdaten. Verschlüsseltes externes Ziel, Aufbewahrung, Löschregeln und regelmäßige Rücksicherungstests gehören zum Betrieb. Ein zweiter Ordner auf demselben Datenträger schützt nicht vor dessen Ausfall.
 
 ## Updates und Deinstallation
 
@@ -121,3 +142,6 @@ Es gibt absichtlich keine automatische datenlöschende Deinstallation. Vor manue
 - IIS FastCGI: https://learn.microsoft.com/en-us/iis/configuration/system.webserver/fastcgi/application/
 - IIS URL Rewrite: https://www.iis.net/downloads/microsoft/url-rewrite
 - PCNTL ist unter Windows nicht verfügbar: https://www.php.net/manual/en/pcntl.installation.php
+
+- NTFS-Rechte sichern/wiederherstellen: [Microsoft icacls](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls)
+- Kopierparameter und Fehlercodes: [Microsoft Robocopy](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy)

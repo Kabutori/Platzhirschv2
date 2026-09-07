@@ -10,7 +10,7 @@ Dieses Dokument beschreibt ausschließlich den Quellcode dieses Repositories. Di
 - Erstadministrator mit Einmal-Schlüssel, gesperrtem Sentinel und Datenbanktransaktion; kein automatischer Login nach Setup.
 - Session-Anmeldung, Logout, Kontosperren, CSRF-Schutz, Login-Limitierung, Passwort-Reset per konfiguriertem SMTP, TOTP-Einrichtung und Replay-Schutz.
 - Plattformübersicht, Mandantenanlage und asynchrone Provisionierung, Sperren/Freigeben, Benutzeranlage und Einladungslinks, Audit-Protokoll, Betriebsdaten.
-- Drei unveränderliche Rollen: System-Administrator, Restaurant-Administrator und Mitarbeiter. Keine frei editierbare Rollenverwaltung.
+- Drei geschützte Grundrollen sowie eigene Mitarbeiterrollen pro Restaurant mit getrennten Lese-, Schreib-, Storno-, Export-, Konfigurations-, Widget- und Supportrechten. Teammitglieder können bearbeitet, gesperrt und Rollen zugewiesen werden. Fremde Rollen, Selbstentzug von Administratorrechten und veraltete Rollenänderungen werden abgewiesen.
 - Restaurantprofil, Räume, Tische, wöchentliche Öffnungszeiten und Sondertage.
 - Reservierungen erstellen, bearbeiten und stornieren; Kapazitätsprüfung, Öffnungszeitenprüfung, zeitzonenbezogene Eingabe, Speicherung in UTC, transaktionale Tischsperren und Prüfung auf zeitliche Überschneidungen.
 - Reservierungsübersicht, Tageskennzahlen, Belegungsansicht je Tisch, CSV-Export mit Schutz gegen Tabellenformeln.
@@ -24,15 +24,15 @@ Dieses Dokument beschreibt ausschließlich den Quellcode dieses Repositories. Di
 
 Die vollständige Anwendung aus allen Konzeptphasen ist mit diesem ersten Stand **nicht** umgesetzt. Insbesondere fehlen:
 
-- Frei konfigurierbare Rollen/Berechtigungsfamilien, organisationsübergreifender Rollen-Rollout, SSO und Sidebar-Favoriten.
+- Dynamische Berechtigungsfamilien aus externen Modulen, organisationsübergreifender Rollen-Rollout, SSO und Sidebar-Favoriten. Restaurant-Mitarbeiterrollen sind implementiert.
 - Produktive Modulregistrierung, Modul-Marktplatz, Kauf/Aktivierung/Versionsmanagement und unabhängige Modul-Repositories.
 - Abos, rechtlich geprüfte Rechnungen, Zahlungsanbieter, automatische Abrechnung und Testphasenpolitik.
 - Mehrere Datenbankserver, Cluster-Resolver, Umzug/Massenmigration von Mandanten.
 - Weitere Widget-Designvorlagen und automatische Buchungs-E-Mails/SMS.
 - Öffentliche Marketing-Website, öffentliche Selbstregistrierung, E-Mail-Verifikation, Rechtstexte und deren Gestaltung.
 - Odoo-, Wetter- und weitergehende Reporting-Integrationen; PDF/XLSX/SQL/XML-Exporte.
-- Vollständiger Update-/Rollback-/Restore-Automat, signierter eigener Installer, Zertifikatserneuerung, externe Backup-Ablage und Monitoring-Alarmierung.
-- Vollständige visuelle 1:1-Abnahme, Bildschirmleser-/Tastatur-Abnahme, durchgängige browserbasierte Admin-E2E-Suite und mobile Detailabnahme; drei isolierte Widget-Browsertests sind vorhanden.
+- Versionsübergreifender Update-/Rollback-Automat, Wiederherstellung auf neuer Maschine, signierter eigener Installer, Zertifikatserneuerung, externe Backup-Ablage und Monitoring-Alarmierung. Vollständige Offline-Snapshots und Wiederherstellung derselben Installation sind implementiert; der zusätzliche Windows-Abnahmelauf steht unten.
+- Vollständige visuelle 1:1-Abnahme, Bildschirmleser-/Tastatur-Abnahme, durchgängige browserbasierte Admin-E2E-Suite und mobile Detailabnahme; drei Widget- und zwei Rollen-Browsertests sind vorhanden.
 
 ## Technische Entscheidungen und Abweichungen
 
@@ -47,6 +47,12 @@ Die vollständige Anwendung aus allen Konzeptphasen ist mit diesem ersten Stand 
 9. Gemeinsame CSS-Variablen statt des geplanten veröffentlichten JSON-Design-Token-Pakets. Das spätere Modul-Paketsystem bleibt ein Folgearbeitspaket.
 10. Öffnungszeiten sind Zeitfenster innerhalb desselben Kalendertags. Buchungen über Mitternacht, Tischkombinationen und Wartelisten sind noch nicht unterstützt.
 11. Plattformlisten zeigen begrenzte erste Seiten; vollständige Paginierungsbedienung fehlt noch.
+
+## Neue Erweiterungen und laufende Abnahme
+
+- Rollenverwaltung: [Prüflauf 34145834334](https://github.com/Kabutori/Platzhirschv2/actions/runs/34145834334) erfolgreich, einschließlich sieben zusätzlicher PHP-Rechtetests und zwei neuer Rollen-Browsertests.
+- Offline-Snapshot und Wiederherstellung: gemeinsamer Sicherungszeitpunkt aller Datenbanken inklusive MySQL-Konten, Anwendung, Schlüssel und NTFS-Rechte. Prüfsummen vor dem Restore; zusätzliche Sicherung des aktuellen Stands; bei unvollständiger Rückkopie kein Neustart. Beschränkt auf dieselbe Maschine, Version und Installationskonfiguration.
+- Der erweiterte Windows-Test erstellt eine Sicherung, legt danach eine weitere Buchung an, prüft die Ablehnung einer beschädigten Sicherung und stellt den ursprünglichen Datenstand samt Schlüsseln wieder her. Diese zusätzliche Windows-Abnahme ist zum Zeitpunkt dieses Dokuments noch nicht abgeschlossen. Vorschau 13 enthält diese Erweiterungen nicht.
 
 ## Verifikationsgrenze
 
