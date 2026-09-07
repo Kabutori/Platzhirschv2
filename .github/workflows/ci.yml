@@ -45,6 +45,10 @@ jobs:
         working-directory: admin-ui
       - run: npm audit --omit=dev --audit-level=high
         working-directory: admin-ui
+      - run: npx playwright install --with-deps chromium
+        working-directory: admin-ui
+      - run: npx playwright test
+        working-directory: admin-ui
   windows-syntax:
     runs-on: windows-latest
     steps:

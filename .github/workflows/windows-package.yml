@@ -4,6 +4,7 @@ on:
     paths:
       - 'app/**'
       - 'admin-ui/**'
+      - 'widget-embed/**'
       - 'installer/**'
       - 'tools/**'
       - 'Install.bat'

@@ -11,7 +11,7 @@ class WidgetController
         abort_unless($r->user()->canManage(), 403);
         return DB::table('widget_clients')
             ->where('tenant_id', $r->attributes->get('tenant')->id)
-            ->get(['id', 'origins', 'expires_at', 'created_at']);
+            ->get(['id', 'origins', 'expires_at', 'created_at', 'duration_minutes', 'accent']);
     }
     public function create(Request $r)
     {
@@ -19,6 +19,9 @@ class WidgetController
         $data = $r->validate([
             'origins' => 'required|array|min:1|max:10',
             'origins.*' => 'required|url:http,https|max:250',
+            'months' => 'sometimes|integer|min:1|max:12',
+            'duration_minutes' => 'sometimes|integer|min:30|max:240|multiple_of:15',
+            'accent' => ['nullable', 'regex:/^#[a-fA-F0-9]{6}$/D'],
         ]);
         $origins = [];
         foreach ($data['origins'] as $url) {
@@ -39,13 +42,27 @@ class WidgetController
             'tenant_id' => $r->attributes->get('tenant')->id,
             'token_hash' => hash('sha256', $token),
             'origins' => json_encode($origins),
-            'expires_at' => now()->addYear(),
+            'expires_at' => now()->addMonthsNoOverflow($data['months'] ?? 12),
+            'duration_minutes' => $data['duration_minutes'] ?? 90,
+            'accent' => $data['accent'] ?? null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
         Audit::record('widget.created', $id, $r->attributes->get('tenant')->id);
         return response()->json(
-            ['id' => $id, 'token' => $token, 'url' => config('app.url') . '/admin/#booking?token=' . $token],
+            [
+                'id' => $id,
+                'token' => $token,
+                'url' => config('app.url') . '/admin/#booking?token=' . $token,
+                'embed' =>
+                    '<platzhirsch-booking token="' .
+                    $token .
+                    '"></platzhirsch-booking>' .
+                    "\n" .
+                    '<script src="' .
+                    htmlspecialchars(rtrim(config('app.url'), '/') . '/widget.js', ENT_QUOTES, 'UTF-8') .
+                    '" defer></script>',
+            ],
             201,
         );
     }
@@ -78,7 +95,15 @@ class WidgetController
         $database = app(TenantDatabase::class);
         $database->connect($tenant);
         try {
-            $response = response()->json($callback($tenant));
+            try {
+                $response = response()->json($callback($tenant, $client));
+            } catch (\Throwable $error) {
+                // Allowed origins must also receive validation and conflict responses.
+                // Otherwise browsers hide useful booking errors behind a CORS failure.
+                $handler = app(\Illuminate\Contracts\Debug\ExceptionHandler::class);
+                $handler->report($error);
+                $response = $handler->render($r, $error);
+            }
             if ($origin) {
                 $response->headers->set('Access-Control-Allow-Origin', $origin);
                 $response->headers->set('Vary', 'Origin');
@@ -95,9 +120,11 @@ class WidgetController
         return $this->run(
             $r,
             $token,
-            fn($tenant) => [
+            fn($tenant, $client) => [
                 'name' => $tenant->name,
                 'timezone' => $tenant->timezone,
+                'duration_minutes' => $client->duration_minutes,
+                'accent' => $client->accent,
                 'tables' => DB::connection('tenant')
                     ->table('dining_tables')
                     ->where('active', true)
@@ -112,17 +139,36 @@ class WidgetController
     {
         return $this->run($r, $token, fn() => []);
     }
+    public function availability(Request $r, string $token, ReservationService $service)
+    {
+        return $this->run($r, $token, function ($tenant, $client) use ($r, $service) {
+            $data = $r->validate([
+                'starts_at' => 'required|date_format:Y-m-d\\TH:i',
+                'party_size' => 'required|integer|min:1|max:50',
+            ]);
+            return [
+                'tables' => $service->availableTables(
+                    $data['starts_at'],
+                    (int) $data['party_size'],
+                    (int) $client->duration_minutes,
+                    $tenant->timezone,
+                ),
+            ];
+        });
+    }
     public function book(Request $r, string $token, ReservationService $service)
     {
-        return $this->run($r, $token, function ($tenant) use ($r, $service) {
+        return $this->run($r, $token, function ($tenant, $client) use ($r, $service) {
             $data = $r->validate([
                 ...RestaurantController::reservationRules(),
                 'email' => 'required|email|max:254',
                 'consent' => 'required|accepted',
                 'website' => 'nullable|string|max:0',
+                'duration_minutes' => 'sometimes|integer',
+                'request_key' => 'required|uuid',
             ]);
             $data['status'] = 'confirmed';
-            $data['duration_minutes'] = 90;
+            $data['duration_minutes'] = (int) $client->duration_minutes;
             $reservation = $service->save($data, $tenant->timezone, null, 'widget');
             Audit::record('widget.booked', $reservation->id, $tenant->id);
             return [

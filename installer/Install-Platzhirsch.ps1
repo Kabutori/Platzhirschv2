@@ -214,9 +214,11 @@ GRANT SELECT ON platzhirsch_platform.* TO 'ph_provision'@'127.0.0.1';
     $entry=Get-WebConfiguration "system.webServer/fastCgi/application[@fullPath='$fastCgi']" -PSPath 'MACHINE/WEBROOT/APPHOST'
     if(-not $entry){Add-WebConfigurationProperty -PSPath 'MACHINE/WEBROOT/APPHOST' -Filter 'system.webServer/fastCgi' -Name '.' -Value @{fullPath=$fastCgi;maxInstances=4;instanceMaxRequests=1000;activityTimeout=90;requestTimeout=90}}
     if(-not(Test-Path IIS:\Sites\Platzhirsch)){New-Website -Name Platzhirsch -Port $Port -IPAddress '127.0.0.1' -PhysicalPath "$app\public" -ApplicationPool Platzhirsch|Out-Null}
-    $handler=Get-WebHandler -PSPath 'IIS:\Sites\Platzhirsch' -Name 'Platzhirsch-PHP' -ErrorAction SilentlyContinue
-    if(-not $handler){New-WebHandler -PSPath 'IIS:\Sites\Platzhirsch' -Name 'Platzhirsch-PHP' -Path '*.php' -Verb '*' -Modules FastCgiModule -ScriptProcessor $fastCgi -ResourceType File|Out-Null}
-    Set-WebConfigurationProperty -PSPath 'IIS:\Sites\Platzhirsch' -Filter 'system.webServer/security/authentication/anonymousAuthentication' -Name userName -Value ''
+    # These sections are normally locked for web.config delegation. Keep that
+    # protection and write administrator-owned, site-scoped ApplicationHost settings.
+    $handler=Get-WebConfiguration -PSPath 'MACHINE/WEBROOT/APPHOST' -Location Platzhirsch -Filter "system.webServer/handlers/add[@name='Platzhirsch-PHP']"
+    if(-not $handler){Add-WebConfigurationProperty -PSPath 'MACHINE/WEBROOT/APPHOST' -Location Platzhirsch -Filter 'system.webServer/handlers' -Name '.' -Value @{name='Platzhirsch-PHP';path='*.php';verb='*';modules='FastCgiModule';scriptProcessor=$fastCgi;resourceType='File'}}
+    Set-WebConfigurationProperty -PSPath 'MACHINE/WEBROOT/APPHOST' -Location Platzhirsch -Filter 'system.webServer/security/authentication/anonymousAuthentication' -Name userName -Value ''
     Invoke-Checked $php @("$app\artisan",'config:cache')
     Write-Phase 'Hintergrundaufgaben einrichten'
     Copy-Item "$PSScriptRoot\Worker.ps1" "$InstallPath\tasks\Worker.ps1" -Force

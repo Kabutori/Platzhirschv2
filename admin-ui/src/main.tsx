@@ -1536,12 +1536,13 @@ function Widget({ tenant }: { tenant?: string }) {
   const q = useData('v1/restaurant/widget', tenant);
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState('');
+  const [embed, setEmbed] = useState('');
   const [error, setError] = useState<unknown>();
   return (
     <>
       <div className="toolbar">
         <p className="muted">
-          Buchungszugänge für deine Website. Links sind ein Jahr gültig und können widerrufen werden.
+          Buchungszugänge für deine Website. Gültigkeit und Buchungsdauer sind konfigurierbar.
         </p>
         <button className="primary" onClick={() => setOpen(true)}>
           <Plus size={16} />
@@ -1562,6 +1563,17 @@ function Widget({ tenant }: { tenant?: string }) {
             Verlinke ihn auf deiner Restaurant-Website. Der Zugriff erlaubt ausschließlich öffentliche
             Buchungen, keinen Verwaltungszugang.
           </p>
+          <h2>Direkt in die Website einbetten</h2>
+          <p>
+            Füge diesen Code an der gewünschten Stelle deiner Website ein. Das Widget zeigt freie Tische und
+            übernimmt die Buchung direkt.
+          </p>
+          <code className="secret">{embed}</code>
+          <button onClick={() => navigator.clipboard.writeText(embed)}>Einbettungscode kopieren</button>
+          <p className="muted">
+            Für externe Websites muss Platzhirsch über HTTPS erreichbar sein. Bei einer eigenen
+            Content-Security-Policy die Platzhirsch-Adresse für script-src und connect-src erlauben.
+          </p>
         </section>
       )}
       <section className="panel">
@@ -1581,6 +1593,7 @@ function Widget({ tenant }: { tenant?: string }) {
                   typeof r.origins === 'string' ? JSON.parse(r.origins).join(', ') : r.origins.join(', '),
               },
               { key: 'expires_at', label: 'Gültig bis' },
+              { key: 'duration_minutes', label: 'Dauer (Minuten)' },
             ]}
             actions={(r) => (
               <button
@@ -1612,10 +1625,45 @@ function Widget({ tenant }: { tenant?: string }) {
                 required: true,
                 help: 'Zum Beispiel https://mein-restaurant.de — ohne Unterseite.',
               },
+              {
+                key: 'months',
+                label: 'Gültigkeit in Monaten',
+                type: 'number',
+                min: 1,
+                max: 12,
+                default: 12,
+                required: true,
+              },
+              {
+                key: 'duration_minutes',
+                label: 'Reservierungsdauer',
+                required: true,
+                default: 90,
+                options: [30, 45, 60, 75, 90, 120, 150, 180, 240].map((value) => ({
+                  value,
+                  label: `${value} Minuten`,
+                })),
+              },
+              {
+                key: 'accent',
+                label: 'Akzentfarbe (optional)',
+                help: 'Hex-Farbe wie #d0845b; leer lassen für das Platzhirsch-Design.',
+              },
             ]}
             onSave={async (data) => {
-              const result = await api('v1/restaurant/widget', 'POST', { origins: [data.origin] }, tenant);
+              const result = await api(
+                'v1/restaurant/widget',
+                'POST',
+                {
+                  origins: [data.origin],
+                  months: data.months,
+                  duration_minutes: data.duration_minutes,
+                  accent: data.accent || null,
+                },
+                tenant,
+              );
               setUrl(result.url);
+              setEmbed(result.embed);
               setOpen(false);
               await q.refetch();
             }}
@@ -1657,7 +1705,9 @@ function Booking() {
           ) : (
             <>
               <h2>Ein Platz für dich.</h2>
-              <p className="muted">Reservierungsdauer: 90 Minuten · Uhrzeiten in {q.data.timezone}</p>
+              <p className="muted">
+                Reservierungsdauer: {q.data.duration_minutes} Minuten · Uhrzeiten in {q.data.timezone}
+              </p>
               <Form
                 label="Verbindlich reservieren"
                 fields={[
@@ -1695,7 +1745,11 @@ function Booking() {
                   const response = await fetch('/api/widget/' + token, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-                    body: JSON.stringify({ ...data, request_key: key, duration_minutes: 90 }),
+                    body: JSON.stringify({
+                      ...data,
+                      request_key: key,
+                      duration_minutes: q.data.duration_minutes,
+                    }),
                   });
                   const body = await response.json();
                   if (!response.ok)

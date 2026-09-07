@@ -6,6 +6,32 @@ use Illuminate\Validation\ValidationException;
 
 class ReservationService
 {
+    public function availableTables(string $date, int $partySize, int $duration, string $timezone)
+    {
+        $start = CarbonImmutable::createFromFormat('!Y-m-d\\TH:i', $date, $timezone);
+        $end = $start->addMinutes($duration);
+        if ($start->lessThan(CarbonImmutable::now($timezone))) {
+            $this->invalid('starts_at', 'Bitte einen zukünftigen Termin wählen.');
+        }
+        $this->assertOpeningHours($start, $end);
+        // Availability is advisory. The final booking still takes transaction locks.
+        return DB::connection('tenant')
+            ->table('dining_tables')
+            ->where('active', true)
+            ->where('capacity', '>=', $partySize)
+            ->whereNotExists(function ($query) use ($start, $end) {
+                $query
+                    ->selectRaw('1')
+                    ->from('reservations')
+                    ->whereColumn('reservations.table_id', 'dining_tables.id')
+                    ->whereNotIn('status', ['cancelled', 'no_show'])
+                    ->where('starts_at', '<', $end->utc()->format('Y-m-d H:i:s'))
+                    ->where('ends_at', '>', $start->utc()->format('Y-m-d H:i:s'));
+            })
+            ->orderBy('capacity')
+            ->orderBy('id')
+            ->get(['id', 'name', 'capacity']);
+    }
     public function save(array $data, string $timezone, ?int $id = null, string $source = 'admin'): object
     {
         $db = DB::connection('tenant');
@@ -33,7 +59,11 @@ class ReservationService
                 );
             }
             if (!$id && !empty($data['request_key'])) {
-                $existing = $db->table('reservations')->where('request_key', $data['request_key'])->lockForUpdate()->first();
+                $existing = $db
+                    ->table('reservations')
+                    ->where('request_key', $data['request_key'])
+                    ->lockForUpdate()
+                    ->first();
                 if ($existing) {
                     return $existing;
                 }

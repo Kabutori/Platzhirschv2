@@ -207,4 +207,67 @@ class RestaurantTest extends TestCase
         ]);
         $this->getJson('/api/v1/support/' . $id)->assertNotFound();
     }
+    private function widgetToken(array $settings = []): string
+    {
+        $response = $this->postJson('/api/v1/restaurant/widget', [
+            'origins' => ['https://restaurant.example'],
+            ...$settings,
+        ])->assertCreated();
+        $this->assertStringContainsString('/widget.js', $response->json('embed'));
+        return $response->json('token');
+    }
+    public function test_widget_availability_excludes_occupied_tables_and_guest_data(): void
+    {
+        $token = $this->widgetToken();
+        $payload = $this->payload();
+        $query = http_build_query(['starts_at' => $payload['starts_at'], 'party_size' => 2]);
+        $this->getJson('/api/widget/' . $token . '/availability?' . $query)
+            ->assertOk()
+            ->assertJsonCount(1, 'tables')
+            ->assertJsonMissingPath('tables.0.guest_name');
+        $this->postJson('/api/v1/restaurant/reservations', $payload)->assertCreated();
+        $this->getJson('/api/widget/' . $token . '/availability?' . $query)
+            ->assertOk()
+            ->assertJsonCount(0, 'tables');
+    }
+    public function test_widget_duration_is_server_controlled_and_errors_have_cors_headers(): void
+    {
+        $token = $this->widgetToken(['duration_minutes' => 120, 'months' => 1, 'accent' => '#c08050']);
+        $this->withHeader('Origin', 'https://restaurant.example')
+            ->getJson('/api/widget/' . $token)
+            ->assertOk()
+            ->assertJson(['duration_minutes' => 120, 'accent' => '#c08050']);
+        $this->postJson('/api/widget/' . $token, [
+            ...$this->payload(),
+            'duration_minutes' => 15,
+            'email' => 'guest@example.test',
+            'consent' => true,
+        ])->assertOk();
+        $row = DB::connection('tenant')->table('reservations')->first();
+        $this->assertEquals(
+            120,
+            \Carbon\CarbonImmutable::parse($row->starts_at)->diffInMinutes($row->ends_at),
+        );
+        $this->postJson('/api/widget/' . $token, [
+            ...$this->payload(),
+            'email' => 'guest@example.test',
+            'consent' => true,
+        ])
+            ->assertConflict()
+            ->assertHeader('Access-Control-Allow-Origin', 'https://restaurant.example');
+        $this->postJson('/api/widget/' . $token, [])
+            ->assertUnprocessable()
+            ->assertHeader('Access-Control-Allow-Origin', 'https://restaurant.example');
+    }
+    public function test_revoked_and_expired_widget_tokens_stop_working(): void
+    {
+        $token = $this->widgetToken();
+        $client = DB::table('widget_clients')->where('token_hash', hash('sha256', $token))->first();
+        DB::table('widget_clients')
+            ->where('id', $client->id)
+            ->update(['expires_at' => now()->subMinute()]);
+        $this->getJson('/api/widget/' . $token)->assertNotFound();
+        $this->deleteJson('/api/v1/restaurant/widget/' . $client->id)->assertNoContent();
+        $this->getJson('/api/widget/' . $token)->assertNotFound();
+    }
 }
