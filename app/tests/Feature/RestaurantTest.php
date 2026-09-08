@@ -93,7 +93,7 @@ class RestaurantTest extends TestCase
                 ->where('id', $id)
                 ->update(['status' => $status]);
         }
-        request()->attributes->set('tenant', $this->tenant);
+        request()->attributes->set('tenant', $this->tenant->refresh());
         $date = now()->addDay()->format('Y-m-d');
         $rows = app(\App\Contracts\Module\ReservationReports::class)->daily($date, $date);
         $this->assertCount(1, $rows);
