@@ -12,7 +12,11 @@ export default function Designer({
   initial?: Row;
   created: (result: Row) => void;
 }) {
-  const [origin, setOrigin] = useState(''),
+  const [origin, setOrigin] = useState(() => {
+      if (!initial) return '';
+      const origins = typeof initial.origins === 'string' ? JSON.parse(initial.origins) : initial.origins;
+      return origins?.[0] || '';
+    }),
     [months, setMonths] = useState(12),
     [duration, setDuration] = useState(initial?.duration_minutes ?? 90),
     [accent, setAccent] = useState(initial?.accent ?? '#cc794e'),
@@ -122,18 +126,22 @@ export default function Designer({
               ))}
             </select>
           </label>
-          <label>
-            Gültigkeit (Monate)
-            <input
-              type="number"
-              min="1"
-              max="12"
-              disabled={!!initial}
-              required
-              value={months}
-              onChange={(e) => setMonths(Number(e.target.value))}
-            />
-          </label>
+          {!initial ? (
+            <label>
+              Gültigkeit (Monate)
+              <input
+                type="number"
+                min="1"
+                max="12"
+                disabled={!!initial}
+                required
+                value={months}
+                onChange={(e) => setMonths(Number(e.target.value))}
+              />
+            </label>
+          ) : (
+            <p className="muted">Gültig bis: {initial.expires_at}</p>
+          )}
         </div>
         <label className="designer-brand">
           <input type="checkbox" checked={brand} onChange={(e) => setBrand(e.target.checked)} />

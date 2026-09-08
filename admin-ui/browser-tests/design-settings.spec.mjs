@@ -97,6 +97,7 @@ test('widget designer edits appearance without issuing a new link', async ({ pag
   await page.getByLabel('Max. Personenzahl', { exact: true }).fill('5');
   await expect(page.getByText('Up to 5 guests')).toBeVisible();
   await expect(page.getByLabel('Website-Ursprung', { exact: false })).toBeDisabled();
+  await expect(page.getByLabel('Website-Ursprung', { exact: false })).toHaveValue('https://example.test');
   await mkdir('test-results', { recursive: true });
   await page.screenshot({ path: 'test-results/design-widget.png', fullPage: true });
   await page.getByRole('button', { name: 'Einstellungen speichern', exact: true }).click();

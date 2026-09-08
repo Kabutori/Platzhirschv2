@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { mkdir } from 'node:fs/promises';
 const admin = {
   id: 1,
   name: 'Owner',
@@ -49,6 +50,8 @@ test('restaurant administrator creates a scoped employee role', async ({ page })
   await page.getByRole('button', { name: 'Rolle anlegen', exact: true }).click();
   await page.getByLabel('Rollenname').fill('Empfang');
   await page.getByLabel('Reservierungen und Belegung ansehen').check();
+  await mkdir('test-results', { recursive: true });
+  await page.screenshot({ path: 'test-results/roles-restaurant.png', fullPage: true });
   await page.getByRole('button', { name: 'Speichern', exact: true }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   expect(saved).toEqual([{ name: 'Empfang', permissions: ['reservation.read'] }]);
