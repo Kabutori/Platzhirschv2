@@ -6,7 +6,10 @@ class SecurityHeaders
     {
         $response = $next($request);
         $response->headers->set('X-Content-Type-Options', 'nosniff');
-        $response->headers->set('Referrer-Policy', 'same-origin');
+        $response->headers->set(
+            'Referrer-Policy',
+            $request->is('api/v1/admin/auth/sso/callback/*') ? 'no-referrer' : 'same-origin',
+        );
         $response->headers->set('X-Frame-Options', 'DENY');
         $response->headers->set(
             'Content-Security-Policy',

@@ -74,3 +74,18 @@ app('router')
             'throttle:5,1',
         );
     });
+
+app('router')
+    ->middleware(['web'])
+    ->prefix('api/v1/admin/auth/sso')
+    ->group(function ($r) {
+        $c = \App\Modules\Identity\Http\SsoController::class;
+        $r->get('/status', [$c, 'status']);
+        $r->post('/start', [$c, 'start'])->middleware('throttle:10,1');
+        $r->get('/callback/{portal}', [$c, 'callback'])
+            ->where('portal', 'administration|restaurant')
+            ->middleware('throttle:20,1');
+        $r->post('/mfa', [$c, 'mfa'])->middleware('throttle:5,1');
+        $r->post('/link', [$c, 'link'])->middleware(['auth', 'throttle:5,1']);
+        $r->post('/unlink', [$c, 'unlink'])->middleware(['auth', 'throttle:5,1']);
+    });

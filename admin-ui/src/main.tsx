@@ -227,7 +227,13 @@ function ShellBody({ user }: { user: Row }) {
   const [more, setMore] = useState(false);
   const scope = portal === 'administration' ? 'system' : 'restaurant';
   const [page, setPage] = useState(
-    user.role === 'system_admin' ? 'dashboard' : allowed(user, 'reservation.read') ? 'overview' : 'account',
+    location.hash === '#account'
+      ? 'account'
+      : user.role === 'system_admin'
+        ? 'dashboard'
+        : allowed(user, 'reservation.read')
+          ? 'overview'
+          : 'account',
   );
   const [mobile, setMobile] = useState(false);
   const installedModules = useQuery({

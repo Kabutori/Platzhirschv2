@@ -1,3 +1,4 @@
+import SsoAccount from './SsoAccount';
 import RestaurantRoleEditor from './RestaurantRoles';
 import { useState, useEffect, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -36,6 +37,7 @@ function allowed(user: Row, permission: string) {
   return user.permissions?.includes('*') || user.permissions?.includes(permission);
 }
 export function Login({ onLogin, setup = false }: { onLogin: () => void; setup?: boolean }) {
+  const sso = useData('v1/admin/auth/sso/status');
   const [mfa, setMfa] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [forgot, setForgot] = useState(false);
@@ -108,6 +110,18 @@ export function Login({ onLogin, setup = false }: { onLogin: () => void; setup?:
                 }}
               />
             </>
+          ) : sso.data?.pending_mfa ? (
+            <>
+              <h2>SSO bestätigen</h2>
+              <Form
+                fields={[{ key: 'mfa_code', label: 'Bestätigungscode', required: true }]}
+                onSave={async (data) => {
+                  await api('v1/admin/auth/sso/mfa', 'POST', data);
+                  onLogin();
+                }}
+                label="SSO-Anmeldung abschließen"
+              />
+            </>
           ) : (
             <form onSubmit={submit}>
               <h2>{forgot ? 'Passwort zurücksetzen' : 'Anmelden'}</h2>
@@ -176,6 +190,26 @@ export function Login({ onLogin, setup = false }: { onLogin: () => void; setup?:
                 {forgot ? 'Zurück zur Anmeldung' : 'Passwort vergessen?'}
               </button>
             </form>
+          )}
+          {!setup && sso.data?.notice && <p role="alert">{sso.data.notice}</p>}
+          {!setup && sso.data?.enabled && (
+            <button
+              className="full"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                setError(undefined);
+                try {
+                  const result = await api('v1/admin/auth/sso/start', 'POST', {});
+                  location.assign(result.url);
+                } catch (e) {
+                  setError(e);
+                  setBusy(false);
+                }
+              }}
+            >
+              Mit {sso.data.label} anmelden
+            </button>
           )}
         </section>
         <a
@@ -446,45 +480,49 @@ export function Account({ user }: { user: Row }) {
   const [secret, setSecret] = useState('');
   const [done, setDone] = useState(false);
   return (
-    <section className="panel padded">
-      <h2>Dein Zugang</h2>
-      <p>
-        {user.name} · {user.email}
-      </p>
-      <h3>Zwei-Faktor-Anmeldung</h3>
-      {user.mfa_enabled || done ? (
-        <div className="notice">
-          <Check size={17} />
-          Zwei-Faktor-Anmeldung ist aktiv. Für eine Wiederherstellung wende dich an den Server-Administrator.
-        </div>
-      ) : secret ? (
-        <>
-          <p>Füge diesen Schlüssel in deiner Authenticator-App als zeitbasierten Code hinzu:</p>
-          <code className="secret">{secret}</code>
-          <Form
-            fields={[{ key: 'code', label: 'Bestätigungscode', required: true }]}
-            onSave={async (data) => {
-              await api('v1/admin/auth/mfa/confirm', 'POST', data);
-              setSecret('');
-              setDone(true);
-            }}
-          />
-        </>
-      ) : (
-        <>
-          <p className="muted">
-            Schütze dein Konto mit einem zusätzlichen Code aus deiner Authenticator-App.
-          </p>
-          <Form
-            fields={[{ key: 'password', label: 'Aktuelles Passwort', type: 'password', required: true }]}
-            label="Einrichtung starten"
-            onSave={async (data) => {
-              const result = await api('v1/admin/auth/mfa/begin', 'POST', data);
-              setSecret(result.secret);
-            }}
-          />
-        </>
-      )}
-    </section>
+    <>
+      <SsoAccount user={user} />
+      <section className="panel padded">
+        <h2>Dein Zugang</h2>
+        <p>
+          {user.name} · {user.email}
+        </p>
+        <h3>Zwei-Faktor-Anmeldung</h3>
+        {user.mfa_enabled || done ? (
+          <div className="notice">
+            <Check size={17} />
+            Zwei-Faktor-Anmeldung ist aktiv. Für eine Wiederherstellung wende dich an den
+            Server-Administrator.
+          </div>
+        ) : secret ? (
+          <>
+            <p>Füge diesen Schlüssel in deiner Authenticator-App als zeitbasierten Code hinzu:</p>
+            <code className="secret">{secret}</code>
+            <Form
+              fields={[{ key: 'code', label: 'Bestätigungscode', required: true }]}
+              onSave={async (data) => {
+                await api('v1/admin/auth/mfa/confirm', 'POST', data);
+                setSecret('');
+                setDone(true);
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <p className="muted">
+              Schütze dein Konto mit einem zusätzlichen Code aus deiner Authenticator-App.
+            </p>
+            <Form
+              fields={[{ key: 'password', label: 'Aktuelles Passwort', type: 'password', required: true }]}
+              label="Einrichtung starten"
+              onSave={async (data) => {
+                const result = await api('v1/admin/auth/mfa/begin', 'POST', data);
+                setSecret(result.secret);
+              }}
+            />
+          </>
+        )}
+      </section>
+    </>
   );
 }

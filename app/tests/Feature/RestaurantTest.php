@@ -675,7 +675,10 @@ class RestaurantTest extends TestCase
         $this->assertSame(2, $db->table('reservation_notifications')->where('status', 'pending')->count());
         $this->postJson('/api/v1/restaurant/reservations/' . $id . '/cancel')->assertNoContent();
         $this->assertSame(1, $db->table('reservation_notifications')->where('status', 'pending')->count());
-        \Illuminate\Support\Facades\Mail::shouldReceive('raw')->once()->andReturnNull();
+        $this->mock(
+            \Illuminate\Contracts\Mail\Mailer::class,
+            fn($mailer) => $mailer->shouldReceive('raw')->once()->andReturnNull(),
+        );
         app(\App\Modules\Reservation\Application\ReservationNotifications::class)->dispatch(
             'Restaurant',
             'Europe/Berlin',
