@@ -56,10 +56,10 @@ class DatabaseServerTest extends TestCase
         $this->actingAs($this->admin())
             ->getJson('/api/v1/admin/modules')
             ->assertOk()
-            ->assertJsonPath('0.code', 'provisioning');
+            ->assertJsonFragment(['code' => 'provisioning']);
         $this->getJson('/api/v1/admin/permissions/families')
             ->assertOk()
-            ->assertJsonPath('0.module', 'provisioning');
+            ->assertJsonFragment(['module' => 'provisioning']);
         $this->postJson('/api/v1/admin/modules', ['code' => 'untrusted'])->assertStatus(405);
     }
     public function test_restaurant_accounts_and_guests_cannot_manage_servers(): void
