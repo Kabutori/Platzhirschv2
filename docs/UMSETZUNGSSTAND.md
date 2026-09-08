@@ -1,79 +1,59 @@
 # Platzhirsch – tatsächlicher Umsetzungsstand
 
-Stand: 2026-09-07. Version: 0.1.0 (Entwicklungsstand, keine Produktionsfreigabe).
+Stand: 2026-09-08. Entwicklungszweig `codex/windows-application`, [Entwurfs-PR #1](https://github.com/Kabutori/Platzhirschv2/pull/1). Keine Produktionsfreigabe sämtlicher Konzeptphasen. Maßgeblich für ein Installationspaket sind der Commit und die erfolgreichen Prüfungen seines Releases.
 
-Dieses Dokument beschreibt ausschließlich den Quellcode dieses Repositories. Die älteren Dokumente KONZEPT.md, ADMIN-UI.md und BACKEND-BASIS.md beschreiben teilweise andere, hier nicht vorhandene Worktrees. Deren Testberichte gelten nicht für diesen Code.
+Die älteren Dateien KONZEPT.md, ADMIN-UI.md und BACKEND-BASIS.md enthalten auch Planungen und Testberichte anderer Implementierungen. Dieser Stand beschreibt den tatsächlich vorhandenen Code.
 
-## Implementiert
+## Anwendung und Gestaltung
 
-- Getrennte Portalanmeldungen und Sitzungen; Plattformrollen mit serverseitiger Rechteprüfung und Modulnavigation. Testrestaurantanlage mit eigenem Login, Raum, drei Tischen und Öffnungszeiten.
+- Getrennte Administration und Restaurantportal mit eigenen Anmeldeseiten und Sitzungen; Erstadministrator nur mit einmaligem Einrichtungsschlüssel.
+- Anmeldung, Kontosperren, CSRF, Kennwort-Reset bei konfiguriertem SMTP, TOTP mit Replay-Schutz.
+- Plattformrollen mit gespeichertem Entwurf, Prüfung und expliziter Aktivierung; Rollenzuordnung für Plattformmitarbeiter. Eigene Restaurantrollen mit sofortiger serverseitiger Berechtigungsprüfung. Rechtefamilien kommen aus den installierten Modulen und werden nach Portal getrennt.
+- Rollenoberfläche mit horizontaler Rollenauswahl, Gruppenschaltern und Rechtezeilen nach der Vorlage. Modul-Shop mit Basismodulen, Erweiterungskacheln, Kaufstatus und Aktivierungsschaltern. Dunkle kantige Oberfläche mit den lokal gelieferten Schriften und zentralen Designtokens.
+- Mandanten, Konten, Restaurantprofile, Audit, Systemstatus, Räume, Tische, Öffnungszeiten und Sondertage.
+- Testrestaurant mit gewähltem Besitzerzugang, eigenem Schema, Raum, drei Tischen und sieben Öffnungstagen.
+- Reservierungen mit Zeitzone, Kapazitäts-/Öffnungsprüfung, Konfliktprüfung unter Datenbanksperren, Storno, Tageszahlen, Tischbelegung und CSV-Export.
+- Öffentliche Buchungsseite und Shadow-DOM-Widget mit Verfügbarkeit, Ablauf/Widerruf, zulässigen Website-Ursprüngen und serverseitiger Buchungsdauer.
+- Support-Tickets, Antworten und interne Notizen mit Mandantentrennung.
+- Systemadministrator kann eingeschränkte SQL-Anwendungszugänge sehen und nach Kennwortprüfung kurzzeitig anzeigen. Worker- und MySQL-Root-Zugänge werden nicht im Web ausgegeben.
 
-- Laravel-Anwendung mit zentraler Plattform-Datenbank und eigenem MySQL-Schema sowie eigenem Datenbankbenutzer je Restaurant.
-- Erstadministrator mit Einmal-Schlüssel, gesperrtem Sentinel und Datenbanktransaktion; kein automatischer Login nach Setup.
-- Session-Anmeldung, Logout, Kontosperren, CSRF-Schutz, Login-Limitierung, Passwort-Reset per konfiguriertem SMTP, TOTP-Einrichtung und Replay-Schutz.
-- Plattformübersicht, Mandantenanlage und asynchrone Provisionierung, Sperren/Freigeben, Benutzeranlage und Einladungslinks, Audit-Protokoll, Betriebsdaten.
-- Drei geschützte Grundrollen sowie eigene Mitarbeiterrollen pro Restaurant mit getrennten Lese-, Schreib-, Storno-, Export-, Konfigurations-, Widget- und Supportrechten. Teammitglieder können bearbeitet, gesperrt und Rollen zugewiesen werden. Fremde Rollen, Selbstentzug von Administratorrechten und veraltete Rollenänderungen werden abgewiesen.
-- Restaurantprofil, Räume, Tische, wöchentliche Öffnungszeiten und Sondertage.
-- Reservierungen erstellen, bearbeiten und stornieren; Kapazitätsprüfung, Öffnungszeitenprüfung, zeitzonenbezogene Eingabe, Speicherung in UTC, transaktionale Tischsperren und Prüfung auf zeitliche Überschneidungen.
-- Reservierungsübersicht, Tageskennzahlen, Belegungsansicht je Tisch, CSV-Export mit Schutz gegen Tabellenformeln.
-- Buchungslinks mit Ablaufdatum und Widerruf, öffentliche Buchungsseite und öffentliche eingeschränkte Buchungs-API. Shadow-DOM-Embed mit Verfügbarkeitsabfrage, konfigurierbarer Buchungsdauer und Akzentfarbe; keine Gästedaten in der öffentlichen Verfügbarkeitsantwort.
-- Support-Tickets, Nachrichten und interne Notizen mit Mandantengrenzen.
-- React/TypeScript-Oberfläche in Anlehnung an die gelieferten Prototypen, dunkles sharp/flat-Design, lokal ausgelieferte Schriften, Formularvalidierung, Lade-/Fehler-/Leerzustände.
-- Windows-Installer-Quellcode: BAT-Einstieg, PowerShell 5.1, IIS/FastCGI, PHP NTS, eigene MySQL-Instanz, lokale Erstinstallation, gesonderte HTTPS-Freigabe und Backup-Skript.
-- Windows-Release-Workflow und CI für Frontend, PHP-Funktionstests, Dependency-Prüfung und PowerShell-Syntax.
+## Module, Kauf und Serverbetrieb
 
-## Absichtlich noch nicht als fertig bezeichnet
+- Composer-Pakete für Identity, Customer, Reservation, Widget, Support, Billing, Reporting und Provisioning sowie Contracts und Module Host. Entsprechende npm-Pakete und gemeinsame UI-/Token-Pakete. Feste Paketversionen, Lockdateien und Composer-Autodiscovery; modulare PHP-Migrationen und getrennte UI-Dateien.
+- Die Anwendung enthält die Integrationsadapter, Queue-Orchestrierung, Middleware und Betriebskonfiguration. Historische Tabellen und Migrationsnamen werden zur Datenkompatibilität nicht pauschal umbenannt. Separate Modul-Repositories und private Satis-/npm-Registries sind noch nicht eingerichtet.
+- Modulangebote mit festgelegtem Monatspreis; Bestellungen mit Preisprüfung und Wiederholungsschutz. Freigabe erst nach manueller Bestätigung des externen Zahlungseingangs. Eindeutige Zahlungsreferenzen verhindern erneute Freigabe derselben Zahlung.
+- Mandantenaktivierung über privilegierten Hintergrundauftrag: temporäre Migrationsrechte, mitgelieferte Tenant-Migration, anschließender Rechteentzug. Deaktivierung und abgelaufene Nutzungszeiträume sperren Zugriff ohne Datenlöschung.
+- Reporting als erste kostenpflichtig freischaltbare Erweiterung: Tagesauswertung, gespeicherte Zeiträume und eigene Lese-/Schreibrechte.
+- Zusätzliche Datenbankserver mit Prüfzugang und separater lokaler Autorisierung des Workers. Neue Restaurants können direkt auf einem freigegebenen Server angelegt werden. Externe Verbindungen verlangen TLS mit Zertifikatsprüfung.
+- Mandantenumzug mit Kennwort, frischem TOTP, Sicherungs-/Ausfallbestätigung, exklusiver Mandantensperre, Kopie in ein neues Schema, geordnetem Inhaltsvergleich und anschließender Zuordnungsänderung. Quelle bleibt erhalten; API-Zugriffe verwenden nach Erfolg den Zielserver.
+- Reparaturpfad für hart unterbrochene Modulaufträge: lokale Prüfung, Entzug verbleibender DDL-Rechte und erneute Aktivierung. Keine automatische Löschung partieller Migrationen.
 
-Die vollständige Anwendung aus allen Konzeptphasen ist mit diesem ersten Stand **nicht** umgesetzt. Insbesondere fehlen:
+Die Bedienung und konkreten Grenzen stehen in [MODULE-UND-SERVER.md](MODULE-UND-SERVER.md).
 
-- Organisationsübergreifender Rollen-Rollout, SSO und Sidebar-Favoriten. Plattformrollen mit Entwurf, lokaler Prüfung und Aktivierung sowie registrierte Berechtigungsfamilien der eingebundenen Module sind implementiert.
-- Vollständige Extraktion des Anwendungscodes in eigenständige Composer-/npm-Pakete, Modul-Marktplatz, Kauf und mandantenbezogene Aktivierung einschließlich Migrationen. Registry und UI-Manifest-Anbindung für Provisioning und Identity sind vorhanden.
-- Abos, rechtlich geprüfte Rechnungen, Zahlungsanbieter, automatische Abrechnung und Testphasenpolitik.
-- Produktive Zuordnung neuer Restaurants zu externen Datenbankservern, Cluster-Resolver und Umzug/Massenmigration von Mandanten. Erfasste Server können geprüft werden; Restaurants werden weiterhin lokal provisioniert.
-- Weitere Widget-Designvorlagen und automatische Buchungs-E-Mails/SMS.
-- Öffentliche Marketing-Website, öffentliche Selbstregistrierung, E-Mail-Verifikation, Rechtstexte und deren Gestaltung.
-- Odoo-, Wetter- und weitergehende Reporting-Integrationen; PDF/XLSX/SQL/XML-Exporte.
-- Versionsübergreifender Update-/Rollback-Automat, Wiederherstellung auf neuer Maschine, signierter eigener Installer, Zertifikatserneuerung, externe Backup-Ablage und Monitoring-Alarmierung. Vollständige Offline-Snapshots und Wiederherstellung derselben Installation sind implementiert; der zusätzliche Windows-Abnahmelauf steht unten.
-- Vollständige visuelle 1:1-Abnahme, Bildschirmleser-/Tastatur-Abnahme, durchgängige browserbasierte Admin-E2E-Suite und mobile Detailabnahme; drei Widget- und zwei Rollen-Browsertests sind vorhanden.
+## Windows-Auslieferung
 
-## Technische Entscheidungen und Abweichungen
+`Install.bat` startet PowerShell mit einer nur für diesen Prozess geltenden Ausführungsrichtlinie. Das gebaute Paket enthält IIS-Zusatzkomponenten, PHP NTS, MySQL, PHP-Abhängigkeiten und fertige UI. Git, Composer und Node.js sind auf dem Zielserver nicht erforderlich.
 
-1. Laravel 13 (PHP ab 8.3) statt der älteren Laravel-12-Referenz. Das Windows-Paket verwendet PHP 8.5.10 NTS und MySQL 8.4.11 LTS; heruntergeladene Versionen müssen im Release-Build real bestätigt werden.
-2. IIS ist der einzige Installer-Webserver. Kein Docker, WSL, Nginx, Redis, Git, Composer oder Node-Build auf dem Zielserver erforderlich.
-3. Cache, Sessions und Queue nutzen die zentrale MySQL-Datenbank. Anwendungsschlüssel bleiben bei Wiederaufnahme unverändert.
-4. Browser-API nutzt Laravel-Web-Middleware mit Session und CSRF, nicht zusätzliche Sanctum-Tokens. Öffentliche API ist separat und ohne Admin-Session.
-5. Mandantenauflösung ist zunächst eine kleine dedizierte Verbindungskomponente, nicht stancl/tenancy. Es gibt genau einen physischen DB-Server. Jede Anfrage löst die erlaubte Tenant-ID serverseitig auf; gewöhnliche Benutzer können den Kontext nicht per Header ändern.
-6. Provisionierungszugänge liegen in einer von IIS nicht lesbaren Datei. Der Windows-Hintergrundprozess läuft als LocalService und liest diese Datei. Separate Windows-Service-Konten je Worker sind vor einer gehärteten Produktion weiter zu prüfen.
-7. Hintergrundprozesse werden über geplante Aufgaben gestartet. Der PowerShell-Elternprozess begrenzt die Laufzeit eines einzelnen Jobs, da PCNTL unter Windows nicht verfügbar ist. Kein WinSW-Binary nötig.
-8. UI-Navigation verwendet komponenteninternen Zustand; Hash-Routen sind für Passwort-Reset und Buchungsseiten vorgesehen. Noch kein React-Router-Manifest-System.
-9. Gemeinsame CSS-Variablen statt des geplanten veröffentlichten JSON-Design-Token-Pakets. Das spätere Modul-Paketsystem bleibt ein Folgearbeitspaket.
-10. Öffnungszeiten sind Zeitfenster innerhalb desselben Kalendertags. Buchungen über Mitternacht, Tischkombinationen und Wartelisten sind noch nicht unterstützt.
-11. Plattformlisten zeigen begrenzte erste Seiten; vollständige Paginierungsbedienung fehlt noch.
+Installer: eigene lokale MySQL-Instanz, IIS/FastCGI, geschützte Konfiguration, geplante Aufgaben für Worker und Scheduler, Gesundheitsprüfung und wiederholbarer Lauf derselben Version. Standardmäßig nur lokaler HTTP-Zugang; separate HTTPS-Freigabe.
 
-## Neue Erweiterungen und laufende Abnahme
+Offline-Snapshot und Wiederherstellung sind für dieselbe lokale Maschine, Version und Konfiguration vorhanden. Zusätzliche autorisierte Datenbankserver sperren diese lokale Komplettsicherung: eine koordinierte Sicherung mehrerer Server ist noch nicht automatisiert.
 
-- Rollenverwaltung: [Prüflauf 34145834334](https://github.com/Kabutori/Platzhirschv2/actions/runs/34145834334) erfolgreich, einschließlich sieben zusätzlicher PHP-Rechtetests und zwei neuer Rollen-Browsertests.
-- Offline-Snapshot und Wiederherstellung: gemeinsamer Sicherungszeitpunkt aller Datenbanken inklusive MySQL-Konten, Anwendung, Schlüssel und NTFS-Rechte. Prüfsummen vor dem Restore; zusätzliche Sicherung des aktuellen Stands; bei unvollständiger Rückkopie kein Neustart. Beschränkt auf dieselbe Maschine, Version und Installationskonfiguration.
-- Der erweiterte Windows-Test erstellt eine Sicherung, legt danach eine weitere Buchung an, prüft die Ablehnung einer beschädigten Sicherung und stellt den ursprünglichen Datenstand samt Schlüsseln wieder her. Diese zusätzliche Windows-Abnahme ist zum Zeitpunkt dieses Dokuments noch nicht abgeschlossen. Vorschau 13 enthält diese Erweiterungen nicht.
+## Prüfstand
 
-## Verifikationsgrenze
+- [Anwendungsprüfung 34192895027](https://github.com/Kabutori/Platzhirschv2/actions/runs/34192895027): 71 PHP-Tests, 484 Assertions; Frontend-Build, Abhängigkeitsprüfung, zwölf Chromium-Browsertests und PowerShell-5.1-Syntax erfolgreich. PHPUnit meldet zusätzlich sieben Notices, keine fehlgeschlagenen Tests.
+- Browserprüfungen arbeiten mit API-Mocks und erzeugen Desktop-/Mobilaufnahmen. Zusätzlich prüfen Windows-Jobs die tatsächliche Installation hinter IIS mit echten MySQL-Datenbanken.
+- [Windows-Prüfung 34190594946](https://github.com/Kabutori/Platzhirschv2/actions/runs/34190594946) hat auf Server 2022 und 2025 die erste vollständige Modul-/Serverkette bestanden: lokale Sicherung/Wiederherstellung, Bestellung, Freigabe, Aktivierung, zweite MySQL-Instanz, direkte Serverzuordnung und Umzug samt Reporting-Daten und erhaltener Quelle.
+- Nachfolgende Paket-/Rechteänderungen und der Reparaturpfad durchlaufen denselben erweiterten Windows-Test erneut. Ein Download wird erst veröffentlicht, wenn beide Server erfolgreich sind. Die Release-Seite nennt den konkreten Prüflauf dieses Pakets; ein älterer grüner Lauf ersetzt diese Prüfung nicht.
+- PHP und PowerShell stehen in der lokalen Bearbeitungsumgebung nicht zur Verfügung; ihre Laufzeitprüfungen erfolgen in GitHub Actions.
 
-- Der [Anwendungs-Prüflauf 34144092198](https://github.com/Kabutori/Platzhirschv2/actions/runs/34144092198) für Commit `e262b1cb4112f11d11f49330aaf248f585ebe27e` ist vollständig grün: 24 PHP-Tests / 100 Assertions einschließlich tatsächlichem HTTP-Einstiegspunkt und begrenzter Fehlerdiagnose, drei Chromium-Widget-Tests, Frontend-Build, Dependency-Prüfung und PowerShell-5.1-Syntax. PHP und PowerShell sind lokal nicht verfügbar; diese Laufzeitprüfungen erfolgen über GitHub Actions.
-- Widget-Browsertests verwenden API-Mocks. Der Windows-Integrationstest arbeitet zusätzlich mit der tatsächlichen IIS-/MySQL-Installation und der öffentlichen Widget-API.
-- Der [Windows-Prüflauf 34144092188](https://github.com/Kabutori/Platzhirschv2/actions/runs/34144092188) für denselben Code ist vollständig erfolgreich: Paketbau, Installation und Integration auf **Windows Server 2022 und 2025**, anschließend öffentliche Veröffentlichung.
-- Geprüftes Paket: [Windows-Vorschau 13](https://github.com/Kabutori/Platzhirschv2/releases/tag/windows-preview-13-1), Asset `Platzhirsch-0.1.0-preview.13-windows-x64.zip`. SHA-256: `0d9189f46b7c57edc6457e83baf79a1df30679199560a47b64c5da802881fba4`. Diese Vorschau enthält die Korrekturen für IIS-Konfigurationssektionen, HTTP-Einstiegspunkt, PHP-8.5-OPcache, Admin-Startdatei und die maskierten GRANT-/REVOKE-Datenbanknamen. IIS darf die ausführbaren Bootstrap-Caches nur lesen.
-- Ältere Actions-Artefakte enthalten Installations- beziehungsweise Provisionierungsfehler. Für einen Installationstest die oben verlinkte veröffentlichte Vorschau verwenden. Die grünen Integrationsprüfungen sind keine Freigabe sämtlicher Konzeptanforderungen.
-- Der Windows-Test umfasst Administrator-Einrichtung, Anmeldung, asynchrone Restaurant-Provisionierung, Reservierung, Konflikt, Storno, zwei nebenläufig gesendete Widget-Buchungen, Worker/Scheduler und Wiederholung des Installers mit unveränderten Schlüsseln und erhaltenen Reservierungen. Ein echter Windows-Neustart, Nebenläufigkeit bei Tischwechseln/Konfigurationsänderungen und Backup/Restore sind dadurch nicht abgenommen.
-- Quellcode öffentlich auf Branch `codex/windows-application`, [Entwurfs-PR #1](https://github.com/Kabutori/Platzhirschv2/pull/1). Keine Zusammenführung nach `main` und keine Produktionsfreigabe der vollständigen Konzeptphasen.
+## Noch nicht vollständig umgesetzt oder abgenommen
 
-## Definition für die Produktionsfreigabe
+- Automatischer Zahlungsanbieter, automatische Abbuchungen/Verlängerungen, Rechnungen, Rückerstattungen und Testphasenpolitik. Die vorhandene Freigabe ist eine manuelle externe Zahlungsbestätigung.
+- Separate Paket-Repositories, private Paketregistries und unabhängige Modul-Releases. Erweiterte Clusterplanung, Massenumzüge und automatische Bereinigung alter/abgebrochener Kopien.
+- Versionsübergreifende Updates und Rollback, Wiederherstellung auf neuer Maschine, koordinierte Wiederherstellung verteilter Datenbanken, echte Neustartabnahme, externe CA-/Netzwerkabnahme, große Datenmengen und Lasttests.
+- SSO, organisationsübergreifender Rollen-Rollout, Favoriten und vollständige Listenpaginierung.
+- Marketing-Website, Selbstregistrierung, E-Mail-Verifikation, automatische Buchungs-E-Mails/SMS, Odoo-/Wetterintegrationen und weitergehende Berichte/Exportformate.
+- Buchungen über Mitternacht, Tischkombinationen und Warteliste.
+- Vollständige visuelle 1:1-Abnahme aller Designansichten sowie durchgängige Tastatur-, Bildschirmleser- und Browser-Ende-zu-Ende-Abnahme.
 
-1. Alle erforderlichen CI-Prüfungen grün; Composer-Lockdatei aus einem geprüften Build im Repository fixiert.
-2. Install.bat auf frischem Windows Server 2025 und Server 2022 getestet, inklusive erforderlicher Windows-Neustarts und zweitem Installer-Lauf.
-3. Setup ohne gültigen Schlüssel gesperrt; Schlüssel nach Abschluss wirkungslos; CSRF, MFA-Replay und Kontosperren nachgewiesen.
-4. Zwei Restaurants angelegt; gegenseitiger Zugriff auf Daten und Tickets zuverlässig abgewiesen, einschließlich direkter Objekt-IDs und manipulierten Headern.
-5. Zwei tatsächlich gleichzeitige MySQL-Buchungen desselben Tisches: genau eine erfolgreich; nebenläufige Tischwechsel, Stornierung und Konfigurationsänderungen ebenfalls testen.
-6. Nach Serverneustart laufen MySQL, IIS, beide Worker und Scheduler ohne interaktive Anmeldung.
-7. HTTPS, gültige Zertifikatskette, sichere Cookies, SMTP, protokollierte Fehler und Datenbankzugriffsrechte verifiziert.
-8. Backup in isolierter Umgebung vollständig wiederhergestellt, einschließlich Anwendungsschlüssel, Tenant-Zugänge und DB-Benutzer.
-9. Fehlende Produktmodule nach vereinbartem Umfang implementiert und mit echten End-to-End-Tests abgenommen.
+Ein bestehendes System anderer Version darf nicht durch Löschen seiner Installation oder Daten an der Versionsprüfung vorbeigeführt werden. Für neue Vorschauen bis zur Update-Implementierung eine getrennte Installation verwenden.

@@ -12,6 +12,7 @@ Copy-Item "$root\Install.bat" $out
 Copy-Item "$root\installer\*.ps1" "$out\installer"
 Copy-Item "$root\docs\BETRIEB.md" "$out\BETRIEB.md"
 Copy-Item "$root\docs\UMSETZUNGSSTAND.md" "$out\UMSETZUNGSSTAND.md"
+Copy-Item "$root\docs\MODULE-UND-SERVER.md" "$out\MODULE-UND-SERVER.md"
 # Package runtime files explicitly: no test databases, logs, developer environment
 # or cached configuration from the build machine may enter an installation.
 foreach($entry in @('app','bootstrap','config','database','public','routes','vendor','artisan','composer.json','composer.lock')) {

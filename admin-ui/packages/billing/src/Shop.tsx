@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@platzhirsch/ui-runtime/api';
 export default function Shop({ tenant }: { tenant?: string }) {
@@ -9,6 +9,12 @@ export default function Shop({ tenant }: { tenant?: string }) {
     queryFn: () => api('v1/restaurant/modules', 'GET', undefined, tenant),
     refetchInterval: 10000,
   });
+  const entitlementState = (data.data?.entitlements || [])
+    .map((e: any) => [e.module_code, e.status, e.paid_until].join(':'))
+    .join('|');
+  useEffect(() => {
+    if (data.data) void q.invalidateQueries({ queryKey: ['v1/admin/auth/me'] });
+  }, [entitlementState]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
@@ -49,6 +55,7 @@ export default function Shop({ tenant }: { tenant?: string }) {
           {notice}
         </p>
       )}
+      {data.isPending && <p role="status">Module werden geladen …</p>}
       {data.error && <p role="alert">{data.error.message}</p>}
       <h3>Basismodule</h3>
       <div className="module-cards shop-grid">
@@ -94,14 +101,16 @@ export default function Shop({ tenant }: { tenant?: string }) {
               </strong>
               <p>
                 Status:{' '}
-                {(
-                  {
-                    active: 'Gekauft & aktiviert',
-                    inactive: 'Gekauft · nicht aktiv',
-                    activating: 'Wird aktiviert',
-                    error: 'Aktivierung fehlgeschlagen',
-                  } as Record<string, string>
-                )[entitlement?.status] || 'Nicht gekauft'}
+                {entitlement && !usable
+                  ? 'Nutzungszeitraum abgelaufen'
+                  : (
+                      {
+                        active: 'Gekauft & aktiviert',
+                        inactive: 'Gekauft · nicht aktiv',
+                        activating: 'Wird aktiviert',
+                        error: 'Aktivierung fehlgeschlagen',
+                      } as Record<string, string>
+                    )[entitlement?.status] || 'Nicht gekauft'}
                 {usable
                   ? ' · gültig bis ' + new Date(entitlement.paid_until).toLocaleDateString('de-DE')
                   : ''}

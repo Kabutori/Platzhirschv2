@@ -12,7 +12,7 @@ Zielplattformen: Windows Server 2025/2022, x64. Windows 11 Pro/Enterprise besitz
 
 ## Fertiges Paket herunterladen
 
-Aktuell geprüft: [Windows-Vorschau 13](https://github.com/Kabutori/Platzhirschv2/releases/tag/windows-preview-13-1). Erstinstallation und Anwendungstest sind auf Windows Server 2022 und 2025 erfolgreich.
+Den aktuellen Download und seine bestandenen Prüfungen unter [GitHub Releases](https://github.com/Kabutori/Platzhirschv2/releases) auswählen. Ein Paket wird erst nach erfolgreicher Installation auf Windows Server 2022 und 2025 veröffentlicht.
 
 Unter [GitHub Releases](https://github.com/Kabutori/Platzhirschv2/releases) eine Windows-Vorschau öffnen und unter **Assets** die Datei `Platzhirsch-…-windows-x64.zip` herunterladen. Vollständig entpacken und `Install.bat` als Administrator ausführen. Die automatisch angebotenen „Source code“-Archive enthalten keine gebauten Laufzeitkomponenten. Wenn noch keine Vorschau vorhanden ist, sind die Installationstests noch nicht vollständig erfolgreich abgeschlossen.
 
@@ -39,7 +39,7 @@ Als Administrator im entpackten Installationspaket:
 
 Bei gefordertem Neustart meldet das Skript Exitcode 3010. Nach dem Neustart denselben Befehl wiederholen. Bereits erzeugte Daten und Schlüssel bleiben erhalten. Die Wiederholung einer abgeschlossenen Installation mit unveränderten Schlüsseln und erhaltenen Reservierungen ist auf Server 2022 und 2025 geprüft. Wiederaufnahme nach einem tatsächlichen Abbruch oder Windows-Neustart ist noch separat nachzuweisen.
 
-Am Ende `http://localhost:8378/admin/` öffnen und den angezeigten Einmal-Schlüssel verwenden. Namen, E-Mail und mindestens zwölf Zeichen langes Passwort für den ersten Administrator eingeben. Anschließend normal anmelden und im Bereich „Mein Konto“ TOTP aktivieren. Die Einrichtung nimmt nicht automatisch eine Anmeldung vor.
+Am Ende `http://localhost:8378/administration/login` öffnen und den angezeigten Einmal-Schlüssel verwenden. Namen, E-Mail und mindestens zwölf Zeichen langes Passwort für den ersten Administrator eingeben. Anschließend normal anmelden und im Bereich „Mein Konto“ TOTP aktivieren. Die Einrichtung nimmt nicht automatisch eine Anmeldung vor.
 
 Die Standardinstallation öffnet keine Firewall-Regel und bindet HTTP nur an 127.0.0.1. Der Einmal-Schlüssel ist nicht als öffentlicher URL-Parameter oder im Repository gespeichert. Die Datei `installation.json` enthält Wiederaufnahme- und Wiederherstellungsgeheimnisse und darf nur für lokale Administratoren und SYSTEM lesbar sein.
 
@@ -161,3 +161,9 @@ Neue Versionspakete sind weiterhin für Neuinstallationen vorgesehen. Der Instal
 Administration → SQL-Zugangsdaten zeigt Systemadministratoren Host, Port, Datenbank und Anwendungsbenutzer der Plattform und fertig eingerichteter Restaurants. „SQL-Passwort anzeigen“ verlangt das aktuelle Administratorkennwort erneut. Der Abruf ist auf fünf Versuche pro Minute begrenzt und nur über HTTPS oder auf dem lokalen Rechner möglich. Passwörter werden nicht in Listen oder Audit-Einträgen gespeichert und nach 30 Sekunden beziehungsweise beim Verlassen des Fensters ausgeblendet. Gezeigt werden Anwendungszugänge, keine MySQL-Root- oder Provisionierungszugänge.
 
 Die Plattformrollen orientieren sich nun an der Vorlage: Aktionsleiste, Rollenreiter, Gruppenschalter und einzelne Berechtigungszeilen. Neue Rollen können die aktiven Rechte einer bestehenden ungesperrten Rolle als Entwurf übernehmen. Berechtigungscodes selbst werden weiterhin ausschließlich durch Module registriert.
+
+## Module und mehrere Datenbankserver
+
+Anleitung: [MODULE-UND-SERVER.md](MODULE-UND-SERVER.md). Sie beschreibt die getrennten Portale, das Testrestaurant, Angebote und Aktivierung, zusätzliche Server, Mandantenumzüge sowie die lokale Reparatur unterbrochener Modulaufträge.
+
+Der lokale Snapshot deckt zusätzliche Datenbankserver nicht ab und wird bei vorhandener Serverautorisierung gesperrt. Updates zwischen unterschiedlichen Vorschauversionen bleiben ein eigenes, noch nicht automatisiertes Betriebsverfahren.

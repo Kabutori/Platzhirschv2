@@ -120,7 +120,9 @@ jobs:
 
           Das Asset Platzhirsch-…-windows-x64.zip herunterladen, vollständig entpacken und Install.bat als Administrator ausführen. Die automatisch angebotenen Source-code-Archive enthalten keine Laufzeitpakete.
 
-          Geprüft: PHP-Funktionstests, Frontend-Build, Widget-Browsertests und vollständige Erstinstallation auf Windows Server 2022 und 2025 mit IIS, MySQL, Administrator-Einrichtung, Mandanten-Provisionierung, Buchung und Wiederholung des Installers. Ein tatsächlicher Windows-Neustart und Backup/Restore sind noch nicht abgenommen.
+          Geprüft: PHP-Funktionstests, Frontend und Browsertests; Erstinstallation auf Windows Server 2022 und 2025; getrennte Portale, Testrestaurant, Reservierungen, lokale Sicherung/Wiederherstellung, Modulbestellung mit externer Zahlungsbestätigung, Aktivierung und Reparatur, zweite MySQL-Instanz, Serverzuordnung sowie Restaurantumzug mit Inhaltsvergleich und erhaltener Quelle.
+
+          Ein echter Windows-Neustart, externe TLS-Topologien, automatische Zahlungsanbieter, versionsübergreifende Updates und koordinierte Wiederherstellung mehrerer Datenbankserver sind nicht abgenommen.
           NOTES
           printf '\nPrüflauf: %s\nBuild-Commit: %s\n' "$CHECK_URL" "$RELEASE_COMMIT" >> release-notes.md
           gh release create "$RELEASE_TAG" ./*.zip SHA256SUMS.txt --target "$RELEASE_COMMIT" --prerelease --title "Platzhirsch Windows-Vorschau $RELEASE_TAG" --notes-file release-notes.md
