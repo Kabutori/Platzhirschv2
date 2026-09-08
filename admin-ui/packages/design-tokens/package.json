@@ -1,0 +1,10 @@
+{
+  "name": "@platzhirsch/design-tokens",
+  "version": "0.1.0",
+  "files": [
+    "tokens.css"
+  ],
+  "exports": {
+    "./tokens.css": "./tokens.css"
+  }
+}
