@@ -62,7 +62,7 @@ In der IDE Änderungen prüfen, ausgewählte Quelldateien committen und den eige
 git status
 git add admin-ui/packages/reservation/src/Screens.tsx
 git commit -m "Reservierungsansicht anpassen"
-git push -u origin dev/meine-aenderungen
+git push -u origin HEAD
 ```
 
 Danach einen Pull Request in `codex/windows-application` erstellen. Die Anwendungsprüfungen laufen für Pull Requests; Windows-Pakete werden bei relevanten Änderungen ebenfalls geprüft. Quellcode wird gebaut, getestet und als Vorschau veröffentlicht. Das allein verändert keine vorhandene Installation.

@@ -146,6 +146,8 @@ jobs:
 
           Geprüft: PHP-Funktionstests, Frontend und Browsertests; Erstinstallation auf Windows Server 2022 und 2025; getrennte Portale, Testrestaurant, Reservierungen, lokale Sicherung/Wiederherstellung, Modulbestellung mit externer Zahlungsbestätigung, Aktivierung und Reparatur, zweite MySQL-Instanz, Serverzuordnung sowie Restaurantumzug mit Inhaltsvergleich und erhaltener Quelle.
 
+          Entwicklung: Start-Development.bat im vollstaendig entpackten Paket startet die Einrichtung eines separaten Git-Checkouts mit eigenem Branch. PHP/MySQL-Laufzeitdateien einer vorhandenen Installation werden benoetigt; Entwicklungsdaten liegen separat. Kein automatischer Push oder Produktiv-Update. Details in DEVELOPMENT.md.
+
           Ein echter Windows-Neustart, externe TLS-Topologien, automatische Zahlungsanbieter, versionsübergreifende Updates und koordinierte Wiederherstellung mehrerer Datenbankserver sind nicht abgenommen.
           NOTES
           printf '\nPrüflauf: %s\nBuild-Commit: %s\n' "$CHECK_URL" "$RELEASE_COMMIT" >> release-notes.md
