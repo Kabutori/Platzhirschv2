@@ -1,3 +1,4 @@
+import TablePlan from './TablePlan';
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Armchair, Download, CalendarDays } from 'lucide-react';
@@ -45,6 +46,19 @@ export function RestaurantResource({ resource, tenant }: { resource: string; ten
             options: pick(['terracotta', 'sage', 'sky', 'mustard', 'plum', 'slate']),
           },
           { key: 'outdoor', label: 'Außenbereich', type: 'checkbox' },
+          { key: 'location', label: 'Standort' },
+          { key: 'note', label: 'Notiz', type: 'textarea' },
+          {
+            key: 'icon',
+            label: 'Raum-Symbol',
+            default: 'room',
+            options: [
+              { value: 'room', label: 'Raum' },
+              { value: 'terrace', label: 'Terrasse' },
+              { value: 'bar', label: 'Bar' },
+              { value: 'event', label: 'Veranstaltung' },
+            ],
+          },
         ]
       : resource === 'tables'
         ? [
@@ -65,6 +79,18 @@ export function RestaurantResource({ resource, tenant }: { resource: string; ten
               default: 4,
             },
             { key: 'active', label: 'Für Buchungen verfügbar', type: 'checkbox', default: true },
+            {
+              key: 'shape',
+              label: 'Tischform',
+              default: 'rectangle',
+              options: [
+                { value: 'rectangle', label: 'Rechteckig' },
+                { value: 'square', label: 'Quadratisch' },
+                { value: 'round', label: 'Rund' },
+              ],
+            },
+            { key: 'layout_x', label: 'Position horizontal (%)', type: 'number', min: 0, max: 100 },
+            { key: 'layout_y', label: 'Position vertikal (%)', type: 'number', min: 0, max: 100 },
           ]
         : resource === 'hours'
           ? [
@@ -341,41 +367,16 @@ export function Reservations({
         ) : q.error ? (
           <ErrorBox error={q.error} />
         ) : mode === 'table-plan' ? (
-          <div className="table-plan">
-            {tables.data?.map((table: Row) => (
-              <section key={table.id} className="table-lane">
-                <div>
-                  <Armchair size={20} />
-                  <strong>{table.name}</strong>
-                  <small>{table.capacity} Plätze</small>
-                </div>
-                <div>
-                  {live.filter((r) => r.table_id === table.id).length ? (
-                    live
-                      .filter((r) => r.table_id === table.id)
-                      .map((r) => (
-                        <button
-                          disabled={!allowed(user, 'reservation.write')}
-                          className="booking-block"
-                          key={r.id}
-                          onClick={() => edit(r)}
-                        >
-                          <strong>
-                            {clock(r.starts_at, tz)}–{clock(r.ends_at, tz)}
-                          </strong>
-                          <span>
-                            {r.guest_name} · {r.party_size} Personen
-                          </span>
-                          <Badge value={r.status} />
-                        </button>
-                      ))
-                  ) : (
-                    <span className="muted">Keine Reservierungen</span>
-                  )}
-                </div>
-              </section>
-            ))}
-          </div>
+          <TablePlan
+            tables={tables.data || []}
+            reservations={rows}
+            timezone={tz}
+            tenant={tenant}
+            canConfigure={allowed(user, 'restaurant.configure')}
+            canWrite={allowed(user, 'reservation.write')}
+            edit={edit}
+            create={(table) => setForm({ table_id: table.id, request_key: crypto.randomUUID() })}
+          />
         ) : (
           <DataTable
             rows={rows}

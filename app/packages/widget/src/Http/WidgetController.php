@@ -18,7 +18,18 @@ class WidgetController
         return $this->db
             ->table('widget_clients')
             ->where('tenant_id', $r->attributes->get('tenant')->id)
-            ->get(['id', 'origins', 'expires_at', 'created_at', 'duration_minutes', 'accent']);
+            ->get([
+                'id',
+                'origins',
+                'expires_at',
+                'created_at',
+                'duration_minutes',
+                'accent',
+                'language',
+                'position',
+                'max_party_size',
+                'show_brand',
+            ]);
     }
     public function create(Request $r)
     {
@@ -27,6 +38,10 @@ class WidgetController
             'origins' => 'required|array|min:1|max:10',
             'origins.*' => 'required|url:http,https|max:250',
             'months' => 'sometimes|integer|min:1|max:12',
+            'language' => 'sometimes|in:de,en',
+            'position' => 'sometimes|in:inline,bottom-right,bottom-left,top-right,top-left',
+            'max_party_size' => 'sometimes|integer|min:1|max:50',
+            'show_brand' => 'sometimes|boolean',
             'duration_minutes' => 'sometimes|integer|min:30|max:240|multiple_of:15',
             'accent' => ['nullable', 'regex:/^#[a-fA-F0-9]{6}$/D'],
         ]);
@@ -52,6 +67,10 @@ class WidgetController
             'expires_at' => now()->addMonthsNoOverflow($data['months'] ?? 12),
             'duration_minutes' => $data['duration_minutes'] ?? 90,
             'accent' => $data['accent'] ?? null,
+            'language' => $data['language'] ?? 'de',
+            'position' => $data['position'] ?? 'inline',
+            'max_party_size' => $data['max_party_size'] ?? 50,
+            'show_brand' => $data['show_brand'] ?? true,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -72,6 +91,26 @@ class WidgetController
             ],
             201,
         );
+    }
+    public function update(Request $r, int $id)
+    {
+        abort_unless($r->user()->hasPermission('widget.manage'), 403);
+        $query = $this->db
+            ->table('widget_clients')
+            ->where('tenant_id', $r->attributes->get('tenant')->id)
+            ->where('id', $id);
+        abort_unless($query->exists(), 404);
+        $data = $r->validate([
+            'duration_minutes' => 'required|integer|min:30|max:240|multiple_of:15',
+            'accent' => ['nullable', 'regex:/^#[a-fA-F0-9]{6}$/D'],
+            'language' => 'required|in:de,en',
+            'position' => 'required|in:inline,bottom-right,bottom-left,top-right,top-left',
+            'max_party_size' => 'required|integer|min:1|max:50',
+            'show_brand' => 'required|boolean',
+        ]);
+        $query->update([...$data, 'updated_at' => now()]);
+        $this->audit->record('widget.updated', $id, $r->attributes->get('tenant')->id);
+        return response()->json(['id' => $id, 'updated' => true]);
     }
     public function revoke(Request $r, int $id)
     {
@@ -128,6 +167,10 @@ class WidgetController
                 'timezone' => $tenant->timezone,
                 'duration_minutes' => $client->duration_minutes,
                 'accent' => $client->accent,
+                'language' => $client->language,
+                'position' => $client->position,
+                'max_party_size' => $client->max_party_size,
+                'show_brand' => (bool) $client->show_brand,
                 ...$this->reservations->catalog(),
             ],
         );
@@ -141,7 +184,7 @@ class WidgetController
         return $this->run($r, $token, function ($tenant, $client) use ($r, $service) {
             $data = $r->validate([
                 'starts_at' => 'required|date_format:Y-m-d\\TH:i',
-                'party_size' => 'required|integer|min:1|max:50',
+                'party_size' => 'required|integer|min:1|max:' . $client->max_party_size,
             ]);
             return [
                 'tables' => $service->availableTables(
@@ -160,6 +203,7 @@ class WidgetController
                 ...\App\Modules\Reservation\PublicApi\ReservationRules::rules(),
                 'email' => 'required|email|max:254',
                 'consent' => 'required|accepted',
+                'party_size' => 'required|integer|min:1|max:' . $client->max_party_size,
                 'website' => 'nullable|string|max:0',
                 'duration_minutes' => 'sometimes|integer',
                 'request_key' => 'required|uuid',

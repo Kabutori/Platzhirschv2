@@ -1,3 +1,4 @@
+import { PreferencesProvider, PreferencesPage, usePreferences } from '@platzhirsch/ui-runtime/preferences';
 const Tenants = lazy(() => import('@platzhirsch/customer-ui').then((m) => ({ default: m.Tenants })));
 const Profile = lazy(() => import('@platzhirsch/customer-ui').then((m) => ({ default: m.Profile })));
 import {
@@ -102,14 +103,13 @@ const systemNav = [
   ['users', 'Benutzer', Users],
   ['roles', 'Rollen & Rechte', ShieldCheck],
   ['modules', 'Module', Code2],
-  ['database-access', 'SQL-Zugangsdaten', ShieldCheck],
-  ['billing-admin', 'Angebote & Bestellungen', Code2],
-  ['placement', 'Serverzuordnung & Umzüge', Building2],
+  ['system-settings', 'System-Einstellungen', Settings],
   ['audit-log', 'Audit Log', ScrollText],
   ['health', 'System', Activity],
   ['system-guide', 'System verstehen', Building2],
-  [provisioningNavigation.key, provisioningNavigation.label, provisioningNavigation.icon],
+
   ['support', 'Support', MessageSquare],
+  ['preferences', 'Einstellungen', Settings],
   ['account', 'Mein Konto', Settings],
 ] as const;
 const restaurantNav = [
@@ -126,7 +126,9 @@ const restaurantNav = [
   ['team', 'Team', Users],
   ['restaurant-roles', 'Rollen & Rechte', ShieldCheck],
   ['profile', 'Restaurant-Profil', Building2],
+  ['system-guide', 'System verstehen', Building2],
   ['support', 'Support', MessageSquare],
+  ['preferences', 'Einstellungen', Settings],
   ['account', 'Mein Konto', Settings],
 ] as const;
 function App() {
@@ -208,6 +210,15 @@ const platformPagePermission: Record<string, string> = {
   'database-servers': 'provisioning.servers.read',
 };
 function Shell({ user }: { user: Row }) {
+  return (
+    <PreferencesProvider key={portal + user.id} identity={portal + ':' + user.id}>
+      <ShellBody user={user} />
+    </PreferencesProvider>
+  );
+}
+function ShellBody({ user }: { user: Row }) {
+  const { value: preferences, save: savePreferences, error: preferenceError } = usePreferences();
+  const [more, setMore] = useState(false);
   const scope = portal === 'administration' ? 'system' : 'restaurant';
   const [page, setPage] = useState(
     user.role === 'system_admin' ? 'dashboard' : allowed(user, 'reservation.read') ? 'overview' : 'account',
@@ -237,7 +248,10 @@ function Shell({ user }: { user: Row }) {
             (!['database-access', 'placement', 'billing-admin'].includes(key) ||
               user.role === 'system_admin') &&
             (!platformPagePermission[key] || allowed(user, platformPagePermission[key])) &&
-            (key !== provisioningNavigation.key || provisioningVisible) &&
+            (key !== 'system-settings' ||
+              user.role === 'system_admin' ||
+              provisioningVisible ||
+              allowed(user, 'platform.health.read')) &&
             (key !== 'roles' || identityVisible),
         )
       : restaurantNav.filter(
@@ -248,7 +262,7 @@ function Shell({ user }: { user: Row }) {
         );
   const title = nav.find(([key]) => key === page)?.[1] || 'Platzhirsch';
   return (
-    <div className="app">
+    <div className={preferences.collapsed ? 'app compact-navigation' : 'app'}>
       <aside className={mobile ? 'sidebar open' : 'sidebar'}>
         <div className="brand">
           <b>P</b>
@@ -257,6 +271,14 @@ function Shell({ user }: { user: Row }) {
             <small>{scope === 'system' ? 'Plattform-Verwaltung' : 'Restaurant-Verwaltung'}</small>
           </div>
         </div>
+        <button
+          className="collapse-sidebar"
+          aria-label={preferences.collapsed ? 'Menü ausklappen' : 'Menü einklappen'}
+          onClick={() => savePreferences({ ...preferences, collapsed: !preferences.collapsed })}
+        >
+          <Menu size={18} />
+          <span>{preferences.collapsed ? 'Ausklappen' : 'Einklappen'}</span>
+        </button>
         <a
           className="scope-switch"
           href={portal === 'administration' ? '/restaurant/login' : '/administration/login'}
@@ -265,21 +287,36 @@ function Shell({ user }: { user: Row }) {
         </a>
         <div className="nav-label">{scope === 'system' ? 'PLATTFORM-VERWALTUNG' : 'DEIN RESTAURANT'}</div>
         <nav aria-label="Hauptnavigation">
-          {nav.map(([key, label, Icon]) => (
-            <button
-              key={key}
-              className={key === page ? 'active' : ''}
-              onClick={() => {
-                setPage(key);
-                setMobile(false);
-              }}
-              aria-current={key === page ? 'page' : undefined}
-            >
-              <Icon size={17} />
-              {label}
-              {key === page && <ChevronRight size={14} />}
+          {nav
+            .filter(([key]) => !preferences.favoritesEnabled || preferences.favorites.includes(key) || more)
+            .sort(([a], [b]) =>
+              preferences.favoritesEnabled
+                ? Number(preferences.favorites.includes(b)) - Number(preferences.favorites.includes(a))
+                : 0,
+            )
+            .map(([key, label, Icon]) => (
+              <button
+                key={key}
+                className={key === page ? 'active' : ''}
+                onClick={() => {
+                  setPage(key);
+                  setMobile(false);
+                }}
+                title={label}
+                aria-label={label}
+                aria-current={key === page ? 'page' : undefined}
+              >
+                <Icon size={17} />
+                <span className="nav-text">{label}</span>
+                {key === page && <ChevronRight size={14} />}
+              </button>
+            ))}
+          {preferences.favoritesEnabled && nav.some(([key]) => !preferences.favorites.includes(key)) && (
+            <button aria-expanded={more} onClick={() => setMore(!more)}>
+              <ChevronRight size={17} />
+              <span className="nav-text">{more ? 'Weniger' : 'Weitere'}</span>
             </button>
-          ))}
+          )}
         </nav>
         <div className="user">
           <div className="avatar">{user.name?.slice(0, 2).toUpperCase()}</div>
@@ -323,8 +360,12 @@ function Shell({ user }: { user: Row }) {
           </div>
         </header>
         <main>
-          <ErrorBox error={error} />
-          <Content key={scope + page} scope={scope} page={page} user={user} go={setPage} />
+          <ErrorBox error={error || preferenceError} />
+          {page === 'preferences' ? (
+            <PreferencesPage items={nav} />
+          ) : (
+            <Content key={scope + page} scope={scope} page={page} user={user} go={setPage} />
+          )}
         </main>
         <footer className="page-footer">
           <span>PLATZHIRSCH</span>
@@ -349,6 +390,12 @@ function Content({
 }) {
   if (scope === 'restaurant' && pagePermission[page] && !allowed(user, pagePermission[page]))
     return <Empty>Für diesen Bereich fehlt dir die Berechtigung.</Empty>;
+  if (page === 'system-guide')
+    return (
+      <Suspense fallback={<Loading />}>
+        <SystemGuide administrator={scope === 'system' && user.role === 'system_admin'} />
+      </Suspense>
+    );
   if (page === 'restaurant-roles') return <RestaurantRoles tenant={tenant} />;
   if (page === 'account') return <Account user={user} />;
   if (page === 'support')
@@ -378,7 +425,8 @@ function Content({
           <PlatformRoles />
         </Suspense>
       );
-    if (page === 'modules') return <ModuleCatalog />;
+    if (page === 'modules') return <ModuleCenter user={user} />;
+    if (page === 'system-settings') return <Infrastructure user={user} />;
     if (page === 'billing-admin' && user.role === 'system_admin')
       return (
         <Suspense fallback={<Loading />}>
@@ -441,6 +489,66 @@ function Content({
     <Suspense fallback={<Loading />}>
       <RestaurantResource resource={page} tenant={tenant} />
     </Suspense>
+  );
+}
+function Infrastructure({ user }: { user: Row }) {
+  const tabs = [
+    ...(allowed(user, 'provisioning.servers.read') ? [['servers', 'Datenbankserver']] : []),
+    ...(user.role === 'system_admin'
+      ? [
+          ['access', 'SQL-Zugangsdaten'],
+          ['move', 'Serverzuordnung & Umzüge'],
+        ]
+      : []),
+    ...(allowed(user, 'platform.health.read') ? [['health', 'Betriebsstatus']] : []),
+  ];
+  const [tab, setTab] = useState(tabs[0]?.[0]);
+  if (!tabs.length) return <Empty>Keine Berechtigung für System-Einstellungen.</Empty>;
+  return (
+    <>
+      <nav className="section-tabs" aria-label="System-Einstellungen">
+        {tabs.map(([key, label]) => (
+          <button key={key} aria-pressed={key === tab} onClick={() => setTab(key)}>
+            {label}
+          </button>
+        ))}
+      </nav>
+      <Suspense fallback={<Loading />}>
+        {tab === 'servers' ? (
+          <DatabaseServers />
+        ) : tab === 'access' && user.role === 'system_admin' ? (
+          <DatabaseAccess />
+        ) : tab === 'move' && user.role === 'system_admin' ? (
+          <Placement />
+        ) : tab === 'health' ? (
+          <Health />
+        ) : null}
+      </Suspense>
+    </>
+  );
+}
+function ModuleCenter({ user }: { user: Row }) {
+  const [tab, setTab] = useState('catalog');
+  return (
+    <>
+      <nav className="section-tabs" aria-label="Modulverwaltung">
+        <button aria-pressed={tab === 'catalog'} onClick={() => setTab('catalog')}>
+          Modul-Katalog
+        </button>
+        {user.role === 'system_admin' && (
+          <button aria-pressed={tab === 'billing'} onClick={() => setTab('billing')}>
+            Angebote & Bestellungen
+          </button>
+        )}
+      </nav>
+      {tab === 'catalog' ? (
+        <ModuleCatalog />
+      ) : user.role === 'system_admin' ? (
+        <Suspense fallback={<Loading />}>
+          <BillingAdministration />
+        </Suspense>
+      ) : null}
+    </>
   );
 }
 function Dashboard({ go }: { go: (s: string) => void }) {

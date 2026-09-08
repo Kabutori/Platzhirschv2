@@ -34,12 +34,18 @@ class ReservationController
                 'name' => 'required|string|max:120',
                 'color' => ['required', Rule::in(['terracotta', 'sage', 'sky', 'mustard', 'plum', 'slate'])],
                 'outdoor' => 'required|boolean',
+                'location' => 'nullable|string|max:200',
+                'note' => 'nullable|string|max:2000',
+                'icon' => 'sometimes|in:room,terrace,bar,event',
             ],
             'tables' => [
                 'name' => 'required|string|max:60',
                 'room_id' => 'required|integer|exists:tenant.rooms,id',
                 'capacity' => 'required|integer|min:1|max:50',
                 'active' => 'required|boolean',
+                'shape' => 'sometimes|in:rectangle,square,round',
+                'layout_x' => 'nullable|integer|min:0|max:100',
+                'layout_y' => 'nullable|integer|min:0|max:100',
             ],
             'hours' => [
                 'weekday' => 'required|integer|min:1|max:7',

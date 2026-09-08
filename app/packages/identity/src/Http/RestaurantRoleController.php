@@ -18,6 +18,12 @@ class RestaurantRoleController
         $tenant = $this->tenant($r);
         return [
             'catalog' => Permissions::catalog(),
+            'families' => array_values(
+                array_filter(
+                    app(\App\Core\Module\ModuleRegistry::class)->permissionFamilies(),
+                    fn($f) => in_array($f['scope'] ?? '', ['restaurant', 'both'], true),
+                ),
+            ),
             'roles' => $this->db
                 ->table('restaurant_roles')
                 ->where('tenant_id', $tenant)

@@ -2,6 +2,36 @@
   'use strict';
   const origin = new URL(document.currentScript.src).origin;
   const css = '__WIDGET_CSS__';
+  const english = {
+    Tischreservierung: 'Table reservation',
+    'Tisch reservieren': 'Reserve a table',
+    'Lade Restaurant …': 'Loading restaurant …',
+    'Erneut laden': 'Retry',
+    'Datum und Uhrzeit': 'Date and time',
+    Personen: 'Guests',
+    'Verfügbare Tische anzeigen': 'Show available tables',
+    Tisch: 'Table',
+    'Zuerst Verfügbarkeit prüfen': 'Check availability first',
+    'Dein Name': 'Your name',
+    'E-Mail': 'Email',
+    Telefon: 'Phone',
+    Wünsche: 'Requests',
+    'Meine Angaben dürfen zur Bearbeitung dieser Reservierung verwendet werden.':
+      'My details may be used to process this reservation.',
+    'Verbindlich reservieren': 'Confirm reservation',
+    'Verfügbarkeit erneut prüfen': 'Check availability again',
+    'Prüfe freie Tische …': 'Checking available tables …',
+    'Bitte einen Tisch wählen': 'Select a table',
+    'Bitte einen Tisch auswählen. Verfügbarkeit wird beim Buchen erneut geprüft.':
+      'Please select a table. Availability is checked again when booking.',
+    'Zu dieser Zeit ist kein passender Tisch frei. Bitte eine andere Zeit wählen.':
+      'No suitable table is available at this time. Please choose another time.',
+    'Reservierung wird gespeichert …': 'Saving reservation …',
+    'Bitte Angaben prüfen oder erneut versuchen.': 'Please check your details or try again.',
+    'Die Reservierung konnte nicht geladen werden.': 'The reservation form could not be loaded.',
+    'Anfrage fehlgeschlagen.': 'Request failed.',
+    Schließen: 'Close',
+  };
   if (customElements.get('platzhirsch-booking')) return;
   class BookingWidget extends HTMLElement {
     constructor() {
@@ -18,6 +48,9 @@
     disconnectedCallback() {
       this.controller?.abort();
     }
+    t(text) {
+      return this.config?.language === 'en' ? english[text] || text : text;
+    }
     async request(path = '', data) {
       const response = await fetch(`${origin}/api/widget/${this.token}${path}`, {
         method: data ? 'POST' : 'GET',
@@ -33,7 +66,7 @@
         throw new Error(
           body.errors
             ? Object.values(body.errors).flat().join(' ')
-            : body.message || 'Anfrage fehlgeschlagen.',
+            : body.message || this.t('Anfrage fehlgeschlagen.'),
         );
       return body;
     }
@@ -67,18 +100,57 @@
         this.config = await this.request();
         if (!this.isConnected) return;
         this.root.querySelector('h2').textContent = this.config.name;
+        const section = this.root.querySelector('section');
+        section.lang = this.config.language === 'en' ? 'en' : 'de';
+        const walker = document.createTreeWalker(section, NodeFilter.SHOW_TEXT);
+        while (walker.nextNode()) {
+          const node = walker.currentNode;
+          const trimmed = node.textContent.trim();
+          if (english[trimmed]) node.textContent = node.textContent.replace(trimmed, this.t(trimmed));
+        }
+        section
+          .querySelectorAll('[aria-label]')
+          .forEach((node) => node.setAttribute('aria-label', this.t(node.getAttribute('aria-label'))));
+        if (this.config.show_brand !== false) {
+          const brand = document.createElement('p');
+          brand.className = 'widget-brand';
+          brand.textContent = 'P · Platzhirsch';
+          section.prepend(brand);
+        }
+
         this.root.querySelector('#hint').textContent =
-          `Uhrzeiten in ${this.config.timezone} · Reservierungsdauer: ${this.config.duration_minutes} Minuten`;
+          this.config.language === 'en'
+            ? `Times in ${this.config.timezone} · Duration: ${this.config.duration_minutes} minutes`
+            : `Uhrzeiten in ${this.config.timezone} · Reservierungsdauer: ${this.config.duration_minutes} Minuten`;
         if (/^#[a-f0-9]{6}$/i.test(this.config.accent || ''))
           this.style.setProperty('--accent', this.config.accent);
         this.form = this.root.querySelector('form');
         this.form.hidden = false;
+        this.form.elements.party_size.max = String(this.config.max_party_size || 50);
+        this.form.elements.party_size.value = String(Math.min(2, this.config.max_party_size || 50));
+        if (['bottom-right', 'bottom-left', 'top-right', 'top-left'].includes(this.config.position)) {
+          this.setAttribute('data-placement', this.config.position);
+          const dialog = document.createElement('dialog');
+          dialog.setAttribute('aria-label', this.config.name);
+          const close = document.createElement('button');
+          close.type = 'button';
+          close.textContent = this.t('Schließen');
+          close.onclick = () => dialog.close();
+          const launch = document.createElement('button');
+          launch.type = 'button';
+          launch.className = 'widget-launch';
+          launch.textContent = this.t('Tisch reservieren');
+          launch.onclick = () => dialog.showModal();
+          dialog.append(close, section);
+          this.root.append(launch, dialog);
+        } else this.removeAttribute('data-placement');
+
         this.table = this.form.elements.table_id;
         this.book = this.root.querySelector('#book');
         for (const name of ['starts_at', 'party_size'])
           this.form.elements[name].addEventListener('input', () => {
             this.generation++;
-            this.table.replaceChildren(new Option('Verfügbarkeit erneut prüfen', ''));
+            this.table.replaceChildren(new Option(this.t('Verfügbarkeit erneut prüfen'), ''));
             this.table.disabled = true;
             this.book.disabled = true;
             this.status.textContent = '';
@@ -94,7 +166,9 @@
       } catch (error) {
         if (error.name === 'AbortError') return;
         this.error.textContent = error.message;
-        this.root.querySelector('#hint').textContent = 'Die Reservierung konnte nicht geladen werden.';
+        this.root.querySelector('#hint').textContent = this.t(
+          'Die Reservierung konnte nicht geladen werden.',
+        );
         retry.hidden = false;
       }
     }
@@ -106,18 +180,23 @@
       this.error.textContent = '';
       this.book.disabled = true;
       this.table.disabled = true;
-      this.status.textContent = 'Prüfe freie Tische …';
+      this.status.textContent = this.t('Prüfe freie Tische …');
       try {
         const query = new URLSearchParams({ starts_at: date.value, party_size: party.value });
         const result = await this.request('/availability?' + query);
         if (generation !== this.generation) return;
-        this.table.replaceChildren(new Option('Bitte einen Tisch wählen', ''));
+        this.table.replaceChildren(new Option(this.t('Bitte einen Tisch wählen'), ''));
         for (const table of result.tables)
-          this.table.add(new Option(`${table.name} · ${table.capacity} Plätze`, String(table.id)));
+          this.table.add(
+            new Option(
+              `${table.name} · ${table.capacity} ${this.config.language === 'en' ? 'seats' : 'Plätze'}`,
+              String(table.id),
+            ),
+          );
         this.table.disabled = !result.tables.length;
         this.status.textContent = result.tables.length
-          ? 'Bitte einen Tisch auswählen. Verfügbarkeit wird beim Buchen erneut geprüft.'
-          : 'Zu dieser Zeit ist kein passender Tisch frei. Bitte eine andere Zeit wählen.';
+          ? this.t('Bitte einen Tisch auswählen. Verfügbarkeit wird beim Buchen erneut geprüft.')
+          : this.t('Zu dieser Zeit ist kein passender Tisch frei. Bitte eine andere Zeit wählen.');
       } catch (error) {
         if (generation !== this.generation || error.name === 'AbortError') return;
         this.error.textContent = error.message;
@@ -135,11 +214,14 @@
       data.duration_minutes = this.config.duration_minutes;
       this.form.querySelector('fieldset').disabled = true;
       this.error.textContent = '';
-      this.status.textContent = 'Reservierung wird gespeichert …';
+      this.status.textContent = this.t('Reservierung wird gespeichert …');
       try {
         const result = await this.request('', data);
         this.form.hidden = true;
-        this.status.textContent = `Dein Tisch ist reserviert. Buchungsnummer: ${result.id}. Bitte notiere diese Nummer. Für Änderungen kontaktiere das Restaurant.`;
+        this.status.textContent =
+          this.config.language === 'en'
+            ? `Your table is reserved. Booking number: ${result.id}. Please keep this number. Contact the restaurant for changes.`
+            : `Dein Tisch ist reserviert. Buchungsnummer: ${result.id}. Bitte notiere diese Nummer. Für Änderungen kontaktiere das Restaurant.`;
         this.status.setAttribute('tabindex', '-1');
         this.status.focus();
         this.dispatchEvent(
@@ -148,7 +230,7 @@
       } catch (error) {
         if (error.name !== 'AbortError') {
           this.error.textContent = error.message;
-          this.status.textContent = 'Bitte Angaben prüfen oder erneut versuchen.';
+          this.status.textContent = this.t('Bitte Angaben prüfen oder erneut versuchen.');
         }
       } finally {
         this.submitting = false;

@@ -1,0 +1,105 @@
+dialog:has(.widget-designer) {
+  width: min(1040px, calc(100vw - 32px));
+  max-width: 1040px;
+}
+.widget-designer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  padding: 24px;
+}
+.widget-designer form,
+.widget-designer section {
+  min-width: 0;
+}
+.widget-designer label {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 18px;
+}
+.widget-designer small {
+  color: var(--muted);
+}
+.designer-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.widget-designer .designer-brand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.designer-brand input {
+  width: auto;
+}
+.designer-preview {
+  min-height: 420px;
+  position: relative;
+  background-image: radial-gradient(var(--border-strong) 1px, transparent 1px);
+  background-size: 16px 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+}
+.preview-surface {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  padding: 18px;
+  max-width: 100%;
+  width: 290px;
+}
+.preview-brand {
+  color: var(--designer-accent);
+}
+.preview-action,
+.preview-launch {
+  display: block;
+  background: var(--designer-accent);
+  color: #121212;
+  padding: 12px;
+  text-align: center;
+}
+.preview-launch {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+}
+.designer-preview.bottom-left .preview-launch {
+  left: 12px;
+  right: auto;
+}
+.designer-preview.top-right .preview-launch {
+  top: 12px;
+  bottom: auto;
+}
+.designer-preview.top-left .preview-launch {
+  top: 12px;
+  bottom: auto;
+  left: 12px;
+  right: auto;
+}
+.designer-preview.top-left,
+.designer-preview.top-right {
+  padding-top: 70px;
+}
+.designer-preview.bottom-left,
+.designer-preview.bottom-right {
+  padding-bottom: 70px;
+}
+.preview-surface p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 800px) {
+  .widget-designer {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+  .designer-fields {
+    gap: 10px;
+  }
+}

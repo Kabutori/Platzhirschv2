@@ -6,6 +6,7 @@ $r->middleware(['web', 'auth', 'tenant'])
     ->group(function ($r) {
         $r->get('/', [C::class, 'list']);
         $r->post('/', [C::class, 'create']);
+        $r->patch('/{id}', [C::class, 'update'])->whereNumber('id');
         $r->delete('/{id}', [C::class, 'revoke'])->whereNumber('id');
     });
 $r->middleware(['api', 'throttle:widget'])

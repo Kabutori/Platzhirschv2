@@ -1,3 +1,4 @@
+import RestaurantRoleEditor from './RestaurantRoles';
 import { useState, useEffect, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -439,95 +440,7 @@ export function UsersPage({ tenant, team = false, user }: { tenant?: string; tea
   );
 }
 export function RestaurantRoles({ tenant }: { tenant?: string }) {
-  const q = useData('v1/restaurant/roles', tenant);
-  const qc = useQueryClient();
-  const [form, setForm] = useState<Row | null>(null);
-  const [error, setError] = useState<unknown>();
-  return (
-    <>
-      <div className="toolbar">
-        <p className="muted">
-          Eigene Mitarbeiterrollen gelten nur für dieses Restaurant. Administratoren verwalten weiterhin Team
-          und Rollen.
-        </p>
-        <button className="primary" onClick={() => setForm({})}>
-          Rolle anlegen
-        </button>
-      </div>
-      <ErrorBox error={error} />
-      {q.isPending ? (
-        <Loading />
-      ) : q.error ? (
-        <ErrorBox error={q.error} />
-      ) : (
-        <section className="panel">
-          <DataTable
-            rows={q.data.roles}
-            columns={[
-              { key: 'name', label: 'Rolle' },
-              {
-                key: 'permissions',
-                label: 'Berechtigungen',
-                render: (r) =>
-                  r.permissions.map((permission: string) => q.data.catalog[permission]).join(', ') ||
-                  'Kein Zugriff',
-              },
-            ]}
-            actions={(r) => (
-              <>
-                <button onClick={() => setForm(r)}>Bearbeiten</button>
-                <button
-                  onClick={async () => {
-                    if (!confirm('Unbenutzte Rolle löschen?')) return;
-                    try {
-                      await api('v1/restaurant/roles/' + r.id, 'DELETE', undefined, tenant);
-                      await qc.invalidateQueries();
-                    } catch (e) {
-                      setError(e);
-                    }
-                  }}
-                >
-                  Löschen
-                </button>
-              </>
-            )}
-          />
-        </section>
-      )}
-      {form && q.data && (
-        <Modal title={form.id ? 'Rolle bearbeiten' : 'Rolle anlegen'} close={() => setForm(null)}>
-          <Form
-            fields={[
-              { key: 'name', label: 'Rollenname', required: true },
-              ...Object.entries(q.data.catalog).map(([key, label]) => ({
-                key,
-                label: String(label),
-                type: 'checkbox',
-              })),
-            ]}
-            initial={{
-              name: form.name || '',
-              ...Object.fromEntries((form.permissions || []).map((key: string) => [key, true])),
-            }}
-            onSave={async (data) => {
-              await api(
-                'v1/restaurant/roles' + (form.id ? '/' + form.id : ''),
-                form.id ? 'PATCH' : 'POST',
-                {
-                  name: data.name,
-                  version: form.version,
-                  permissions: Object.keys(q.data.catalog).filter((key) => data[key]),
-                },
-                tenant,
-              );
-              setForm(null);
-              await qc.invalidateQueries();
-            }}
-          />
-        </Modal>
-      )}
-    </>
-  );
+  return <RestaurantRoleEditor tenant={tenant} />;
 }
 export function Account({ user }: { user: Row }) {
   const [secret, setSecret] = useState('');

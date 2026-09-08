@@ -222,6 +222,27 @@ export function Profile({ tenant }: { tenant?: string }) {
             { key: 'email', label: 'Kontakt-E-Mail', type: 'email', required: true },
             { key: 'phone', label: 'Telefon' },
             { key: 'address', label: 'Adresse', type: 'textarea' },
+            { key: 'cuisine', label: 'Küche' },
+            {
+              key: 'price_range',
+              label: 'Preisklasse',
+              options: [
+                { value: '', label: 'Keine Angabe' },
+                { value: 'budget', label: 'Günstig' },
+                { value: 'moderate', label: 'Mittel' },
+                { value: 'upscale', label: 'Gehoben' },
+                { value: 'fine_dining', label: 'Fine Dining' },
+              ],
+            },
+            { key: 'total_seats', label: 'Plätze gesamt (Stammdaten)', type: 'number', min: 1, max: 10000 },
+            { key: 'description', label: 'Beschreibung', type: 'textarea' },
+            { key: 'website', label: 'Website', type: 'url' },
+            {
+              key: 'logo_url',
+              label: 'Logo-Adresse (HTTPS)',
+              type: 'url',
+              help: 'Öffentlich abrufbares Logo; wird bei Verwendung vom Browser geladen.',
+            },
           ]}
           initial={q.data}
           onSave={async (data) => {

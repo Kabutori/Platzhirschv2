@@ -29,6 +29,7 @@ test('database secret is requested explicitly and removed when the dialog closes
     await route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
   });
   await page.goto('/administration/login');
+  await page.getByRole('button', { name: 'System-Einstellungen', exact: true }).click();
   await page.getByRole('button', { name: 'SQL-Zugangsdaten', exact: true }).click();
   await page.getByRole('button', { name: 'Verbindungsdaten öffnen' }).click();
   expect(reveals).toBe(0);

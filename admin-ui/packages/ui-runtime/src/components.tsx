@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, type ReactNode, type FormEvent } from 'rea
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, RefreshCw, CalendarDays, X, ChevronRight } from 'lucide-react';
 import { api } from './api';
+import { usePreferences } from './preferences';
 export type Row = Record<string, any>;
 export type Field = {
   key: string;
@@ -79,13 +80,23 @@ export function useData(path: string, tenant?: string) {
   });
 }
 export function Modal({ title, children, close }: { title: string; children: ReactNode; close: () => void }) {
+  const { value: preferences } = usePreferences();
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     ref.current?.showModal();
     return () => ref.current?.close();
   }, []);
   return (
-    <dialog ref={ref} onCancel={close} aria-labelledby="dialog-title">
+    <dialog
+      ref={ref}
+      onCancel={close}
+      aria-labelledby="dialog-title"
+      onClick={(e) => {
+        if (!preferences.backdropClose || e.target !== e.currentTarget) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) close();
+      }}
+    >
       <header>
         <h2 id="dialog-title">{title}</h2>
         <button className="icon" onClick={close} aria-label="Schließen">

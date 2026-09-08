@@ -44,6 +44,12 @@ if($installExit -ne 0){
 }
 $state=Get-Content "$target\installation.json" -Raw|ConvertFrom-Json
 foreach($key in @('rootPassword','appPassword','provisionPassword','setupToken','appKey')) {Write-Output "::add-mask::$($state.$key)"}
+$progressFiles=@(Get-ChildItem "$target\logs" -Filter 'installation-*.log')
+if($progressFiles.Count -lt 1){throw 'Fortschrittsprotokoll fehlt.'}
+$progressText=Get-Content $progressFiles[0].FullName -Raw
+if($progressText -notmatch 'Schritt 8/8' -or $progressText -notmatch 'Gesamtdauer'){throw 'Fortschrittsprotokoll ist unvollstaendig.'}
+foreach($key in @('rootPassword','appPassword','provisionPassword','setupToken','appKey')) {if($progressText.Contains([string]$state.$key)){throw 'Fortschrittsprotokoll enthaelt ein Installationsgeheimnis.'}}
+Write-Host 'Fortschrittsprotokoll geprueft: nummerierte Schritte und Laufzeit, ohne Installationsgeheimnisse.'
 $password=[Guid]::NewGuid().ToString('N')+'-Aa7!'
 Write-Output "::add-mask::$password"
 $base='http://127.0.0.1:8378'

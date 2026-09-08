@@ -42,6 +42,7 @@ test('provisioning UI appears only for an installed module', async ({ page }) =>
 test('server checks report failure and editing never preloads a password', async ({ page }) => {
   const requests = await mock(page);
   await page.goto('/administration/login');
+  await page.getByRole('button', { name: 'System-Einstellungen', exact: true }).click();
   await page.getByRole('button', { name: 'Datenbankserver', exact: true }).click();
   await page.getByRole('button', { name: 'Berechtigungen testen', exact: true }).click();
   await expect(page.getByText('Datenbankrechte reichen für diese Prüfung nicht aus')).toBeVisible();

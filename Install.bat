@@ -3,6 +3,7 @@ setlocal
 cd /d "%~dp0"
 echo Platzhirsch - Windows-Installation
 echo Bitte dieses Fenster als Administrator starten.
+echo Der Installer zeigt Schritte, Wartezeiten und Pruefergebnisse an.
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0installer\Install-Platzhirsch.ps1" %*
 set "PH_EXIT=%ERRORLEVEL%"
 if not "%PH_EXIT%"=="0" echo Installation angehalten. Details stehen oben. Exitcode: %PH_EXIT%

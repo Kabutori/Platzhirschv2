@@ -15,7 +15,31 @@ $ProgressPreference = 'SilentlyContinue'
 $source = Split-Path $PSScriptRoot -Parent
 $utf8 = New-Object Text.UTF8Encoding($false)
 
-function Write-Phase([string]$Text) { Write-Host "`n[Platzhirsch] $Text" -ForegroundColor Cyan }
+$script:InstallClock=[Diagnostics.Stopwatch]::StartNew()
+$script:PhaseClock=[Diagnostics.Stopwatch]::StartNew()
+$script:PhaseNumber=0
+$script:StatusLog=$null
+$script:StatusLines=New-Object 'System.Collections.Generic.List[string]'
+function Write-Status([string]$Text) {
+    $line="[$(Get-Date -Format 'HH:mm:ss')] $Text"
+    Write-Host $line
+    $script:StatusLines.Add($line)
+    if($script:StatusLog){[IO.File]::AppendAllText($script:StatusLog,$line+[Environment]::NewLine,$utf8)}
+}
+function Write-Phase([string]$Text) {
+    if($script:PhaseNumber -gt 0){Write-Status "Vorheriger Schritt abgeschlossen ($([int]$script:PhaseClock.Elapsed.TotalSeconds) Sekunden)."}
+    $script:PhaseNumber++
+    $script:PhaseClock.Restart()
+    Write-Host ''
+    Write-Status "Schritt $script:PhaseNumber/8: $Text"
+}
+function Wait-InstallerProcess([Diagnostics.Process]$Process,[string]$Label) {
+    $clock=[Diagnostics.Stopwatch]::StartNew()
+    Write-Status "Warte auf $Label."
+    while(-not $Process.WaitForExit(5000)){Write-Status "$Label laeuft weiter ($([int]$clock.Elapsed.TotalSeconds) Sekunden)."}
+    $Process.WaitForExit()
+    Write-Status "$Label beendet (Exitcode $($Process.ExitCode), $([int]$clock.Elapsed.TotalSeconds) Sekunden)."
+}
 function Write-Utf8([string]$Path,[string]$Text) { [IO.File]::WriteAllText($Path,$Text,$utf8) }
 function Invoke-Checked([string]$File,[string[]]$Arguments,[int[]]$Allowed=@(0)) {
     & $File @Arguments
@@ -41,10 +65,12 @@ function Protect-File([string]$Path) {
     Set-Acl -LiteralPath $Path -AclObject $acl
 }
 function Wait-Health([string]$Url,[int]$Attempts=40) {
+    Write-Status "HTTP-Pruefung: $Url"
     $lastStatus='keine HTTP-Antwort'
     for($i=0;$i -lt $Attempts;$i++){
-        try{$response=Invoke-WebRequest -UseBasicParsing -Uri $Url -TimeoutSec 5;$lastStatus="HTTP $($response.StatusCode)";if($response.StatusCode -eq 200){return}}
+        try{$response=Invoke-WebRequest -UseBasicParsing -Uri $Url -TimeoutSec 5;$lastStatus="HTTP $($response.StatusCode)";if($response.StatusCode -eq 200){Write-Status "Erreichbar: $Url (HTTP 200)";return}}
         catch{if($_.Exception.Response){$lastStatus="HTTP $([int]$_.Exception.Response.StatusCode)"}}
+        if($i % 5 -eq 0){Write-Status "Warte auf HTTP-Antwort: Versuch $($i+1)/$Attempts ($lastStatus)."}
         Start-Sleep -Seconds 2
     }
     throw "Gesundheitspruefung fehlgeschlagen: $Url ($lastStatus). Siehe IIS-Protokoll und app\storage\logs\php.log."
@@ -57,12 +83,18 @@ try {
     if($Port -eq $DatabasePort){throw 'Web- und Datenbank-Port muessen verschieden sein.'}
     if($InstallPath -in @($env:windir,$env:ProgramFiles,$env:ProgramData,$env:USERPROFILE)){throw 'Eigenes Installationsverzeichnis erforderlich.'}
     if(-not (Test-Path "$source\release-manifest.json")){throw 'Dies ist ein Quellcode-Checkout. Das fertige Platzhirsch-...-windows-x64.zip unter https://github.com/Kabutori/Platzhirschv2/releases herunterladen und vollstaendig entpacken.'}
+    Write-Status "Ziel: $InstallPath | Web-Port: $Port | MySQL-Port: $DatabasePort"
     $manifest=Get-Content "$source\release-manifest.json" -Raw | ConvertFrom-Json
+    $verified=0
+    $fileCount=@($manifest.files).Count
+    Write-Status "Pruefe SHA-256 fuer $fileCount Paketdateien."
     foreach($file in $manifest.files){
         $full=[IO.Path]::GetFullPath((Join-Path $source $file.path))
         if(-not $full.StartsWith([IO.Path]::GetFullPath($source)+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Ungueltiger Release-Pfad.'}
         if(-not (Test-Path -LiteralPath $full) -or (Get-FileHash -LiteralPath $full -Algorithm SHA256).Hash -ne $file.sha256){throw "Release-Datei beschaedigt: $($file.path)"}
+        $verified++;if($verified % 500 -eq 0){Write-Status "Paketdateien geprueft: $verified/$fileCount"}
     }
+    Write-Status "Integritaetspruefung erfolgreich: $fileCount Dateien."
     $marker=Join-Path $InstallPath 'installation.json'
     if((Test-Path $InstallPath) -and -not (Test-Path $marker) -and (Get-ChildItem $InstallPath -Force | Measure-Object).Count -gt 0){throw 'Zielverzeichnis enthaelt fremde Dateien. Es wird nichts ueberschrieben.'}
     if(Test-Path $marker){
@@ -80,7 +112,12 @@ try {
     }
     $runtime=Join-Path $InstallPath 'runtime';$app=Join-Path $InstallPath 'app';$data=Join-Path $InstallPath 'mysql-data';$logs=Join-Path $InstallPath 'logs'
     foreach($dir in @($runtime,$app,$data,$logs,"$InstallPath\tasks")){New-Item -ItemType Directory -Path $dir -Force|Out-Null}
+    $script:StatusLog=Join-Path $logs ('installation-'+(Get-Date -Format 'yyyyMMdd-HHmmss')+'.log')
+    Write-Utf8 $script:StatusLog (($script:StatusLines -join [Environment]::NewLine)+[Environment]::NewLine)
+    Write-Status "Fortschrittsprotokoll: $script:StatusLog"
     Write-Phase 'Windows-Webserver aktivieren'
+    Write-Status 'Aktiviere IIS, CGI/FastCGI, statische Inhalte und Verwaltung. Windows-Komponenten koennen mehrere Minuten benoetigen.'
+    $ProgressPreference = 'Continue'
     if($os.ProductType -eq 1){
         $result=Enable-WindowsOptionalFeature -Online -FeatureName IIS-WebServerRole,IIS-WebServer,IIS-CommonHttpFeatures,IIS-StaticContent,IIS-DefaultDocument,IIS-HttpErrors,IIS-ApplicationDevelopment,IIS-CGI,IIS-ManagementConsole -All -NoRestart
         if($result.RestartNeeded){Write-Host 'Windows-Neustart erforderlich. Danach Install.bat erneut mit denselben Optionen starten.';exit 3010}
@@ -90,20 +127,26 @@ try {
         if(-not $result.Success){throw 'IIS-Rollen konnten nicht aktiviert werden.'}
         if($result.RestartNeeded -eq 'Yes'){Write-Host 'Windows-Neustart erforderlich. Danach Installation erneut starten.';exit 3010}
     }
+    $ProgressPreference = 'SilentlyContinue'
     Write-Phase 'Laufzeitkomponenten installieren'
+    Write-Status 'Pruefe Herstellersignaturen fuer Microsoft- und MySQL-Pakete.'
     foreach($name in @('vc_redist.x64.exe','rewrite_amd64_en-US.msi','mysql.msi')){
         $sig=Get-AuthenticodeSignature "$source\packages\$name"
         if($sig.Status -ne 'Valid'){throw "Herstellersignatur ungueltig: $name"}
         if($name -eq 'mysql.msi' -and $sig.SignerCertificate.Subject -notmatch 'Oracle'){throw 'MySQL-Herausgeber stimmt nicht ueberein.'}
         if($name -ne 'mysql.msi' -and $sig.SignerCertificate.Subject -notmatch 'Microsoft'){throw 'Microsoft-Herausgeber stimmt nicht ueberein.'}
     }
-    $process=Start-Process "$source\packages\vc_redist.x64.exe" -ArgumentList '/install /quiet /norestart' -PassThru -Wait
+    $process=Start-Process "$source\packages\vc_redist.x64.exe" -ArgumentList '/install /quiet /norestart' -PassThru
+    Wait-InstallerProcess $process 'Microsoft Visual C++ Laufzeit'
     if($process.ExitCode -notin @(0,1638,3010)){throw "VC Runtime: $($process.ExitCode)"}
-    $process=Start-Process msiexec.exe -ArgumentList "/i `"$source\packages\rewrite_amd64_en-US.msi`" /qn /norestart" -PassThru -Wait
+    $process=Start-Process msiexec.exe -ArgumentList "/i `"$source\packages\rewrite_amd64_en-US.msi`" /qn /norestart" -PassThru
+    Wait-InstallerProcess $process 'IIS URL Rewrite'
     if($process.ExitCode -notin @(0,1638,3010)){throw "URL Rewrite: $($process.ExitCode)"}
+    Write-Status 'PHP-Laufzeit pruefen und bei Bedarf entpacken.'
     if(-not(Test-Path "$runtime\php\php.exe")){Expand-Archive "$source\packages\php.zip" "$runtime\php"}
     if(-not(Test-Path "$runtime\mysql\bin\mysqld.exe")){
-        $process=Start-Process msiexec.exe -ArgumentList "/i `"$source\packages\mysql.msi`" /qn /norestart INSTALLDIR=`"$runtime\mysql`"" -PassThru -Wait
+        $process=Start-Process msiexec.exe -ArgumentList "/i `"$source\packages\mysql.msi`" /qn /norestart INSTALLDIR=`"$runtime\mysql`"" -PassThru
+        Wait-InstallerProcess $process 'MySQL-Programminstallation'
         if($process.ExitCode -notin @(0,3010)){throw "MySQL Installation: $($process.ExitCode)"}
     }
     $php="$runtime\php\php.exe";$mysqld="$runtime\mysql\bin\mysqld.exe"
@@ -139,7 +182,9 @@ opcache.validate_timestamps=0
     Write-Utf8 $checkFile '<?php foreach(["pdo_mysql","mbstring","openssl","intl","fileinfo","curl"] as $x){if(!extension_loaded($x)){fwrite(STDERR,"Missing extension: ".$x);exit(1);}}'
     try { Invoke-Checked $php @($checkFile) } finally { Remove-Item -LiteralPath $checkFile -Force }
     Write-Phase 'Anwendung bereitstellen und Zugangsdaten schuetzen'
+    Write-Status 'Kopiere Anwendung, Modulpakete und fertige Oberflaeche.'
     Copy-Item "$source\payload\app\*" $app -Recurse -Force
+    Write-Status 'Anwendungsdateien kopiert; richte geschuetzte Konfiguration ein.'
     foreach($dir in @('bootstrap\cache','storage\logs','storage\framework\sessions','storage\framework\views','storage\framework\cache','storage\app\private')){New-Item -ItemType Directory -Path "$app\$dir" -Force|Out-Null}
     $sha=[Security.Cryptography.SHA256]::Create();try{$tokenHash=-join($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($state.setupToken))|ForEach-Object{$_.ToString('x2')})}finally{$sha.Dispose()}
     if(-not(Test-Path "$app\.env")){
@@ -191,13 +236,16 @@ GRANT SELECT ON platzhirsch_platform.* TO 'ph_provision'@'127.0.0.1';
     Add-Access $InstallPath '*S-1-5-19' 'ReadAndExecute'
     Protect-File $marker
     foreach($dir in @($data,$logs)){Add-Access $dir '*S-1-5-19' 'Modify'}
+    Write-Status 'Starte Windows-Dienst PlatzhirschMySQL und pruefe die Datenbank.'
     Start-Service PlatzhirschMySQL
     $ready=$false
     for($i=0;$i -lt 40;$i++){try{Invoke-Checked $php @("$app\artisan",'platform:health');$ready=$true;break}catch{Start-Sleep -Seconds 2}}
     if(-not $ready){throw 'MySQL ist nicht betriebsbereit. Siehe logs\mysql.log.'}
     Write-Utf8 $ini $iniText
     Remove-Item -LiteralPath $initSql -Force
+    Write-Status 'Fuehre Plattform- und Modulmigrationen aus.'
     Invoke-Checked $php @("$app\artisan",'migrate','--force')
+    Write-Status 'Migrationen erfolgreich; entziehe temporaere Schema-Aenderungsrechte.'
     # Only the installation process needs platform DDL privileges. Revoke through the protected local admin connection.
     $mysql="$runtime\mysql\bin\mysql.exe";$clientIni=Join-Path $InstallPath 'mysql-admin.cnf'
     Write-Utf8 $clientIni "[client]`nuser=root`npassword=$($state.rootPassword)`nhost=127.0.0.1`nport=$DatabasePort`n"
@@ -234,11 +282,13 @@ GRANT SELECT ON platzhirsch_platform.* TO 'ph_provision'@'127.0.0.1';
     $settings=New-ScheduledTaskSettingsSet -StartWhenAvailable -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1) -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew
     foreach($queue in @('default','provisioning')){
         $action=New-ScheduledTaskAction -Execute "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" -Argument "-NoLogo -NoProfile -ExecutionPolicy Bypass -File `"$InstallPath\tasks\Worker.ps1`" -InstallPath `"$InstallPath`" -Queue $queue"
+        Write-Status "Registriere und starte Hintergrundaufgabe Platzhirsch-$queue."
         Register-ScheduledTask -TaskName "Platzhirsch-$queue" -Action $action -Trigger (New-ScheduledTaskTrigger -AtStartup) -Principal $principal -Settings $settings -Force|Out-Null
         Start-ScheduledTask -TaskName "Platzhirsch-$queue"
     }
     $action=New-ScheduledTaskAction -Execute $php -Argument "`"$app\artisan`" schedule:run" -WorkingDirectory $app
     $trigger=New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 1)
+    Write-Status 'Registriere Scheduler (jede Minute).'
     Register-ScheduledTask -TaskName 'Platzhirsch-Scheduler' -Action $action -Trigger $trigger -Principal $principal -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Minutes 2) -MultipleInstances IgnoreNew) -Force|Out-Null
     Start-ScheduledTask 'Platzhirsch-Scheduler'
     Start-Website Platzhirsch
@@ -248,6 +298,7 @@ GRANT SELECT ON platzhirsch_platform.* TO 'ph_provision'@'127.0.0.1';
     Wait-Health "http://127.0.0.1:$Port/api/bootstrap-status"
     Wait-Health "http://127.0.0.1:$Port/administration/login"
     $state.completed=$true;Write-Utf8 $marker ($state|ConvertTo-Json)
+    Write-Status "Alle Pruefungen erfolgreich. Gesamtdauer: $([int]$script:InstallClock.Elapsed.TotalSeconds) Sekunden."
     Write-Host "`nInstallation abgeschlossen. Nur lokal erreichbar: http://localhost:$Port/administration/login" -ForegroundColor Green
     if(-not $Unattended){Write-Host "Einrichtungsschluessel: $($state.setupToken)" -ForegroundColor Yellow}
     Write-Host 'Ersten Administrator im Browser anlegen. Diesen Schluessel nicht weitergeben.'
@@ -255,7 +306,9 @@ GRANT SELECT ON platzhirsch_platform.* TO 'ph_provision'@'127.0.0.1';
     if(-not $NoBrowser -and -not $Unattended){Start-Process "http://localhost:$Port/administration/login"}
     exit 0
 } catch {
-    Write-Host "`nInstallation angehalten: $($_.Exception.Message)" -ForegroundColor Red
+    $installationError=$_.Exception.Message
+    try {Write-Status "Installation in Schritt $script:PhaseNumber angehalten. Fehlerdetails stehen im Terminal."} catch {}
+    Write-Host "`nInstallation angehalten: $installationError" -ForegroundColor Red
     Write-Host 'Vorhandene Daten bleiben erhalten. Nach Behebung mit denselben Optionen erneut starten.'
     exit 1
 }

@@ -83,3 +83,4 @@ fieldset {
 [hidden] {
   display: none !important;
 }
+.widget-brand{color:var(--accent);font-weight:600}:host([data-placement]){position:fixed;z-index:10000;width:auto;max-width:calc(100vw - 32px)}:host([data-placement='bottom-right']){right:16px;bottom:16px}:host([data-placement='bottom-left']){left:16px;bottom:16px}:host([data-placement='top-right']){right:16px;top:16px}:host([data-placement='top-left']){left:16px;top:16px}.widget-launch{width:auto;font:var(--font-size) var(--sans)}dialog{padding:0;background:var(--bg);color:var(--text);border:1px solid var(--border-strong);width:min(480px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto}dialog::backdrop{background:rgb(0 0 0 / .65)}dialog>button{margin:0}

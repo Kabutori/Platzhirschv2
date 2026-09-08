@@ -171,3 +171,23 @@ Der lokale Snapshot deckt zusätzliche Datenbankserver nicht ab und wird bei vor
 ## System verstehen
 
 Administration → **System verstehen** öffnet die grafische Systemkarte, den schrittweisen Buchungsablauf, Dateien/Daten, Modulerklärungen und Windows-Grundlagen. Systemadministratoren sehen außerdem konfigurierte Datenbankverbindungen mit Abrufzeitpunkt. Lernwerte sind als Standardwerte gekennzeichnet; ein vollständiges Windows-Inventar ist nicht enthalten. Details: [SYSTEM-GUIDE.md](SYSTEM-GUIDE.md).
+
+## Fortschritt im Installationsfenster
+
+`Install.bat` startet PowerShell bereits mit einer nur fuer diesen Aufruf geltenden ExecutionPolicy. Ein zusaetzlicher `Set-ExecutionPolicy`-Aufruf ist nicht erforderlich.
+
+Das Terminal zeigt acht Installationsschritte mit Uhrzeit und Schrittdauer, die Anzahl gepruefter Paketdateien, Laufzeitstatus der MSI-/VC-Installer, Datenbankmigrationen, Hintergrundaufgaben und HTTP-Pruefergebnisse. Bei Windows-Komponenten wird auch der Windows-Fortschritt angezeigt. Die Anzahl der Schritte ist kein prozentualer Zeitfortschritt.
+
+Nach der Vorbereitung des geschuetzten Zielordners liegt ein Fortschrittsprotokoll unter `C:\Platzhirsch\logs\installation-JJJJMMTT-HHMMSS.log` (bei anderem Installationspfad entsprechend dort). Es enthaelt ausschliesslich die Statusmeldungen, keine Passwoerter, Einrichtungsschluessel oder vollstaendigen Programmausgaben. Fehlerdetails stehen weiterhin im Terminal. Fruehe Voraussetzungenfehler erzeugen noch keine Datei.
+
+## Navigation und Gestaltung
+
+Administration und Restaurant behalten getrennte Logins und Berechtigungen. System-Einstellungen buendeln Datenbankserver, SQL-Zugang, Mandantenumzuege und Systempruefung entsprechend den Rechten. Der Modulbereich enthaelt Katalog und fuer Systemadministratoren Angebote/Bestellungen. Unter Verhalten lassen sich browserlokale Favoriten und das Schliessen allgemeiner Dialoge durch Hintergrundklick einstellen.
+
+Restaurantrollen bieten Rollenreiter, Berechtigungsgruppen und einzelne Schalter. Speichern aktiviert Restaurantrechte unmittelbar. Profil, Raeume und Tische enthalten weitere Gestaltungsfelder; der Tischplan zeigt die Belegung zur gewaehlten Uhrzeit. Mit Konfigurationsrecht lassen sich Tische in einem ausgewaehlten Raum per Ziehen oder Pfeiltasten positionieren.
+
+Der Widget-Designer bietet eine Vorschau, deutsche/englische Oberflaeche, Akzentfarbe, maximale Gruppengroesse, Markenanzeige sowie Inline-/schwebende Platzierung. Bestehende Widgets lassen sich ohne neuen Buchungslink umgestalten; Ursprung und Ablaufdatum bleiben dabei erhalten. Serverseitige Validierungsmeldungen sind weiterhin deutsch. Restaurantlogos werden aktuell als HTTPS-Adresse hinterlegt, nicht als Datei hochgeladen.
+
+Der grafische Guide steht in beiden Portalen unter System verstehen. Tatsaechliche Datenbank-Verbindungsmetadaten bleiben auf Systemadministratoren im Administrationsportal beschraenkt.
+
+Diese Erweiterung ersetzt keinen vollstaendigen Update-Ablauf fuer bereits installierte Vorschauen. Nicht enthalten sind automatische Zahlungen, Einrichtung beliebiger SQL-Server durch die Weboberflaeche, wiederkehrende Schliesszeitraeume und Mehrtischbuchungen.

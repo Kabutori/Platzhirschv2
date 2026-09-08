@@ -17,6 +17,12 @@ class ProfileController
             'email' => 'required|email|max:254',
             'phone' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:2000',
+            'cuisine' => 'nullable|string|max:120',
+            'price_range' => 'nullable|in:budget,moderate,upscale,fine_dining',
+            'total_seats' => 'nullable|integer|min:1|max:10000',
+            'description' => 'nullable|string|max:5000',
+            'website' => 'nullable|url:https,http|max:500',
+            'logo_url' => 'nullable|url:https|max:500',
         ]);
         $tenant = $r->attributes->get('tenant');
         $tenant->update($data);

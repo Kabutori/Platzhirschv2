@@ -8,7 +8,8 @@
   "exports": {
     "./api": "./src/api.ts",
     "./types": "./src/types.ts",
-    "./components": "./src/components.tsx"
+    "./components": "./src/components.tsx",
+    "./preferences": "./src/preferences.tsx"
   },
   "peerDependencies": {
     "react": "^19.2.0",

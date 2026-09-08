@@ -17,7 +17,10 @@ class RestaurantTest extends TestCase
         DB::purge('tenant');
         Artisan::call('migrate', [
             '--database' => 'tenant',
-            '--path' => 'database/tenant',
+            '--path' => app(\App\Core\Module\ModuleRegistry::class)
+                ->get('reservation')
+                ->tenantMigrationsPath(),
+            '--realpath' => true,
             '--force' => true,
         ]);
         $this->mock(TenantDatabase::class, function ($mock) {
@@ -428,5 +431,100 @@ class RestaurantTest extends TestCase
             ->where('id', $id)
             ->update(['permissions' => '[]']);
         $this->getJson('/api/v1/restaurant/reservations?date=' . now()->format('Y-m-d'))->assertForbidden();
+    }
+
+    public function test_design_profile_and_room_table_fields_are_persisted_and_validated(): void
+    {
+        $this->patchJson('/api/v1/restaurant/profile', [
+            'name' => 'Design Restaurant',
+            'email' => 'design@example.test',
+            'cuisine' => 'Regional',
+            'price_range' => 'moderate',
+            'description' => 'Testprofil',
+            'total_seats' => 40,
+            'website' => 'https://example.test',
+            'logo_url' => 'https://example.test/logo.png',
+        ])
+            ->assertOk()
+            ->assertJsonPath('cuisine', 'Regional');
+        $this->patchJson('/api/v1/restaurant/profile', [
+            'name' => 'Design Restaurant',
+            'email' => 'design@example.test',
+            'logo_url' => 'javascript:alert(1)',
+        ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('logo_url');
+        $this->patchJson('/api/v1/restaurant/rooms/1', [
+            'name' => 'Terrasse',
+            'color' => 'sage',
+            'outdoor' => true,
+            'location' => 'Garten',
+            'note' => 'Überdacht',
+            'icon' => 'terrace',
+        ])
+            ->assertOk()
+            ->assertJsonPath('location', 'Garten');
+        $table = [
+            'name' => 'Tisch 1',
+            'room_id' => 1,
+            'capacity' => 4,
+            'active' => true,
+            'shape' => 'round',
+            'layout_x' => 25,
+            'layout_y' => 70,
+        ];
+        $this->patchJson('/api/v1/restaurant/tables/1', $table)
+            ->assertOk()
+            ->assertJsonPath('shape', 'round')
+            ->assertJsonPath('layout_x', 25);
+        $this->patchJson('/api/v1/restaurant/tables/1', [
+            ...$table,
+            'layout_x' => 101,
+        ])->assertUnprocessable();
+    }
+    public function test_widget_designer_settings_enforce_party_limit_on_availability_and_booking(): void
+    {
+        $token = $this->widgetToken([
+            'language' => 'en',
+            'position' => 'bottom-left',
+            'max_party_size' => 2,
+            'show_brand' => false,
+        ]);
+        $this->getJson('/api/widget/' . $token)
+            ->assertOk()
+            ->assertJsonPath('language', 'en')
+            ->assertJsonPath('position', 'bottom-left')
+            ->assertJsonPath('show_brand', false);
+        $payload = [
+            ...$this->payload(),
+            'party_size' => 3,
+            'email' => 'guest@example.test',
+            'consent' => true,
+        ];
+        $this->getJson(
+            '/api/widget/' .
+                $token .
+                '/availability?' .
+                http_build_query(['starts_at' => $payload['starts_at'], 'party_size' => 3]),
+        )
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('party_size');
+        $this->postJson('/api/widget/' . $token, $payload)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('party_size');
+        $id = DB::table('widget_clients')->where('token_hash', hash('sha256', $token))->value('id');
+        $design = [
+            'language' => 'de',
+            'position' => 'inline',
+            'max_party_size' => 4,
+            'show_brand' => true,
+            'duration_minutes' => 90,
+            'accent' => '#c08050',
+        ];
+        $this->patchJson('/api/v1/restaurant/widget/' . $id, $design)->assertOk();
+        $this->getJson('/api/widget/' . $token)
+            ->assertJsonPath('max_party_size', 4)
+            ->assertJsonPath('position', 'inline');
+        $this->patchJson('/api/v1/restaurant/widget/999999', $design)->assertNotFound();
     }
 }

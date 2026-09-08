@@ -1,3 +1,4 @@
+import Designer from './Designer';
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, ChevronRight, Code2, Check } from 'lucide-react';
@@ -21,6 +22,8 @@ import {
 export function Widget({ tenant }: { tenant?: string }) {
   const q = useData('v1/restaurant/widget', tenant);
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Row | undefined>();
+  const [notice, setNotice] = useState('');
   const [url, setUrl] = useState('');
   const [embed, setEmbed] = useState('');
   const [error, setError] = useState<unknown>();
@@ -30,12 +33,19 @@ export function Widget({ tenant }: { tenant?: string }) {
         <p className="muted">
           Buchungszugänge für deine Website. Gültigkeit und Buchungsdauer sind konfigurierbar.
         </p>
-        <button className="primary" onClick={() => setOpen(true)}>
+        <button
+          className="primary"
+          onClick={() => {
+            setEditing(undefined);
+            setOpen(true);
+          }}
+        >
           <Plus size={16} />
           Buchungslink erstellen
         </button>
       </div>
       <ErrorBox error={error} />
+      {notice && <p role="status">{notice}</p>}
       {url && (
         <section className="panel padded">
           <h2>Dein neuer Buchungslink</h2>
@@ -80,78 +90,51 @@ export function Widget({ tenant }: { tenant?: string }) {
               },
               { key: 'expires_at', label: 'Gültig bis' },
               { key: 'duration_minutes', label: 'Dauer (Minuten)' },
+              { key: 'language', label: 'Sprache' },
+              { key: 'position', label: 'Position' },
+              { key: 'max_party_size', label: 'Max. Personen' },
             ]}
             actions={(r) => (
-              <button
-                className="danger-text"
-                onClick={async () => {
-                  if (!confirm('Buchungslink widerrufen? Bestehende Buchungen bleiben erhalten.')) return;
-                  try {
-                    await api('v1/restaurant/widget/' + r.id, 'DELETE', undefined, tenant);
-                    await q.refetch();
-                  } catch (e) {
-                    setError(e);
-                  }
-                }}
-              >
-                Widerrufen
-              </button>
+              <>
+                <button
+                  onClick={() => {
+                    setEditing(r);
+                    setOpen(true);
+                  }}
+                >
+                  Gestaltung bearbeiten
+                </button>
+                <button
+                  className="danger-text"
+                  onClick={async () => {
+                    if (!confirm('Buchungslink widerrufen? Bestehende Buchungen bleiben erhalten.')) return;
+                    try {
+                      await api('v1/restaurant/widget/' + r.id, 'DELETE', undefined, tenant);
+                      await q.refetch();
+                    } catch (e) {
+                      setError(e);
+                    }
+                  }}
+                >
+                  Widerrufen
+                </button>
+              </>
             )}
           />
         )}
       </section>
       {open && (
-        <Modal title="Buchungszugang erstellen" close={() => setOpen(false)}>
-          <Form
-            fields={[
-              {
-                key: 'origin',
-                label: 'Website-Ursprung',
-                type: 'url',
-                required: true,
-                help: 'Zum Beispiel https://mein-restaurant.de — ohne Unterseite.',
-              },
-              {
-                key: 'months',
-                label: 'Gültigkeit in Monaten',
-                type: 'number',
-                min: 1,
-                max: 12,
-                default: 12,
-                required: true,
-              },
-              {
-                key: 'duration_minutes',
-                label: 'Reservierungsdauer',
-                required: true,
-                default: 90,
-                options: [30, 45, 60, 75, 90, 120, 150, 180, 240].map((value) => ({
-                  value,
-                  label: `${value} Minuten`,
-                })),
-              },
-              {
-                key: 'accent',
-                label: 'Akzentfarbe (optional)',
-                help: 'Hex-Farbe wie #d0845b; leer lassen für das Platzhirsch-Design.',
-              },
-            ]}
-            onSave={async (data) => {
-              const result = await api(
-                'v1/restaurant/widget',
-                'POST',
-                {
-                  origins: [data.origin],
-                  months: data.months,
-                  duration_minutes: data.duration_minutes,
-                  accent: data.accent || null,
-                },
-                tenant,
-              );
-              setUrl(result.url);
-              setEmbed(result.embed);
+        <Modal title={editing ? 'Widget gestalten' : 'Buchungszugang erstellen'} close={() => setOpen(false)}>
+          <Designer
+            tenant={tenant}
+            initial={editing}
+            created={(result) => {
+              if (result.url) {
+                setUrl(result.url);
+                setEmbed(result.embed);
+              } else setNotice('Widget-Einstellungen gespeichert. Nach erneutem Laden des Widgets wirksam.');
               setOpen(false);
-              await q.refetch();
+              void q.refetch();
             }}
           />
         </Modal>
@@ -206,7 +189,7 @@ export function Booking() {
                     type: 'number',
                     required: true,
                     min: 1,
-                    max: 50,
+                    max: q.data?.max_party_size || 50,
                     default: 2,
                   },
                   {
