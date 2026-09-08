@@ -26,3 +26,11 @@ Die gemeinsame Schalter-Komponente liegt im npm-Paket `@platzhirsch/ui-runtime`.
 ## Prüfung
 
 Frontend-Build und TypeScript lokal erfolgreich. Browserprüfungen kontrollieren Favoritenreihenfolge, Erhalt der Einstellungen, portalgetrennte Speicherung, Exportberechtigung und Zwischenzustand der Rechtegruppen; Screenshots werden im CI-Artefakt `role-design-preview` abgelegt. Der tatsächliche CI-Status ist im zugehörigen Pull Request sichtbar.
+
+## Reservierungen: Liste und Woche
+
+Der nächste Schritt übernimmt die Suche nach Gast/Tisch, sichtbare Notizen, Tagesnavigation und den Umschalter Liste/Woche aus der Vorlage (ab Zeile 1233). Die Suche berücksichtigt zusätzlich Kontakt und Notizen; ein Statusfilter lässt sich damit kombinieren und gemeinsam zurücksetzen. Der CSV-Export bleibt ausdrücklich ein Export des gewählten Tages ohne diese Anzeigefilter.
+
+Die Wochenansicht zeigt Montag bis Sonntag mit echten Tagesabfragen, Uhrzeit in der Restaurant-Zeitzone, Gast, Personen, Tisch, Status und Notiz. Der Tageskopf öffnet die jeweilige Liste. Mit Schreibrecht öffnet eine Buchung den vorhandenen Bearbeitungsdialog samt Versionsprüfung; lesende Rollen erhalten keine Bearbeitungsaktion. Ladefehler werden pro Tag angezeigt, statt leere Tage vorzutäuschen. Kalenderarithmetik verwendet UTC-Kalendertage, unabhängig von der Sommerzeit des Browsers. Mobile Geräte zeigen die Tage untereinander.
+
+Noch offen bleiben unter anderem der eigene Kalender-Popup-Entwurf, der Tisch-Zeitstrahl und die vollständige Abnahme aller Buchungsaktionen. Die vorhandenen Modulpakete und API-Berechtigungen bleiben maßgeblich.

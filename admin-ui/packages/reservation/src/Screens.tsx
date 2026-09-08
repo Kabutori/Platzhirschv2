@@ -1,8 +1,9 @@
+import Week, { shiftDate, matchesReservation } from './Week';
 import { usePreferences } from '@platzhirsch/ui-runtime/preferences';
 import TablePlan from './TablePlan';
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Armchair, Download, CalendarDays } from 'lucide-react';
+import { Plus, Search, Armchair, Download, CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api, portal } from '@platzhirsch/ui-runtime/api';
 import {
   Row,
@@ -218,6 +219,10 @@ export function Reservations({
 }) {
   const { value: preferences } = usePreferences();
   const [date, setDate] = useState(today());
+  const [view, setView] = useState<'list' | 'week'>('list');
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('');
+  const isWeek = mode === 'reservations' && view === 'week';
   const q = useData('v1/restaurant/reservations?date=' + date, tenant);
   const tables = useData('v1/restaurant/tables', tenant);
   const profile = useData('v1/restaurant/profile', tenant);
@@ -226,6 +231,7 @@ export function Reservations({
   const [error, setError] = useState<unknown>();
   const tz = profile.data?.timezone || 'Europe/Berlin';
   const rows: Row[] = q.data || [];
+  const filteredRows = rows.filter((row) => matchesReservation(row, search, status));
   const live = rows.filter((r) => !['cancelled', 'no_show'].includes(r.status));
   const fields: Field[] = [
     { key: 'guest_name', label: 'Name des Gastes', required: true },
@@ -311,18 +317,36 @@ export function Reservations({
     <>
       <div className="toolbar">
         <div className="date-picker">
+          <button
+            aria-label={isWeek ? 'Vorherige Woche' : 'Vorheriger Tag'}
+            onClick={() => setDate(shiftDate(date, isWeek ? -7 : -1))}
+          >
+            <ChevronLeft size={16} />
+          </button>
           <CalendarDays size={17} />
           <input
             type="date"
             aria-label="Reservierungsdatum"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value) setDate(e.target.value);
+            }}
           />
+          <button
+            aria-label={isWeek ? 'Nächste Woche' : 'Nächster Tag'}
+            onClick={() => setDate(shiftDate(date, isWeek ? 7 : 1))}
+          >
+            <ChevronRight size={16} />
+          </button>
           <button onClick={() => setDate(today())}>Heute</button>
         </div>
         <div className="button-row">
           {preferences.exportEnabled && preferences.csvEnabled && (
-            <button disabled={!allowed(user, 'reservation.export')} onClick={download}>
+            <button
+              disabled={!allowed(user, 'reservation.export')}
+              title={'Alle Reservierungen vom ' + date + ' als CSV; Suchfilter werden nicht angewendet.'}
+              onClick={download}
+            >
               <Download size={16} />
               CSV
             </button>
@@ -355,6 +379,50 @@ export function Reservations({
           ))}
         </div>
       )}
+      {mode !== 'table-plan' && (
+        <div className="reservation-filters">
+          <label className="reservation-search">
+            Suche nach Gast oder Tisch
+            <input
+              type="search"
+              placeholder="Gast, Tisch, Kontakt oder Notiz …"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </label>
+          <label>
+            Status
+            <select value={status} onChange={(e) => setStatus(e.target.value)}>
+              <option value="">Alle Status</option>
+              {['confirmed', 'seated', 'completed', 'no_show', 'cancelled'].map((value) => (
+                <option key={value} value={value}>
+                  {labels[value]}
+                </option>
+              ))}
+            </select>
+          </label>
+          {(search || status) && (
+            <button
+              onClick={() => {
+                setSearch('');
+                setStatus('');
+              }}
+            >
+              Filter zurücksetzen
+            </button>
+          )}
+          {mode === 'reservations' && (
+            <div className="section-tabs" role="group" aria-label="Reservierungsansicht">
+              <button aria-pressed={!isWeek} onClick={() => setView('list')}>
+                Liste
+              </button>
+              <button aria-pressed={isWeek} onClick={() => setView('week')}>
+                Woche
+              </button>
+            </div>
+          )}
+        </div>
+      )}
       <section className="panel">
         <div className="panel-head">
           <h2>{mode === 'table-plan' ? 'Belegung nach Tisch' : 'Reservierungen'}</h2>
@@ -366,7 +434,21 @@ export function Reservations({
             })}
           </small>
         </div>
-        {q.isPending ? (
+        {isWeek ? (
+          <Week
+            date={date}
+            tenant={tenant}
+            search={search}
+            status={status}
+            timezone={tz}
+            canWrite={allowed(user, 'reservation.write')}
+            edit={edit}
+            select={(value) => {
+              setDate(value);
+              setView('list');
+            }}
+          />
+        ) : q.isPending ? (
           <Loading />
         ) : q.error ? (
           <ErrorBox error={q.error} />
@@ -383,7 +465,7 @@ export function Reservations({
           />
         ) : (
           <DataTable
-            rows={rows}
+            rows={filteredRows}
             columns={[
               {
                 key: 'starts_at',
@@ -407,6 +489,11 @@ export function Reservations({
               { key: 'party_size', label: 'Personen' },
               { key: 'table_name', label: 'Tisch' },
               { key: 'status', label: 'Status', render: (r) => <Badge value={r.status} /> },
+              {
+                key: 'notes',
+                label: 'Notiz',
+                render: (r) => <span className="reservation-note">{r.notes || '—'}</span>,
+              },
             ]}
             actions={(r) => (
               <>
