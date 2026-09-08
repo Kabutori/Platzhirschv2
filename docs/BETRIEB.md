@@ -82,7 +82,7 @@ Danach als Administrator `C:\Platzhirsch\runtime\php\php.exe C:\Platzhirsch\app\
 
 - `PlatzhirschMySQL`: eigene MySQL-Windows-Service-Instanz, nur Loopback, LocalService.
 - IIS-Pool `Platzhirsch`: eigene ApplicationPoolIdentity, keine lokalen Administratorrechte, keine Leserechte auf Provisionierungszugänge und keine Schreibrechte auf die ausführbaren Bootstrap-Caches. Diese erzeugt der Installer als Administrator.
-- Geplante Aufgaben `Platzhirsch-default` und `Platzhirsch-provisioning`: Windows-Starttrigger, LocalService, eigener PowerShell-Überwachungsprozess. Jeder PHP-Prozess bearbeitet höchstens einen Job. Der Elternprozess beendet einen überlangen Job nach 180 Sekunden; erneute Sichtbarkeit in der Queue erst nach 300 Sekunden.
+- Geplante Aufgaben `Platzhirsch-default` und `Platzhirsch-provisioning`: Windows-Starttrigger, LocalService, eigener PowerShell-Überwachungsprozess. Jeder PHP-Prozess bearbeitet höchstens einen Job. Der Elternprozess begrenzt normale Jobs auf 180 Sekunden, Provisionierungsjobs auf 3600 Sekunden; erneute Sichtbarkeit in der Queue erst nach 3900 Sekunden.
 - `Platzhirsch-Scheduler`: `schedule:run` jede Minute, kein überlappender Start.
 - Der DB-Benutzer der Webanwendung hat nur Plattform-DML. Tenant-Datenbankbenutzer haben nach der Migration nur DML-Rechte im eigenen Schema. Der Provisionierungsbenutzer darf Benutzer und ausschließlich passend benannte Tenant-Schemata provisionieren. Provisionierung, Migration und anschließende Buchungen mit diesen Zugängen sind im echten Windows-/MySQL-Test geprüft. Weitere negative Datenbank-Rechteprüfungen stehen aus.
 - Provisionierungszugang: `app\storage\app\private\provision.json`, nicht für IIS lesbar. Der Webprozess besitzt keine DDL-Berechtigung, auch nicht für beliebiges SQL aus der Oberfläche.
@@ -152,7 +152,7 @@ Administration → Mandanten → Testrestaurant einrichten erstellt einen getren
 
 Administration → Rollen & Rechte verwaltet Plattformrollen. „Lokal speichern“ speichert einen Entwurf; „Entwurf prüfen“ prüft dessen registrierte Berechtigungscodes; „Rechte aktivieren“ übernimmt den geprüften Entwurf für folgende Anfragen. Diese Prüfung ist kein verteilter Testserver-Rollout. System Administrator bleibt gesperrt und unveränderbar. Zugewiesene Rollen können nicht gelöscht werden. Plattformmitarbeiter erhalten eine aktivierte Rolle bei der Benutzeranlage; sie erhalten dadurch keinen Restaurantzugriff.
 
-Administration → Module zeigt die tatsächlich registrierten Module, Versionen und Abhängigkeiten. Kauf, mandantenbezogene Aktivierung und unabhängige Composer-/npm-Auslieferung sind noch nicht implementiert. Datenbankserver bleiben Prüfziele; Provisionierung erfolgt lokal.
+Administration → Module zeigt die tatsächlich registrierten Module, Versionen und Abhängigkeiten. Bestellung, manuelle Zahlungsfreigabe und mandantenbezogene Aktivierung mit Migration sind implementiert. Zusätzliche lokal autorisierte Server sind Provisionierungs- und Umzugsziele. Die Fachmodule liegen in Composer-/npm-Paketen; unabhängige private Paketregistries fehlen noch.
 
 Neue Versionspakete sind weiterhin für Neuinstallationen vorgesehen. Der Installer verweigert einen Versionswechsel einer vorhandenen Installation; vorhandene Datenordner nicht löschen oder mit einem neuen Paket überschreiben.
 
@@ -167,3 +167,7 @@ Die Plattformrollen orientieren sich nun an der Vorlage: Aktionsleiste, Rollenre
 Anleitung: [MODULE-UND-SERVER.md](MODULE-UND-SERVER.md). Sie beschreibt die getrennten Portale, das Testrestaurant, Angebote und Aktivierung, zusätzliche Server, Mandantenumzüge sowie die lokale Reparatur unterbrochener Modulaufträge.
 
 Der lokale Snapshot deckt zusätzliche Datenbankserver nicht ab und wird bei vorhandener Serverautorisierung gesperrt. Updates zwischen unterschiedlichen Vorschauversionen bleiben ein eigenes, noch nicht automatisiertes Betriebsverfahren.
+
+## System verstehen
+
+Administration → **System verstehen** öffnet die grafische Systemkarte, den schrittweisen Buchungsablauf, Dateien/Daten, Modulerklärungen und Windows-Grundlagen. Systemadministratoren sehen außerdem konfigurierte Datenbankverbindungen mit Abrufzeitpunkt. Lernwerte sind als Standardwerte gekennzeichnet; ein vollständiges Windows-Inventar ist nicht enthalten. Details: [SYSTEM-GUIDE.md](SYSTEM-GUIDE.md).

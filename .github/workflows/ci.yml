@@ -59,6 +59,7 @@ jobs:
           path: |
             admin-ui/test-results/roles-*.png
             admin-ui/test-results/modules-*.png
+            admin-ui/test-results/guide-*.png
           if-no-files-found: ignore
   windows-syntax:
     runs-on: windows-latest

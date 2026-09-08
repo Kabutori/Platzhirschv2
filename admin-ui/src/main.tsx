@@ -32,6 +32,7 @@ import {
   DataTable,
 } from '@platzhirsch/ui-runtime/components';
 const Support = lazy(() => import('@platzhirsch/support-ui/Support.tsx'));
+const SystemGuide = lazy(() => import('@platzhirsch/system-guide-ui'));
 import { billingManifest } from '@platzhirsch/billing-ui';
 import { reportingManifest } from '@platzhirsch/reporting-ui';
 const ModuleShop = lazy(billingManifest.nav[0].screen);
@@ -106,6 +107,7 @@ const systemNav = [
   ['placement', 'Serverzuordnung & Umzüge', Building2],
   ['audit-log', 'Audit Log', ScrollText],
   ['health', 'System', Activity],
+  ['system-guide', 'System verstehen', Building2],
   [provisioningNavigation.key, provisioningNavigation.label, provisioningNavigation.icon],
   ['support', 'Support', MessageSquare],
   ['account', 'Mein Konto', Settings],
@@ -356,6 +358,12 @@ function Content({
       </Suspense>
     );
   if (scope === 'system') {
+    if (page === 'system-guide')
+      return (
+        <Suspense fallback={<Loading />}>
+          <SystemGuide administrator={user.role === 'system_admin'} />
+        </Suspense>
+      );
     if (page === 'dashboard') return <Dashboard go={go} />;
     if (page === 'tenants')
       return (
