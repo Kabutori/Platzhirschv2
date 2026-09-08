@@ -139,7 +139,11 @@ Artisan::command('module:repair {operation} {--acknowledge-partial-migrations}',
         $account = $pdo->quote($tenant->database_user) . '@' . $pdo->quote($host);
         $grant = str_replace('_', '\\_', $tenant->database_name);
         $matched = false;
-        foreach ($pdo->query('SHOW GRANTS FOR ' . $account)->fetchAll(\PDO::FETCH_COLUMN) as $line) {
+        // Inspect only the tenant's own grants. The worker deliberately has no
+        // SELECT privilege on MySQL's system tables to inspect other accounts.
+        $database->connect($tenant, true);
+        $grants = DB::connection('tenant')->getPdo()->query('SHOW GRANTS')->fetchAll(\PDO::FETCH_COLUMN);
+        foreach ($grants as $line) {
             if (
                 !preg_match('/^GRANT (.+?) ON `([^`]+)`\.\* TO /', $line, $m) ||
                 str_replace('\\', '', $m[2]) !== $tenant->database_name
