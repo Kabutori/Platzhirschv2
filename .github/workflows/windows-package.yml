@@ -10,6 +10,7 @@ on:
       - 'docs/**'
       - 'Install.bat'
       - 'Start-Development.bat'
+      - 'Create-PullRequest.bat'
       - 'development/**'
       - '.github/workflows/windows-package.yml'
   workflow_dispatch:

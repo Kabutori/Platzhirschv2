@@ -56,15 +56,12 @@ PHP-Webänderungen werden beim nächsten Request geladen. Entwicklungsworker sta
 
 ## Bewusst nach GitHub und später in Produktion
 
-In der IDE Änderungen prüfen, ausgewählte Quelldateien committen und den eigenen Branch pushen:
+In der IDE Änderungen prüfen und die gewünschten Quelldateien committen. Anschließend **Create-PullRequest.bat doppelklicken** (im Checkout oder im neuen, vollständig entpackten Release-Paket).
 
-```powershell
-git status
-git add admin-ui/packages/reservation/src/Screens.tsx
-git commit -m "Reservierungsansicht anpassen"
-git push -u origin HEAD
-```
+Die BAT prüft Repository, eigenen Branch und einen sauberen Arbeitsstand. Sie zeigt die neuen Commits und fragt vor dem Push einmal nach. Nach Bestätigung pusht sie den Entwicklungsbranch und öffnet den GitHub-Vergleich mit Ziel `codex/windows-application`. Bei einem abweichenden Checkout-Ordner `-DevelopmentPath` wie beim DEV-Starter verwenden.
 
-Danach einen Pull Request in `codex/windows-application` erstellen. Die Anwendungsprüfungen laufen für Pull Requests; Windows-Pakete werden bei relevanten Änderungen ebenfalls geprüft. Quellcode wird gebaut, getestet und als Vorschau veröffentlicht. Das allein verändert keine vorhandene Installation.
+Im Browser **Create pull request** wählen und Titel/Beschreibung ergänzen. Existiert bereits ein offener PR für diesen Branch, diesen öffnen; neue Pushes aktualisieren ihn. Bei einem privaten Repository ist GitHub-Anmeldung erforderlich. Die BAT benötigt keine zusätzliche GitHub-CLI und speichert keine Tokens.
+
+Nach erfolgreichen Prüfungen den PR auf GitHub zusammenführen. Die BAT committet und merged nichts automatisch und pusht niemals erzwungen. Der Paketworkflow baut geänderte Oberflächen aus den Quellen und enthält sie im neuen Installations-ZIP. Ein Push auf einen persönlichen Branch allein veröffentlicht noch kein Paket; maßgeblich sind der PR-Prüflauf und die Übernahme in den Paketbranch.
 
 **Produktion:** ein geprüftes Paket gezielt bereitstellen. Der versionsübergreifende Updater für bestehende Installationen ist weiterhin offen. Deshalb gibt es bewusst keinen „DEV nach PROD kopieren“-Knopf. Entwicklungsdaten, Passwörter und lokale Konfiguration gehören nicht in ein Release. Bis zum Updater neue Versionen getrennt abnehmen und keine bestehende Installation überschreiben.

@@ -10,8 +10,10 @@ if(Test-Path $out){throw 'Ausgabeverzeichnis existiert bereits. Fuer einen neuen
 New-Item -ItemType Directory -Path "$out\packages","$out\payload\app","$out\installer" -Force|Out-Null
 Copy-Item "$root\Install.bat" $out
 Copy-Item "$root\Start-Development.bat" $out
+Copy-Item "$root\Create-PullRequest.bat" $out
 New-Item -ItemType Directory -Path "$out\development" -Force|Out-Null
 Copy-Item "$root\development\Prepare-Development.ps1" "$out\development"
+Copy-Item "$root\development\Create-PullRequest.ps1" "$out\development"
 Copy-Item "$root\docs\DEVELOPMENT.md" "$out\DEVELOPMENT.md"
 Copy-Item "$root\installer\*.ps1" "$out\installer"
 Copy-Item "$root\docs\BETRIEB.md" "$out\BETRIEB.md"
