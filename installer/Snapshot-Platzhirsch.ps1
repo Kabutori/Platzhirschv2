@@ -18,6 +18,7 @@ $destinationPath=[IO.Path]::GetFullPath($Destination).TrimEnd('\')
 if($destinationPath -eq $root -or $destinationPath.StartsWith($root+'\',[StringComparison]::OrdinalIgnoreCase) -or $root.StartsWith($destinationPath+'\',[StringComparison]::OrdinalIgnoreCase)){throw 'Sicherung und Installation muessen getrennte Verzeichnisse sein.'}
 $state=Get-Content "$root\installation.json" -Raw|ConvertFrom-Json
 if($state.product -ne 'Platzhirsch' -or -not $state.completed){throw 'Abgeschlossene Platzhirsch-Installation erforderlich.'}
+if(Get-ChildItem -LiteralPath "$root\app\storage\app\private" -Filter 'server-*.json' -ErrorAction SilentlyContinue) {throw 'Zusaetzliche Datenbankserver sind autorisiert. Lokale Snapshots decken diese Daten nicht ab. Eine koordinierte Sicherung und Wiederherstellung aller Server ist erforderlich.'}
 $taskNames=@('Platzhirsch-default','Platzhirsch-provisioning','Platzhirsch-Scheduler')
 function Assert-NoLinks([string]$Path) {
     $parent=Get-Item -LiteralPath $Path -Force

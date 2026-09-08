@@ -95,6 +95,11 @@ class AuthController
             'mfa_enabled' => (bool) $u->mfa_secret,
             'scopes' => $u->isSystem() ? ['system'] : ['customer'],
             'permissions' => $u->permissions(),
+            'enabled_modules' =>
+                $u->tenant_id &&
+                app(\App\Modules\Billing\PublicApi\Entitlements::class)->active($u->tenant_id, 'reporting')
+                    ? ['reporting']
+                    : [],
             'installed_modules' => $u->isSystem()
                 ? array_column(app(\App\Core\Module\ModuleRegistry::class)->catalog(), 'code')
                 : [],

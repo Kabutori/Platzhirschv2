@@ -7,7 +7,9 @@ class IdentityServiceProvider extends ServiceProvider implements Module
 {
     public function register(): void
     {
-        if (!$this->app->bound(ModuleRegistry::class)) $this->app->singleton(ModuleRegistry::class);
+        if (!$this->app->bound(ModuleRegistry::class)) {
+            $this->app->singleton(ModuleRegistry::class);
+        }
         $this->app->make(ModuleRegistry::class)->register($this);
         $this->app->bind(PublicApi\RoleDirectory::class, Application\RoleDirectory::class);
     }

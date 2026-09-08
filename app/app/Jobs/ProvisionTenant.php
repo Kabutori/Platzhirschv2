@@ -16,17 +16,6 @@ class ProvisionTenant implements ShouldQueue
     }
     public function handle(TenantDatabase $database): void
     {
-        // This credential file is readable by the provisioning service, NOT the IIS identity.
-        $file = storage_path('app/private/provision.json');
-        if (!is_readable($file)) {
-            throw new \RuntimeException('Provisioning-Zugang nicht eingerichtet.');
-        }
-        $credentials = json_decode(file_get_contents($file), true, 512, JSON_THROW_ON_ERROR);
-        config([
-            'database.connections.provision.username' => $credentials['username'],
-            'database.connections.provision.password' => $credentials['password'],
-        ]);
-        DB::purge('provision');
         $tenant = Tenant::findOrFail($this->tenantId);
         if ($tenant->status === 'active') {
             return;
@@ -39,9 +28,12 @@ class ProvisionTenant implements ShouldQueue
         // GRANT/REVOKE treat underscores as wildcards even in backtick-quoted
         // schema names. Delegate privileges for exactly this tenant database.
         $grantName = str_replace('_', '\\_', $name);
+        $pdo = null;
+        $granted = false;
         try {
-            $pdo = DB::connection('provision')->getPdo();
-            $account = $pdo->quote($user) . "@'127.0.0.1'";
+            $database->lock($tenant->id);
+            [$pdo, $host] = app(\App\Services\ProvisioningConnection::class)->open($tenant->server_id);
+            $account = $pdo->quote($user) . '@' . $pdo->quote($host);
             $pdo->exec(
                 "CREATE DATABASE IF NOT EXISTS `$name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
             );
@@ -54,7 +46,8 @@ class ProvisionTenant implements ShouldQueue
             $pdo->exec(
                 "GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,ALTER,INDEX,DROP,REFERENCES ON `$grantName`.* TO $account",
             );
-            $database->connect($tenant);
+            $granted = true;
+            $database->connect($tenant, true);
             $code = Artisan::call('migrate', [
                 '--database' => 'tenant',
                 '--path' => 'database/tenant',
@@ -102,10 +95,17 @@ class ProvisionTenant implements ShouldQueue
             }
             // Web credentials may edit data but may not change the schema.
             $pdo->exec("REVOKE CREATE,ALTER,INDEX,DROP,REFERENCES ON `$grantName`.* FROM $account");
+            $granted = false;
             $tenant->update(['status' => 'active']);
             Audit::record('tenant.provisioned', $tenant->id, $tenant->id);
         } finally {
-            $database->disconnect();
+            try {
+                if ($granted && $pdo) {
+                    $pdo->exec("REVOKE CREATE,ALTER,INDEX,DROP,REFERENCES ON `$grantName`.* FROM $account");
+                }
+            } finally {
+                $database->disconnect();
+            }
             DB::purge('provision');
         }
     }

@@ -50,6 +50,11 @@ Route::prefix('api')->group(function () {
             );
             Route::get('dashboard', [PlatformController::class, 'dashboard']);
             Route::post('test-restaurant', [PlatformController::class, 'demoTenant']);
+            Route::get('operations', [\App\Http\Controllers\TenantOperationController::class, 'index']);
+            Route::post('tenants/{tenant}/move', [
+                \App\Http\Controllers\TenantOperationController::class,
+                'move',
+            ])->middleware('throttle:3,1');
             Route::get('tenants', [PlatformController::class, 'tenants']);
             Route::post('tenants', [PlatformController::class, 'createTenant']);
             Route::patch('tenants/{tenant}', [PlatformController::class, 'updateTenant']);

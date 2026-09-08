@@ -21,9 +21,15 @@ class ModuleArchitectureTest extends TestCase
     private function moduleFiles(): array
     {
         $paths = [];
-        foreach (['identity', 'provisioning'] as $module) {
-            $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(__DIR__.'/../../packages/'.$module.'/src'));
-            foreach ($it as $file) if ($file->isFile() && $file->getExtension() === 'php') $paths[] = $file->getPathname();
+        foreach (['identity', 'provisioning', 'billing', 'reporting'] as $module) {
+            $it = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator(__DIR__ . '/../../packages/' . $module . '/src'),
+            );
+            foreach ($it as $file) {
+                if ($file->isFile() && $file->getExtension() === 'php') {
+                    $paths[] = $file->getPathname();
+                }
+            }
         }
         return $paths;
     }

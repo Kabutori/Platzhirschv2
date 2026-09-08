@@ -19,7 +19,15 @@ class RoleController
     private function codes(): array
     {
         $codes = [];
-        foreach ($this->registry->permissionFamilies() as $f) {
+        foreach (
+            array_values(
+                array_filter(
+                    $this->registry->permissionFamilies(),
+                    fn($family) => ($family['scope'] ?? 'administration') === 'administration',
+                ),
+            )
+            as $f
+        ) {
             foreach ($f['permissions'] as $p) {
                 $codes[] = $p['code'];
             }
@@ -30,7 +38,12 @@ class RoleController
     {
         $this->authorize($r);
         return [
-            'families' => $this->registry->permissionFamilies(),
+            'families' => array_values(
+                array_filter(
+                    $this->registry->permissionFamilies(),
+                    fn($family) => ($family['scope'] ?? 'administration') === 'administration',
+                ),
+            ),
             'roles' => $this->db
                 ->table('identity_platform_roles')
                 ->orderBy('id')

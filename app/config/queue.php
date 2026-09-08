@@ -7,7 +7,7 @@ return [
             'connection' => null,
             'table' => 'jobs',
             'queue' => 'default',
-            'retry_after' => 300,
+            'retry_after' => 3900,
             'after_commit' => true,
         ],
         'sync' => ['driver' => 'sync'],

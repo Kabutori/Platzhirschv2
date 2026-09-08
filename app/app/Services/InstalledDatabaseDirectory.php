@@ -20,7 +20,7 @@ class InstalledDatabaseDirectory implements InstalledDatabaseAccess
             ],
         ];
         foreach (
-            Tenant::whereIn('status', ['active', 'suspended'])
+            Tenant::whereIn('status', ['active', 'blocked'])
                 ->orderBy('name')
                 ->get()
             as $tenant
@@ -47,7 +47,7 @@ class InstalledDatabaseDirectory implements InstalledDatabaseAccess
             ];
         }
         abort_unless(ctype_digit($connection), 404);
-        $tenant = Tenant::whereIn('status', ['active', 'suspended'])->findOrFail($connection);
+        $tenant = Tenant::whereIn('status', ['active', 'blocked'])->findOrFail($connection);
         return ['password' => (string) $tenant->database_password, 'tenant_id' => $tenant->id];
     }
 }

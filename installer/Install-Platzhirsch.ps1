@@ -177,7 +177,7 @@ CREATE USER IF NOT EXISTS 'ph_provision'@'127.0.0.1' IDENTIFIED BY '$($state.pro
 GRANT CREATE USER ON *.* TO 'ph_provision'@'127.0.0.1';
 GRANT SELECT ON platzhirsch_platform.* TO 'ph_provision'@'127.0.0.1';
 "@
-    $sql += "`n" + 'GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,ALTER,INDEX,DROP,REFERENCES ON `ph\_t\_%`.* TO ''ph_provision''@''127.0.0.1'' WITH GRANT OPTION;'
+    $sql += "`n" + 'GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,ALTER,INDEX,DROP,REFERENCES,LOCK TABLES,TRIGGER ON `ph\_t\_%`.* TO ''ph_provision''@''127.0.0.1'' WITH GRANT OPTION;'
     Write-Utf8 $initSql $sql
     $iniText="[mysqld]`nbasedir=$($runtime.Replace('\','/'))/mysql`ndatadir=$($data.Replace('\','/'))`nport=$DatabasePort`nbind-address=127.0.0.1`nmysqlx=0`ncharacter-set-server=utf8mb4`ncollation-server=utf8mb4_unicode_ci`nlog-error=$($logs.Replace('\','/'))/mysql.log`n"
     $service=Get-Service PlatzhirschMySQL -ErrorAction SilentlyContinue

@@ -35,9 +35,9 @@ class ServerController
                 ->get()
                 ->map(fn($r) => $this->publicRow($r))
                 ->all(),
-            'provisioning_mode' => 'local',
+            'provisioning_mode' => 'assigned',
             'notice' =>
-                'Registrierte Verbindungen sind Prüfziele. Neue Restaurants werden weiterhin auf dem lokalen Installationsserver angelegt.',
+                'Für neue Restaurants kann ein vom Serveradministrator freigegebener Datenbankserver ausgewählt werden.',
         ];
     }
     public function save(Request $r, ?int $id = null)
@@ -64,6 +64,11 @@ class ServerController
             $data['updated_at'] = now();
             if ($id) {
                 abort_unless($this->db->table('prov_db_servers')->where('id', $id)->exists(), 404);
+                abort_if(
+                    $this->db->table('prov_db_servers')->where('id', $id)->value('provisioning_enabled'),
+                    409,
+                    'Freigegebene Server können nicht verändert werden.',
+                );
                 $version = $data['version'];
                 $data['version']++;
                 abort_unless(
@@ -71,6 +76,7 @@ class ServerController
                         ->table('prov_db_servers')
                         ->where('id', $id)
                         ->where('version', $version)
+                        ->where('provisioning_enabled', false)
                         ->update($data),
                     409,
                     'Der Server wurde zwischenzeitlich geändert. Bitte neu laden.',

@@ -73,6 +73,13 @@ final class ModuleRegistry
             $visit($code);
         }
     }
+    public function get(string $code): \App\Contracts\Module\Module
+    {
+        if (!isset($this->modules[$code])) {
+            throw new \LogicException('Module not installed.');
+        }
+        return $this->modules[$code];
+    }
     public function catalog(): array
     {
         return array_map(

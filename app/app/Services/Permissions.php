@@ -12,6 +12,19 @@ class Permissions
         'widget.manage' => 'Buchungswidget verwalten',
         'support.access' => 'Support-Tickets lesen und bearbeiten',
     ];
+    public static function catalog(): array
+    {
+        $catalog = self::CATALOG;
+        foreach (app(\App\Core\Module\ModuleRegistry::class)->permissionFamilies() as $family) {
+            if (($family['scope'] ?? '') !== 'restaurant') {
+                continue;
+            }
+            foreach ($family['permissions'] as $permission) {
+                $catalog[$permission['code']] = $permission['label'];
+            }
+        }
+        return $catalog;
+    }
     public const STAFF = [
         'reservation.read',
         'reservation.write',

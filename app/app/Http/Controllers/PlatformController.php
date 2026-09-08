@@ -37,7 +37,17 @@ class PlatformController
             'phone' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:2000',
             'timezone' => 'required|timezone',
+            'server_id' => 'nullable|integer',
         ]);
+        if (!empty($data['server_id'])) {
+            abort_unless(
+                app(\App\Modules\Provisioning\PublicApi\ServerDirectory::class)->isEnabled(
+                    $data['server_id'],
+                ),
+                422,
+                'Zielserver ist nicht für Provisionierung freigegeben.',
+            );
+        }
         return DB::transaction(function () use ($data) {
             $suffix = bin2hex(random_bytes(12));
             $tenant = Tenant::create([

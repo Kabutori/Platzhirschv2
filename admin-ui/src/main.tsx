@@ -1,3 +1,9 @@
+import { billingManifest } from '@platzhirsch/billing-ui';
+import { reportingManifest } from '@platzhirsch/reporting-ui';
+const ModuleShop = lazy(billingManifest.nav[0].screen);
+const Reporting = lazy(reportingManifest.nav[0].screen);
+const BillingAdministration = lazy(() => import('@platzhirsch/billing-ui/Administration.tsx'));
+const Placement = lazy(() => import('@platzhirsch/provisioning-ui/Placement.tsx'));
 const DatabaseAccess = lazy(() => import('@platzhirsch/provisioning-ui/DatabaseAccess.tsx'));
 import { identityManifest } from '@platzhirsch/identity-ui';
 import ModuleCatalog from './module-host/Catalog';
@@ -445,6 +451,8 @@ const systemNav = [
   ['roles', 'Rollen & Rechte', ShieldCheck],
   ['modules', 'Module', Code2],
   ['database-access', 'SQL-Zugangsdaten', ShieldCheck],
+  ['billing-admin', 'Angebote & Bestellungen', Code2],
+  ['placement', 'Serverzuordnung & Umzüge', Building2],
   ['audit-log', 'Audit Log', ScrollText],
   ['health', 'System', Activity],
   [provisioningNavigation.key, provisioningNavigation.label, provisioningNavigation.icon],
@@ -453,6 +461,8 @@ const systemNav = [
 ] as const;
 const restaurantNav = [
   ['overview', 'Auswertung', LayoutDashboard],
+  ['reporting', 'Erweiterte Auswertungen', LayoutDashboard],
+  ['module-shop', 'Modul-Shop', Code2],
   ['reservations', 'Reservierungen', CalendarDays],
   ['table-plan', 'Tischplan', Armchair],
   ['tables', 'Tische', Armchair],
@@ -514,6 +524,8 @@ function allowed(user: Row, permission: string) {
 }
 const pagePermission: Record<string, string> = {
   overview: 'reservation.read',
+  reporting: 'reporting.read',
+  'module-shop': 'modules.manage',
   reservations: 'reservation.read',
   'table-plan': 'reservation.read',
   tables: 'restaurant.configure',
@@ -564,12 +576,18 @@ function Shell({ user }: { user: Row }) {
     scope === 'system'
       ? systemNav.filter(
           ([key]) =>
-            (key !== 'database-access' || user.role === 'system_admin') &&
+            (!['database-access', 'placement', 'billing-admin'].includes(key) ||
+              user.role === 'system_admin') &&
             (!platformPagePermission[key] || allowed(user, platformPagePermission[key])) &&
             (key !== provisioningNavigation.key || provisioningVisible) &&
             (key !== 'roles' || identityVisible),
         )
-      : restaurantNav.filter(([key]) => !pagePermission[key] || allowed(user, pagePermission[key]));
+      : restaurantNav.filter(
+          ([key]) =>
+            (key !== 'reporting' || user.enabled_modules?.includes('reporting')) &&
+            (key !== 'module-shop' || user.role === 'restaurant_admin') &&
+            (!pagePermission[key] || allowed(user, pagePermission[key])),
+        );
   const title = nav.find(([key]) => key === page)?.[1] || 'Platzhirsch';
   return (
     <div className="app">
@@ -687,6 +705,18 @@ function Content({
         </Suspense>
       );
     if (page === 'modules') return <ModuleCatalog />;
+    if (page === 'billing-admin' && user.role === 'system_admin')
+      return (
+        <Suspense fallback={<Loading />}>
+          <BillingAdministration />
+        </Suspense>
+      );
+    if (page === 'placement' && user.role === 'system_admin')
+      return (
+        <Suspense fallback={<Loading />}>
+          <Placement />
+        </Suspense>
+      );
     if (page === 'database-access' && user.role === 'system_admin')
       return (
         <Suspense fallback={<Loading />}>
@@ -704,6 +734,18 @@ function Content({
   }
   if (['overview', 'reservations', 'table-plan'].includes(page))
     return <Reservations tenant={tenant} mode={page} go={go} user={user} />;
+  if (page === 'module-shop' && user.role === 'restaurant_admin')
+    return (
+      <Suspense fallback={<Loading />}>
+        <ModuleShop tenant={tenant} />
+      </Suspense>
+    );
+  if (page === 'reporting' && user.enabled_modules?.includes('reporting'))
+    return (
+      <Suspense fallback={<Loading />}>
+        <Reporting tenant={tenant} canManage={Boolean(allowed(user, 'reporting.manage'))} />
+      </Suspense>
+    );
   if (page === 'widget') return <Widget tenant={tenant} />;
   if (page === 'team') return <UsersPage tenant={tenant} team user={user} />;
   if (page === 'profile') return <Profile tenant={tenant} />;
@@ -820,6 +862,11 @@ function AuditPage() {
 }
 function Tenants({ user }: { user: Row }) {
   const q = useData('v1/admin/tenants');
+  const servers = useQuery({
+    queryKey: ['tenant-create-servers'],
+    queryFn: () => api('v1/admin/database-servers'),
+    enabled: user.role === 'system_admin',
+  });
   const qc = useQueryClient();
   const [form, setForm] = useState<Row | null>(null);
   const [demo, setDemo] = useState(false);
@@ -831,6 +878,21 @@ function Tenants({ user }: { user: Row }) {
     return () => clearInterval(timer);
   }, []);
   const fields: Field[] = [
+    ...(!form?.id
+      ? [
+          {
+            key: 'server_id',
+            label: 'Datenbankserver',
+            type: 'select' as const,
+            options: [
+              { value: '', label: 'Lokaler Server' },
+              ...(servers.data?.servers || [])
+                .filter((s: Row) => s.provisioning_enabled)
+                .map((s: Row) => ({ value: String(s.id), label: s.name })),
+            ],
+          },
+        ]
+      : []),
     { key: 'name', label: 'Restaurantname', required: true },
     { key: 'email', label: 'Kontakt-E-Mail', type: 'email', required: true },
     { key: 'phone', label: 'Telefon' },

@@ -15,7 +15,7 @@ class RoleController
     {
         $tenant = $this->tenant($r);
         return [
-            'catalog' => Permissions::CATALOG,
+            'catalog' => Permissions::catalog(),
             'roles' => DB::table('restaurant_roles')
                 ->where('tenant_id', $tenant)
                 ->orderBy('name')
@@ -37,7 +37,7 @@ class RoleController
                 Rule::unique('restaurant_roles')->where('tenant_id', $tenant)->ignore($id),
             ],
             'permissions' => 'present|array',
-            'permissions.*' => ['string', 'distinct', Rule::in(array_keys(Permissions::CATALOG))],
+            'permissions.*' => ['string', 'distinct', Rule::in(array_keys(Permissions::catalog()))],
             'version' => $id ? 'required|integer|min:1' : 'sometimes|integer',
         ]);
         abort_if(

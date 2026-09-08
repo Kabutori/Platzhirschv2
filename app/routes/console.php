@@ -39,3 +39,76 @@ Artisan::command('platform:recover-admin {email}', function () {
     $this->info('Zugang zurückgesetzt.');
     return 0;
 });
+
+Artisan::command('server:authorize {server} {--credentials-file=}', function () {
+    $server = DB::table('prov_db_servers')->find((int) $this->argument('server'));
+    if (!$server || !in_array($server->purpose, ['primary', 'tenant'], true)) {
+        $this->error('Server ist kein Mandantenziel.');
+        return 1;
+    }
+    if (!$server->tls_required && !in_array($server->host, ['127.0.0.1', 'localhost', '::1'], true)) {
+        $this->error('Externe Server benötigen TLS.');
+        return 1;
+    }
+    $source = $this->option('credentials-file');
+    if ($source) {
+        $credentials = json_decode(file_get_contents($source), true, 512, JSON_THROW_ON_ERROR);
+    } else {
+        $credentials = [
+            'username' => $this->ask('Provisionierungsbenutzer'),
+            'password' => $this->secret('Provisionierungskennwort'),
+            'account_host' => $this->ask('IP oder DNS-Name dieses Anwendungsservers aus Sicht von MySQL'),
+        ];
+    }
+    if (
+        empty($credentials['username']) ||
+        empty($credentials['password']) ||
+        !preg_match('/^[a-zA-Z0-9.:-]+$/D', $credentials['account_host'] ?? '')
+    ) {
+        $this->error('Zugangsdaten unvollständig.');
+        return 1;
+    }
+    $credentials['server_version'] = (int) $server->version;
+    $path = storage_path('app/private/server-' . $server->id . '.json');
+    if (file_exists($path)) {
+        $this->error('Server bereits autorisiert; vorhandene Zugangsdaten bleiben erhalten.');
+        return 1;
+    }
+    $handle = fopen($path, 'x');
+    if (!$handle) {
+        $this->error('Geschütztes Verzeichnis nicht beschreibbar.');
+        return 1;
+    }
+    try {
+        fwrite($handle, json_encode($credentials, JSON_THROW_ON_ERROR));
+    } finally {
+        fclose($handle);
+    }
+    if (PHP_OS_FAMILY !== 'Windows') {
+        chmod($path, 0600);
+    }
+    if (
+        !DB::table('prov_db_servers')
+            ->where('id', $server->id)
+            ->where('version', $server->version)
+            ->where('provisioning_enabled', false)
+            ->update(['provisioning_enabled' => true])
+    ) {
+        unlink($path);
+        $this->error('Server wurde geändert. Freigabe erneut starten.');
+        return 1;
+    }
+    try {
+        app(\App\Services\ProvisioningConnection::class)->open($server->id);
+    } catch (\Throwable $error) {
+        DB::table('prov_db_servers')
+            ->where('id', $server->id)
+            ->update(['provisioning_enabled' => false]);
+        unlink($path);
+        $this->error('Serverfreigabe fehlgeschlagen. TLS und Zugangsdaten prüfen.');
+        return 1;
+    }
+    \App\Services\Audit::record('provisioning.server_authorized', $server->id);
+    $this->info('Server für Mandanten-Provisionierung freigegeben.');
+    return 0;
+});

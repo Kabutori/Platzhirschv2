@@ -33,7 +33,12 @@ class User extends Authenticatable
                 );
         }
         if ($this->role === 'restaurant_admin') {
-            return [...array_keys(\App\Services\Permissions::CATALOG), 'team.manage', 'roles.manage'];
+            return [
+                ...array_keys(\App\Services\Permissions::catalog()),
+                'team.manage',
+                'roles.manage',
+                'modules.manage',
+            ];
         }
         if ($this->role !== 'staff') {
             return [];
@@ -47,7 +52,10 @@ class User extends Authenticatable
             ->where('tenant_id', $this->tenant_id)
             ->value('permissions');
         return array_values(
-            array_intersect(json_decode($json ?? '[]', true), array_keys(\App\Services\Permissions::CATALOG)),
+            array_intersect(
+                json_decode($json ?? '[]', true),
+                array_keys(\App\Services\Permissions::catalog()),
+            ),
         );
     }
     public function hasPermission(string $permission): bool

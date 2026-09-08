@@ -24,7 +24,7 @@ jobs:
       - run: composer update "platzhirsch/*" --no-interaction --prefer-dist
         working-directory: app
       - name: PHP syntax
-        run: find app/app app/config app/database app/routes app/tests -name '*.php' -print0 | xargs -0 -n1 php -l
+        run: find app/app app/packages app/config app/database app/routes app/tests -name '*.php' -print0 | xargs -0 -n1 php -l
       - run: composer test
         working-directory: app
       - run: composer audit --locked
