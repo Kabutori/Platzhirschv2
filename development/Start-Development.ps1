@@ -73,6 +73,8 @@ extension=intl
 extension=mbstring
 extension=openssl
 extension=pdo_mysql
+extension=pdo_sqlite
+extension=sqlite3
 extension=sodium
 extension=zip
 memory_limit=512M
@@ -95,6 +97,7 @@ error_log="$dev\php.log"
     Status 'Composer- und npm-Abhaengigkeiten anhand der Lockdateien installieren'
     Push-Location $app;try{Checked 'composer' @('install','--no-interaction','--prefer-dist')}finally{Pop-Location}
     Push-Location "$root\admin-ui";try{Checked 'npm.cmd' @('ci')}finally{Pop-Location}
+    Checked 'node' @("$root\widget-embed\build.mjs")
     $ini="$dev\my.ini";$init="$dev\initialize.sql"
     Write-File $ini "[mysqld]`nbasedir=$((Split-Path $MySqlBin -Parent).Replace('\','/'))`ndatadir=$($dev.Replace('\','/'))/data`nport=$DatabasePort`nbind-address=127.0.0.1`nmysqlx=0`nlog-error=$($dev.Replace('\','/'))/mysql.log`n"
     Write-File "$dev\admin.cnf" "[client]`nuser=root`npassword=$($state.rootPassword)`nhost=127.0.0.1`nport=$DatabasePort`n"
