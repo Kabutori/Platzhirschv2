@@ -902,6 +902,9 @@ dd {
 }
 .rights-roletabs {
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: fit-content;
   flex-wrap: wrap;
   background: oklch(0.13 0.004 260);
   border: 1px solid #ffffff0f;
@@ -1211,6 +1214,7 @@ dd {
 }
 
 /* Template controls: flat cards, right-aligned switches and a centered mixed state. */
+.preference-row input.design-toggle,
 input.design-toggle {
   appearance: none;
   display: block;
@@ -1225,6 +1229,7 @@ input.design-toggle {
   background: var(--border-strong);
   cursor: pointer;
 }
+.preference-row input.design-toggle::before,
 input.design-toggle::before {
   content: '';
   position: absolute;
@@ -1235,9 +1240,11 @@ input.design-toggle::before {
   background: var(--text);
   transition: transform 0.15s;
 }
+.preference-row input.design-toggle:checked,
 input.design-toggle:checked {
   background: var(--accent);
 }
+.preference-row input.design-toggle:checked::before,
 input.design-toggle:checked::before {
   transform: translateX(20px);
 }
@@ -1341,4 +1348,16 @@ input.design-toggle:focus-visible {
   .rights-search .muted {
     display: none;
   }
+}
+
+.restaurant-role-actions,
+.restaurant-role-name {
+  margin: 18px 0;
+}
+.rights-roletabs + form,
+.rights-roletabs + .toolbar {
+  margin-top: 18px;
+}
+.rights-savebar + .rights-workspace {
+  margin-top: 18px;
 }

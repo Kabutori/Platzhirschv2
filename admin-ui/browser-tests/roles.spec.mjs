@@ -51,7 +51,11 @@ test('restaurant administrator creates a scoped employee role', async ({ page })
   await page.getByLabel('Rollenname').fill('Empfang');
   await page.getByLabel('Reservierungen und Belegung ansehen').check();
   await mkdir('test-results', { recursive: true });
-  await page.screenshot({ path: 'test-results/roles-restaurant.png', fullPage: true });
+  await page.screenshot({
+    path: 'test-results/roles-restaurant.png',
+    fullPage: true,
+    animations: 'disabled',
+  });
   await page.getByRole('button', { name: 'Speichern', exact: true }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   expect(saved).toEqual([{ name: 'Empfang', permissions: ['reservation.read'] }]);
@@ -113,5 +117,9 @@ test('restaurant groups use module identity and show partial selection like plat
   await expect(page.getByRole('button', { name: 'Speichern', exact: true })).toBeEnabled();
   await page.getByRole('textbox', { name: 'Berechtigungen suchen', exact: true }).fill('');
   await page.evaluate(() => document.fonts.ready);
-  await page.screenshot({ path: 'test-results/roles-restaurant-groups.png', fullPage: true });
+  await page.screenshot({
+    path: 'test-results/roles-restaurant-groups.png',
+    fullPage: true,
+    animations: 'disabled',
+  });
 });

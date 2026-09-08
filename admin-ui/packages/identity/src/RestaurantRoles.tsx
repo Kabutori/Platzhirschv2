@@ -1,7 +1,7 @@
 import { Toggle } from '@platzhirsch/ui-runtime/controls';
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Save, Search } from 'lucide-react';
+import { Plus, Trash2, Save, Search, Pencil } from 'lucide-react';
 import { api } from '@platzhirsch/ui-runtime/api';
 import { useData, Loading, ErrorBox, Modal, type Row } from '@platzhirsch/ui-runtime/components';
 function Editor({
@@ -11,8 +11,10 @@ function Editor({
   tenant,
   done,
   onDirty,
+  onDelete,
 }: {
   onDirty?: (value: boolean) => void;
+  onDelete?: () => Promise<void>;
   role: Row;
   catalog: Record<string, string>;
   families: Row[];
@@ -33,6 +35,7 @@ function Editor({
           permissions: Object.entries(catalog).map(([code, label]) => ({ code, label })),
         },
       ];
+  const [renaming, setRenaming] = useState(!role.id);
   const [search, setSearch] = useState('');
   const [group, setGroup] = useState(groups[0]?.module + ':' + groups[0]?.code);
   const active = groups.find((g) => g.module + ':' + g.code === group) || groups[0];
@@ -66,17 +69,57 @@ function Editor({
         }
       }}
     >
-      <div className="toolbar">
-        <label>
-          Rollenname
-          <input required maxLength={120} value={name} onChange={(e) => setName(e.target.value)} />
-        </label>
-        <span className="rights-status">{dirty ? 'Ungespeicherte Änderungen' : 'Gespeicherte Rechte'}</span>
+      <div className="rights-savebar panel">
+        <span className={'rights-status' + (dirty ? ' changed' : '')} role="status">
+          {dirty ? 'Ungespeicherte Änderungen' : 'Gespeicherte Rechte'}
+        </span>
         <button className="primary" disabled={busy || !name.trim() || (!!role.id && !dirty)}>
           <Save size={16} />
           Speichern
         </button>
       </div>
+      {role.id && (
+        <div className="rights-actions restaurant-role-actions">
+          <button type="button" disabled={busy} onClick={() => setRenaming(!renaming)}>
+            <Pencil size={14} />
+            Umbenennen
+          </button>
+          {onDelete && (
+            <button
+              type="button"
+              className="danger"
+              disabled={busy}
+              onClick={async () => {
+                if (!confirm('Unbenutzte Rolle löschen?')) return;
+                setBusy(true);
+                try {
+                  await onDelete();
+                } catch (e) {
+                  setError(e);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              <Trash2 size={14} />
+              Löschen
+            </button>
+          )}
+        </div>
+      )}
+      {renaming && (
+        <label className="rights-rename restaurant-role-name">
+          Rollenname
+          <input
+            autoFocus
+            required
+            maxLength={120}
+            value={name}
+            disabled={busy}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </label>
+      )}
       <ErrorBox error={error} />
       <div className="rights-workspace">
         <div className="rights-groups" aria-label="Berechtigungsgruppen">
@@ -205,27 +248,14 @@ export default function RestaurantRoles({ tenant }: { tenant?: string }) {
             </nav>
             {role ? (
               <>
-                <div className="toolbar">
-                  <h2>{role.name}</h2>
-                  <button
-                    onClick={async () => {
-                      if (!confirm('Unbenutzte Rolle löschen?')) return;
-                      try {
-                        await api('v1/restaurant/roles/' + role.id, 'DELETE', undefined, tenant);
-                        await refresh();
-                      } catch (e) {
-                        setError(e);
-                      }
-                    }}
-                  >
-                    <Trash2 size={16} />
-                    Löschen
-                  </button>
-                </div>
                 <Editor
                   key={role.id + ':' + role.version}
                   role={role}
                   onDirty={setDirty}
+                  onDelete={async () => {
+                    await api('v1/restaurant/roles/' + role.id, 'DELETE', undefined, tenant);
+                    await refresh();
+                  }}
                   catalog={q.data.catalog}
                   families={q.data.families || []}
                   tenant={tenant}

@@ -81,18 +81,22 @@ test('platform role drafts are saved, checked and activated explicitly', async (
   await page.locator('.rights-roletabs').getByRole('button', { name: 'Support', exact: true }).click();
   await expect(page.getByRole('switch', { name: 'Audit Log ansehen', exact: true })).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
-  await page.screenshot({ path: 'test-results/roles-desktop.png', fullPage: true });
+  await page.screenshot({ path: 'test-results/roles-desktop.png', fullPage: true, animations: 'disabled' });
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole('button', { name: 'Lokal speichern', exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
-  await page.screenshot({ path: 'test-results/roles-mobile.png', fullPage: true });
+  await page.screenshot({ path: 'test-results/roles-mobile.png', fullPage: true, animations: 'disabled' });
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.getByRole('button', { name: /Plattformverwaltung/ }).click();
   await page.getByRole('switch', { name: 'Mandanten ansehen', exact: true }).check();
   const group = page.getByRole('checkbox', { name: 'Alle Rechte: Plattformverwaltung', exact: true });
   await expect(group).toHaveAttribute('aria-checked', 'mixed');
   await expect(group).toHaveJSProperty('indeterminate', true);
-  await page.screenshot({ path: 'test-results/roles-mixed-group.png', fullPage: true });
+  await page.screenshot({
+    path: 'test-results/roles-mixed-group.png',
+    fullPage: true,
+    animations: 'disabled',
+  });
   await group.press('Space');
   await expect(page.getByRole('switch', { name: 'Benutzer ansehen', exact: true })).toBeChecked();
   await group.uncheck();

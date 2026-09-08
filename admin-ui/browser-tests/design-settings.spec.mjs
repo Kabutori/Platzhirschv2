@@ -85,7 +85,11 @@ test('table layout saves keyboard movement and read-only users cannot reposition
   await expect.poll(() => writes.length).toBe(1);
   expect(writes[0]).toMatchObject({ layout_x: 25, layout_y: 30, shape: 'round', room_id: 1 });
   await mkdir('test-results', { recursive: true });
-  await page.screenshot({ path: 'test-results/design-table-plan.png', fullPage: true });
+  await page.screenshot({
+    path: 'test-results/design-table-plan.png',
+    fullPage: true,
+    animations: 'disabled',
+  });
 });
 test('read-only table plan offers no layout controls', async ({ page }) => {
   await mock(page, true);
@@ -105,7 +109,7 @@ test('widget designer edits appearance without issuing a new link', async ({ pag
   await expect(page.getByLabel('Website-Ursprung', { exact: false })).toBeDisabled();
   await expect(page.getByLabel('Website-Ursprung', { exact: false })).toHaveValue('https://example.test');
   await mkdir('test-results', { recursive: true });
-  await page.screenshot({ path: 'test-results/design-widget.png', fullPage: true });
+  await page.screenshot({ path: 'test-results/design-widget.png', fullPage: true, animations: 'disabled' });
   await page.getByRole('button', { name: 'Einstellungen speichern', exact: true }).click();
   await expect.poll(() => writes.length).toBe(1);
   expect(writes[0]).toMatchObject({ language: 'en', position: 'bottom-right', max_party_size: 5 });
@@ -135,10 +139,18 @@ test('template preference cards control CSV visibility, survive reload and remai
   await page.getByRole('checkbox', { name: 'Tischplan', exact: true }).check();
   await page.getByRole('button', { name: /Weitere Bereiche ausklappen/ }).click();
   await page.evaluate(() => document.fonts.ready);
-  await page.screenshot({ path: 'test-results/design-preferences-desktop.png', fullPage: true });
+  await page.screenshot({
+    path: 'test-results/design-preferences-desktop.png',
+    fullPage: true,
+    animations: 'disabled',
+  });
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
-  await page.screenshot({ path: 'test-results/design-preferences-mobile.png', fullPage: true });
+  await page.screenshot({
+    path: 'test-results/design-preferences-mobile.png',
+    fullPage: true,
+    animations: 'disabled',
+  });
   expect(await page.evaluate(() => localStorage.getItem('platzhirsch.ui.v1.administration:1'))).toBeNull();
 });
 test('export settings do not appear without the export permission', async ({ page }) => {
