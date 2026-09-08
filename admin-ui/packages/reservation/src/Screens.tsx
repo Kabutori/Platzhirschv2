@@ -1,3 +1,4 @@
+import Calendar from './Calendar';
 import Week, { shiftDate, matchesReservation } from './Week';
 import { usePreferences } from '@platzhirsch/ui-runtime/preferences';
 import TablePlan from './TablePlan';
@@ -323,7 +324,7 @@ export function Reservations({
           >
             <ChevronLeft size={16} />
           </button>
-          <CalendarDays size={17} />
+          <Calendar value={date} onChange={setDate} today={today()} />
           <input
             type="date"
             aria-label="Reservierungsdatum"
@@ -454,6 +455,7 @@ export function Reservations({
           <ErrorBox error={q.error} />
         ) : mode === 'table-plan' ? (
           <TablePlan
+            date={date}
             tables={tables.data || []}
             reservations={rows}
             timezone={tz}

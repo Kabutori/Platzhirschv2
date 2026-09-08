@@ -34,3 +34,11 @@ Der nächste Schritt übernimmt die Suche nach Gast/Tisch, sichtbare Notizen, Ta
 Die Wochenansicht zeigt Montag bis Sonntag mit echten Tagesabfragen, Uhrzeit in der Restaurant-Zeitzone, Gast, Personen, Tisch, Status und Notiz. Der Tageskopf öffnet die jeweilige Liste. Mit Schreibrecht öffnet eine Buchung den vorhandenen Bearbeitungsdialog samt Versionsprüfung; lesende Rollen erhalten keine Bearbeitungsaktion. Ladefehler werden pro Tag angezeigt, statt leere Tage vorzutäuschen. Kalenderarithmetik verwendet UTC-Kalendertage, unabhängig von der Sommerzeit des Browsers. Mobile Geräte zeigen die Tage untereinander.
 
 Noch offen bleiben unter anderem der eigene Kalender-Popup-Entwurf, der Tisch-Zeitstrahl und die vollständige Abnahme aller Buchungsaktionen. Die vorhandenen Modulpakete und API-Berechtigungen bleiben maßgeblich.
+
+## Kalender und Tisch-Zeitstrahl
+
+Der Monatskalender übernimmt das Raster Montag–Sonntag, Monatswechsel, Tagesauswahl und Heute aus der Vorlage. Er markiert den gewählten Tag und den heutigen Tag, schließt bei Escape/Außenklick und gibt nach Auswahl den Fokus zurück. Die direkte Datumseingabe bleibt verfügbar.
+
+Der Tischplan bietet Kacheln/Zeitstrahl und einen gemeinsamen Raumfilter. Im Zeitstrahl stehen Tischname und Plätze links, die Buchungen auf einer 24-Stunden-Achse rechts. Zeiten folgen der Restaurant-Zeitzone; Tage der Zeitumstellung werden mit ihrer tatsächlichen Länge dargestellt. Buchungen vom Vortag werden mitgeladen und am Tagesrand abgeschnitten. Bestätigte, platzierte und abgeschlossene Reservierungen sind sichtbar, stornierte und nicht erschienene ausgeblendet. Überlagerungen erhalten getrennte Zeilen. Buchungen öffnen nur mit Schreibrecht den vorhandenen Bearbeitungsdialog. Auf schmalen Bildschirmen scrollt ausschließlich der Zeitstrahl horizontal.
+
+Die neuen Browsertests prüfen Schaltjahr, Jahreswechsel, Fokus und Schließen, Raumfilter, über Mitternacht laufende Buchungen sowie Nur-Lese-Zugriff und Ladefehler. Der grafische Tischplan mit gespeicherten Positionen bleibt erhalten.

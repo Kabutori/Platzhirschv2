@@ -1,3 +1,5 @@
+import Timeline from './Timeline';
+import { shiftDate } from './Week';
 import { useRef, useState, useEffect, type PointerEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Armchair, DoorOpen, TreePine, Wine, PartyPopper } from 'lucide-react';
@@ -5,6 +7,7 @@ import { api } from '@platzhirsch/ui-runtime/api';
 import { useData, ErrorBox, Loading, clock, type Row } from '@platzhirsch/ui-runtime/components';
 import './table-plan.css';
 export default function TablePlan({
+  date,
   tables,
   reservations,
   timezone,
@@ -14,6 +17,7 @@ export default function TablePlan({
   edit,
   create,
 }: {
+  date: string;
   tables: Row[];
   reservations: Row[];
   timezone: string;
@@ -25,6 +29,8 @@ export default function TablePlan({
 }) {
   const rooms = useData('v1/restaurant/rooms', tenant),
     qc = useQueryClient();
+  const previous = useData('v1/restaurant/reservations?date=' + shiftDate(date, -1), tenant);
+  const [view, setView] = useState<'tiles' | 'timeline'>('tiles');
   const [room, setRoom] = useState('all'),
     [time, setTime] = useState('18:00'),
     [layout, setLayout] = useState(false),
@@ -110,6 +116,21 @@ export default function TablePlan({
   return (
     <div className="floor-plan">
       <div className="toolbar padded">
+        <div className="section-tabs" role="group" aria-label="Tischansicht">
+          <button aria-pressed={view === 'tiles'} onClick={() => setView('tiles')}>
+            Kacheln
+          </button>
+          <button
+            aria-pressed={view === 'timeline'}
+            onClick={() => {
+              setView('timeline');
+              setLayout(false);
+              setSelected(null);
+            }}
+          >
+            Zeitstrahl
+          </button>
+        </div>
         <label>
           Raum
           <select
@@ -132,7 +153,7 @@ export default function TablePlan({
         <label>
           Belegung um ({timezone})<input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
         </label>
-        {canConfigure && (
+        {canConfigure && view === 'tiles' && (
           <label className="floor-toggle">
             <input
               type="checkbox"
@@ -163,99 +184,127 @@ export default function TablePlan({
               </div>
             );
           })}
-      <p className="muted padded">
-        {layout
-          ? 'Tische ziehen oder fokussieren und mit Pfeiltasten verschieben. Jede Position wird unmittelbar gespeichert.'
-          : 'Tisch auswählen, um Reservierungen zu sehen. Freie Anzeige gilt für die gewählte Uhrzeit, nicht automatisch für die gesamte Buchungsdauer.'}
-      </p>
-      <div
-        className="floor-stage"
-        style={{ height: Math.max(480, Math.ceil(list.length / columns) * 130) }}
-        ref={stage}
-        aria-label="Grafischer Tischplan"
-        aria-busy={busy}
-      >
-        {list.map((t, i) => {
-          const x =
-              position && position.id === t.id
-                ? position.x
-                : room !== 'all' && t.layout_x != null
-                  ? t.layout_x
-                  : ((i % columns) * 100) / (columns - 1),
-            y =
-              position && position.id === t.id
-                ? position.y
-                : room !== 'all' && t.layout_y != null
-                  ? t.layout_y
-                  : (Math.floor(i / columns) * 100) / Math.max(1, Math.ceil(list.length / columns) - 1);
-          const booked = bookings(t.id).length > 0;
-          return (
-            <button
-              key={t.id}
-              className={
-                'floor-table ' +
-                (t.shape || 'rectangle') +
-                (!t.active ? ' inactive' : booked ? ' occupied' : ' free')
-              }
-              style={{
-                left: x + '%',
-                top: y + '%',
-                transform: `translate(-${x}%,-${y}%)`,
-                touchAction: layout ? 'none' : 'auto',
-              }}
-              aria-label={`${t.name}, ${t.capacity} Plätze, ${!t.active ? 'deaktiviert' : booked ? 'belegt' : 'frei'}`}
-              aria-pressed={selected === t.id}
-              disabled={busy}
-              onPointerDown={(e) => start(e, t, x, y)}
-              onPointerMove={(e) => {
-                const d = drag.current;
-                if (!d || d.id !== t.id) return;
-                if (Math.abs(e.clientX - d.px) + Math.abs(e.clientY - d.py) > 3) d.moved = true;
-                if (d.moved)
-                  setPosition({
-                    id: t.id,
-                    x: Math.round(Math.max(0, Math.min(100, d.x + ((e.clientX - d.px) / d.w) * 100))),
-                    y: Math.round(Math.max(0, Math.min(100, d.y + ((e.clientY - d.py) / d.h) * 100))),
-                  });
-              }}
-              onPointerUp={() => {
-                const d = drag.current;
-                drag.current = null;
-                if (d?.moved && position && position.id === t.id) void save(t, position.x, position.y);
-              }}
-              onPointerCancel={() => {
-                drag.current = null;
-                setPosition(null);
-              }}
-              onClick={() => setSelected(t.id)}
-              onKeyDown={(e) => {
-                if (
-                  !layout ||
-                  !canConfigure ||
-                  !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)
-                )
-                  return;
-                e.preventDefault();
-                void save(
-                  t,
-                  Math.max(
-                    0,
-                    Math.min(100, x + (e.key === 'ArrowRight' ? 5 : e.key === 'ArrowLeft' ? -5 : 0)),
-                  ),
-                  Math.max(0, Math.min(100, y + (e.key === 'ArrowDown' ? 5 : e.key === 'ArrowUp' ? -5 : 0))),
-                );
-              }}
-            >
-              <Armchair size={20} />
-              <strong>{t.name}</strong>
-              <small>
-                {t.capacity} Plätze · {!t.active ? 'Inaktiv' : booked ? 'Belegt' : 'Frei'}
-              </small>
-            </button>
-          );
-        })}
-      </div>
-      {!list.length && <p className="padded">Keine Tische in diesem Bereich eingerichtet.</p>}
+      {view === 'timeline' ? (
+        previous.isPending ? (
+          <Loading />
+        ) : previous.error ? (
+          <ErrorBox error={previous.error} />
+        ) : (
+          <>
+            <p className="muted padded">
+              {timezone} · Ganzer Tag, einschließlich hineinreichender Buchungen vom Vortag. Stornierungen und
+              nicht erschienene Gäste werden ausgeblendet.
+            </p>
+            <Timeline
+              date={date}
+              tables={list}
+              reservations={[...(previous.data || []), ...reservations]}
+              timezone={timezone}
+              canWrite={canWrite}
+              edit={edit}
+            />
+          </>
+        )
+      ) : (
+        <>
+          <p className="muted padded">
+            {layout
+              ? 'Tische ziehen oder fokussieren und mit Pfeiltasten verschieben. Jede Position wird unmittelbar gespeichert.'
+              : 'Tisch auswählen, um Reservierungen zu sehen. Freie Anzeige gilt für die gewählte Uhrzeit, nicht automatisch für die gesamte Buchungsdauer.'}
+          </p>
+          <div
+            className="floor-stage"
+            style={{ height: Math.max(480, Math.ceil(list.length / columns) * 130) }}
+            ref={stage}
+            aria-label="Grafischer Tischplan"
+            aria-busy={busy}
+          >
+            {list.map((t, i) => {
+              const x =
+                  position && position.id === t.id
+                    ? position.x
+                    : room !== 'all' && t.layout_x != null
+                      ? t.layout_x
+                      : ((i % columns) * 100) / (columns - 1),
+                y =
+                  position && position.id === t.id
+                    ? position.y
+                    : room !== 'all' && t.layout_y != null
+                      ? t.layout_y
+                      : (Math.floor(i / columns) * 100) / Math.max(1, Math.ceil(list.length / columns) - 1);
+              const booked = bookings(t.id).length > 0;
+              return (
+                <button
+                  key={t.id}
+                  className={
+                    'floor-table ' +
+                    (t.shape || 'rectangle') +
+                    (!t.active ? ' inactive' : booked ? ' occupied' : ' free')
+                  }
+                  style={{
+                    left: x + '%',
+                    top: y + '%',
+                    transform: `translate(-${x}%,-${y}%)`,
+                    touchAction: layout ? 'none' : 'auto',
+                  }}
+                  aria-label={`${t.name}, ${t.capacity} Plätze, ${!t.active ? 'deaktiviert' : booked ? 'belegt' : 'frei'}`}
+                  aria-pressed={selected === t.id}
+                  disabled={busy}
+                  onPointerDown={(e) => start(e, t, x, y)}
+                  onPointerMove={(e) => {
+                    const d = drag.current;
+                    if (!d || d.id !== t.id) return;
+                    if (Math.abs(e.clientX - d.px) + Math.abs(e.clientY - d.py) > 3) d.moved = true;
+                    if (d.moved)
+                      setPosition({
+                        id: t.id,
+                        x: Math.round(Math.max(0, Math.min(100, d.x + ((e.clientX - d.px) / d.w) * 100))),
+                        y: Math.round(Math.max(0, Math.min(100, d.y + ((e.clientY - d.py) / d.h) * 100))),
+                      });
+                  }}
+                  onPointerUp={() => {
+                    const d = drag.current;
+                    drag.current = null;
+                    if (d?.moved && position && position.id === t.id) void save(t, position.x, position.y);
+                  }}
+                  onPointerCancel={() => {
+                    drag.current = null;
+                    setPosition(null);
+                  }}
+                  onClick={() => setSelected(t.id)}
+                  onKeyDown={(e) => {
+                    if (
+                      !layout ||
+                      !canConfigure ||
+                      !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)
+                    )
+                      return;
+                    e.preventDefault();
+                    void save(
+                      t,
+                      Math.max(
+                        0,
+                        Math.min(100, x + (e.key === 'ArrowRight' ? 5 : e.key === 'ArrowLeft' ? -5 : 0)),
+                      ),
+                      Math.max(
+                        0,
+                        Math.min(100, y + (e.key === 'ArrowDown' ? 5 : e.key === 'ArrowUp' ? -5 : 0)),
+                      ),
+                    );
+                  }}
+                >
+                  <Armchair size={20} />
+                  <strong>{t.name}</strong>
+                  <small>
+                    {t.capacity} Plätze · {!t.active ? 'Inaktiv' : booked ? 'Belegt' : 'Frei'}
+                  </small>
+                </button>
+              );
+            })}
+          </div>
+          {!list.length && <p className="padded">Keine Tische in diesem Bereich eingerichtet.</p>}
+        </>
+      )}
       {selectedTable && (
         <section className="padded">
           <div className="toolbar">
