@@ -43,7 +43,17 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
                 $query
                     ->selectRaw('1')
                     ->from('reservations')
-                    ->whereColumn('reservations.table_id', 'dining_tables.id')
+                    ->where(function ($match) {
+                        $match
+                            ->whereColumn('reservations.table_id', 'dining_tables.id')
+                            ->orWhereExists(function ($extra) {
+                                $extra
+                                    ->selectRaw('1')
+                                    ->from('reservation_extra_tables')
+                                    ->whereColumn('reservation_id', 'reservations.id')
+                                    ->whereColumn('reservation_extra_tables.table_id', 'dining_tables.id');
+                            });
+                    })
                     ->whereNotIn('status', ['cancelled', 'no_show'])
                     ->where('starts_at', '<', $end->utc()->format('Y-m-d H:i:s'))
                     ->where('ends_at', '>', $start->utc()->format('Y-m-d H:i:s'));
@@ -59,7 +69,16 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
             $old = $id ? $db->table('reservations')->where('id', $id)->first() : null;
             abort_if($id && !$old, 404);
             // All writes lock tables in ascending order, including moves. This serializes overlap checks.
-            $tableIds = array_unique(array_filter([$data['table_id'], $old?->table_id]));
+            $extraIds = array_map('intval', $data['additional_table_ids'] ?? []);
+            $newIds = array_values(array_unique([(int) $data['table_id'], ...$extraIds]));
+            $oldExtra = $id
+                ? $db
+                    ->table('reservation_extra_tables')
+                    ->where('reservation_id', $id)
+                    ->pluck('table_id')
+                    ->all()
+                : [];
+            $tableIds = array_unique(array_filter([...$newIds, $old?->table_id, ...$oldExtra]));
             sort($tableIds);
             $tables = $db
                 ->table('dining_tables')
@@ -69,6 +88,13 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
                 ->get();
             $table = $tables->firstWhere('id', (int) $data['table_id']);
             abort_unless($table && $table->active, 422, 'Tisch ist nicht verfügbar.');
+            $chosen = $tables->whereIn('id', $newIds);
+            abort_unless(
+                $chosen->count() === count($newIds) &&
+                    $chosen->every(fn($t) => $t->active && $t->room_id === $table->room_id),
+                422,
+                'Kombinierte Tische müssen aktiv sein und im selben Raum liegen.',
+            );
             if ($id) {
                 $current = $db->table('reservations')->where('id', $id)->lockForUpdate()->first();
                 abort_if(
@@ -91,7 +117,7 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
             $start = CarbonImmutable::createFromFormat('!Y-m-d\TH:i', $data['starts_at'], $timezone);
             $end = $start->addMinutes($data['duration_minutes']);
             $status = $data['status'] ?? 'confirmed';
-            if ($data['party_size'] > $table->capacity) {
+            if ($data['party_size'] > $chosen->sum('capacity')) {
                 $this->invalid('party_size', 'Zu viele Gäste für diesen Tisch.');
             }
             if ($start->lessThan(CarbonImmutable::now($timezone)->subMinutes(5)) && !$id) {
@@ -101,7 +127,15 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
                 $this->assertOpeningHours($start, $end);
                 $conflict = $db
                     ->table('reservations')
-                    ->where('table_id', $table->id)
+                    ->where(function ($match) use ($newIds) {
+                        $match->whereIn('table_id', $newIds)->orWhereExists(function ($extra) use ($newIds) {
+                            $extra
+                                ->selectRaw('1')
+                                ->from('reservation_extra_tables')
+                                ->whereColumn('reservation_id', 'reservations.id')
+                                ->whereIn('reservation_extra_tables.table_id', $newIds);
+                        });
+                    })
                     ->whereNotIn('status', ['cancelled', 'no_show'])
                     ->when($id, fn($q) => $q->where('id', '!=', $id))
                     ->where('starts_at', '<', $end->utc()->format('Y-m-d H:i:s'))
@@ -138,26 +172,55 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
                         'request_key' => $data['request_key'] ?? null,
                     ]);
             }
-            return $db->table('reservations')->find($id);
+            $db->table('reservation_extra_tables')->where('reservation_id', $id)->delete();
+            foreach ($newIds as $tableId) {
+                if ($tableId !== (int) $table->id) {
+                    $db->table('reservation_extra_tables')->insert([
+                        'reservation_id' => $id,
+                        'table_id' => $tableId,
+                    ]);
+                }
+            }
+            $result = $db->table('reservations')->find($id);
+            $result->additional_table_ids = array_values(array_diff($newIds, [(int) $table->id]));
+            return $result;
         }, 3);
     }
     private function assertOpeningHours(CarbonImmutable $start, CarbonImmutable $end): void
     {
         $db = $this->db->connection('tenant');
-        $special = $db->table('special_days')->where('date', $start->toDateString())->first();
-        if ($special?->closed) {
-            $this->invalid('starts_at', 'An diesem Tag ist geschlossen.');
-        }
-        $slots = $special
-            ? collect([$special])
-            : $db->table('opening_hours')->where('weekday', $start->dayOfWeekIso)->get();
-        foreach ($slots as $slot) {
-            if (
-                $start->isSameDay($end) &&
-                $start->format('H:i:s') >= $slot->opens &&
-                $end->format('H:i:s') <= $slot->closes
-            ) {
-                return;
+        // A special day overrides the entire calendar day, including a spillover
+        // from yesterday. Otherwise an overnight service belongs to its opening day.
+        foreach ([$start->startOfDay(), $start->startOfDay()->subDay()] as $day) {
+            $special = $db->table('special_days')->where('date', $day->toDateString())->first();
+            if ($special?->closed) {
+                continue;
+            }
+            $slots = $special
+                ? collect([$special])
+                : $db->table('opening_hours')->where('weekday', $day->dayOfWeekIso)->get();
+            foreach ($slots as $slot) {
+                if (!$slot->opens || !$slot->closes || $slot->opens === $slot->closes) {
+                    continue;
+                }
+                $opening = $day->setTimeFromTimeString($slot->opens);
+                $closing = $day->setTimeFromTimeString($slot->closes);
+                if ($closing->lessThan($opening)) {
+                    $closing = $closing->addDay();
+                }
+                if ($start->lessThan($opening) || $end->greaterThan($closing)) {
+                    continue;
+                }
+                $overridden = false;
+                for ($cursor = $day->addDay(); $cursor->lessThan($end); $cursor = $cursor->addDay()) {
+                    if ($db->table('special_days')->where('date', $cursor->toDateString())->exists()) {
+                        $overridden = true;
+                        break;
+                    }
+                }
+                if (!$overridden) {
+                    return;
+                }
             }
         }
         $this->invalid('starts_at', 'Der gesamte Termin muss innerhalb einer Öffnungszeit liegen.');

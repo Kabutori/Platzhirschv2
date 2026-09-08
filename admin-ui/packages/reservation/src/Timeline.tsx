@@ -68,7 +68,8 @@ export default function Timeline({
           const bookings = reservations
             .filter(
               (r) =>
-                String(r.table_id) === String(table.id) &&
+                (String(r.table_id) === String(table.id) ||
+                  (r.additional_table_ids || []).map(String).includes(String(table.id))) &&
                 !['cancelled', 'no_show'].includes(r.status) &&
                 instant(r.starts_at) < end &&
                 instant(r.ends_at) > start,

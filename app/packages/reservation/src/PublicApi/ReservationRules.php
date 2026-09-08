@@ -6,6 +6,8 @@ class ReservationRules
     public static function rules(): array
     {
         return [
+            'additional_table_ids' => 'sometimes|array|max:9',
+            'additional_table_ids.*' => 'integer|distinct',
             'table_id' => 'required|integer',
             'guest_name' => 'required|string|max:120',
             'email' => 'nullable|email|max:254',

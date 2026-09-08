@@ -10,6 +10,7 @@ export type Field = {
   type?: string;
   required?: boolean;
   options?: { value: string | number; label: string }[];
+  multiple?: boolean;
   min?: number;
   max?: number;
   default?: any;
@@ -120,7 +121,10 @@ export function Form({
 }) {
   const [values, setValues] = useState<Row>(() =>
     Object.fromEntries(
-      fields.map((f) => [f.key, initial[f.key] ?? f.default ?? (f.type === 'checkbox' ? false : '')]),
+      fields.map((f) => [
+        f.key,
+        initial[f.key] ?? f.default ?? (f.multiple ? [] : f.type === 'checkbox' ? false : ''),
+      ]),
     ),
   );
   const [error, setError] = useState<unknown>();
@@ -149,11 +153,19 @@ export function Form({
             </span>
             {f.options ? (
               <select
+                multiple={f.multiple}
                 required={f.required}
                 value={values[f.key]}
-                onChange={(e) => setValues({ ...values, [f.key]: e.target.value })}
+                onChange={(e) =>
+                  setValues({
+                    ...values,
+                    [f.key]: f.multiple
+                      ? Array.from(e.target.selectedOptions, (o) => o.value)
+                      : e.target.value,
+                  })
+                }
               >
-                <option value="">Bitte auswählen</option>
+                {!f.multiple && <option value="">Bitte auswählen</option>}
                 {f.options.map((o) => (
                   <option value={o.value} key={o.value}>
                     {o.label}

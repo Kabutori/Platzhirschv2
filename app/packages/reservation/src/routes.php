@@ -4,6 +4,16 @@ $r = app('router');
 $r->middleware(['web', 'auth', 'tenant'])
     ->prefix('api/v1/restaurant')
     ->group(function ($r) {
+        $r->get('/waitlist', [\App\Modules\Reservation\Http\WaitlistController::class, 'index']);
+        $r->post('/waitlist', [\App\Modules\Reservation\Http\WaitlistController::class, 'save']);
+        $r->patch('/waitlist/{id}', [
+            \App\Modules\Reservation\Http\WaitlistController::class,
+            'save',
+        ])->whereNumber('id');
+        $r->post('/waitlist/{id}/book', [
+            \App\Modules\Reservation\Http\WaitlistController::class,
+            'book',
+        ])->whereNumber('id');
         $r->get('/reservations', [C::class, 'reservations']);
         $r->get('/export', [C::class, 'export']);
         $r->post('/reservations', [C::class, 'saveReservation']);

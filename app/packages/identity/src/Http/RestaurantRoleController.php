@@ -60,6 +60,12 @@ class RestaurantRoleController
             422,
             'Für Buchungsänderungen und Export muss auch Lesezugriff erlaubt sein.',
         );
+        abort_if(
+            in_array('waitlist.write', $data['permissions'], true) &&
+                !in_array('waitlist.read', $data['permissions'], true),
+            422,
+            'Wartelistenverwaltung benötigt auch Lesezugriff.',
+        );
         return $this->db->transaction(function () use ($id, $tenant, $data) {
             $query = $this->db->table('restaurant_roles')->where('tenant_id', $tenant)->where('id', $id);
             if ($id) {

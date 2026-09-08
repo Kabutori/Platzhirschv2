@@ -547,4 +547,114 @@ class RestaurantTest extends TestCase
         $this->user->update(['role' => 'staff']);
         $this->patchJson('/api/v1/restaurant/widget/' . $id, $design)->assertForbidden();
     }
+
+    public function test_overnight_opening_includes_early_next_day_and_rejects_special_day_spillover(): void
+    {
+        $db = DB::connection('tenant');
+        $db->table('opening_hours')->delete();
+        $this->postJson('/api/v1/restaurant/hours', [
+            'weekday' => now()->addDay()->dayOfWeekIso,
+            'opens' => '18:00',
+            'closes' => '02:00',
+        ])->assertOk();
+        $date = now()->addDay()->format('Y-m-d');
+        $payload = [...$this->payload(), 'starts_at' => $date . 'T23:30', 'duration_minutes' => 120];
+        $id = $this->postJson('/api/v1/restaurant/reservations', $payload)->assertCreated()->json('id');
+        $this->postJson('/api/v1/restaurant/reservations', [
+            ...$this->payload(),
+            'starts_at' => now()->addDays(2)->format('Y-m-d') . 'T00:30',
+        ])->assertConflict();
+        $this->postJson('/api/v1/restaurant/reservations/' . $id . '/cancel')->assertNoContent();
+        $this->postJson('/api/v1/restaurant/reservations', [
+            ...$this->payload(),
+            'starts_at' => now()->addDays(2)->format('Y-m-d') . 'T00:30',
+        ])->assertCreated();
+        $db->table('special_days')->insert(['date' => now()->addDays(2)->format('Y-m-d'), 'closed' => true]);
+        $this->postJson('/api/v1/restaurant/reservations', [
+            ...$payload,
+            'request_key' => (string) \Illuminate\Support\Str::uuid(),
+        ])->assertUnprocessable();
+        $this->postJson('/api/v1/restaurant/hours', [
+            'weekday' => 1,
+            'opens' => '18:00',
+            'closes' => '18:00',
+        ])->assertUnprocessable();
+    }
+    public function test_waitlist_conversion_is_atomic_idempotent_and_permission_checked(): void
+    {
+        $payload = [...$this->payload(), 'requested_at' => $this->payload()['starts_at']];
+        $entry = $this->postJson('/api/v1/restaurant/waitlist', $payload)->assertOk()->json('id');
+        $this->postJson('/api/v1/restaurant/reservations', $this->payload())->assertCreated();
+        $conversion = [
+            'table_id' => 1,
+            'starts_at' => $payload['starts_at'],
+            'duration_minutes' => 90,
+            'version' => 1,
+        ];
+        $this->postJson('/api/v1/restaurant/waitlist/' . $entry . '/book', $conversion)->assertConflict();
+        $this->assertSame(
+            'waiting',
+            DB::connection('tenant')->table('reservation_waitlist')->find($entry)->status,
+        );
+        $conversion['starts_at'] = now()->addDay()->format('Y-m-d') . 'T20:00';
+        $booking = $this->postJson('/api/v1/restaurant/waitlist/' . $entry . '/book', $conversion)
+            ->assertOk()
+            ->json('reservation_id');
+        $this->postJson('/api/v1/restaurant/waitlist/' . $entry . '/book', $conversion)
+            ->assertOk()
+            ->assertJson(['reservation_id' => $booking]);
+        $this->assertSame(2, DB::connection('tenant')->table('reservations')->count());
+        $this->patchJson('/api/v1/restaurant/waitlist/' . $entry, [
+            ...$payload,
+            'version' => 1,
+        ])->assertConflict();
+        $role = $this->customRole(['waitlist.read']);
+        $this->user->update(['role' => 'staff', 'restaurant_role_id' => $role]);
+        $this->getJson('/api/v1/restaurant/waitlist?date=' . now()->addDay()->format('Y-m-d'))->assertOk();
+        $this->postJson('/api/v1/restaurant/waitlist', $payload)->assertForbidden();
+        $this->postJson('/api/v1/restaurant/waitlist/' . $entry . '/book', $conversion)->assertForbidden();
+    }
+
+    public function test_combination_blocks_every_member_and_releases_them_on_cancel(): void
+    {
+        DB::connection('tenant')
+            ->table('dining_tables')
+            ->insert(['id' => 2, 'name' => 'Tisch 2', 'room_id' => 1, 'capacity' => 4, 'active' => true]);
+        $payload = [...$this->payload(), 'additional_table_ids' => [2], 'party_size' => 6];
+        $booking = $this->postJson('/api/v1/restaurant/reservations', $payload)->assertCreated()->json('id');
+        $this->postJson('/api/v1/restaurant/reservations', [
+            ...$this->payload(),
+            'table_id' => 2,
+        ])->assertConflict();
+        $token = $this->widgetToken();
+        $query = http_build_query(['starts_at' => $payload['starts_at'], 'party_size' => 2]);
+        $this->getJson('/api/widget/' . $token . '/availability?' . $query)
+            ->assertOk()
+            ->assertJsonCount(0, 'tables');
+        $this->getJson('/api/v1/restaurant/reservations?date=' . now()->addDay()->format('Y-m-d'))
+            ->assertOk()
+            ->assertJsonPath('0.additional_table_ids.0', 2);
+        $this->postJson('/api/v1/restaurant/reservations/' . $booking . '/cancel')->assertNoContent();
+        $this->postJson('/api/v1/restaurant/reservations', [
+            ...$this->payload(),
+            'table_id' => 2,
+        ])->assertCreated();
+    }
+    public function test_combination_rejects_foreign_rooms_and_missing_tables(): void
+    {
+        DB::connection('tenant')
+            ->table('rooms')
+            ->insert(['id' => 2, 'name' => 'Terrasse']);
+        DB::connection('tenant')
+            ->table('dining_tables')
+            ->insert(['id' => 2, 'name' => 'Tisch 2', 'room_id' => 2, 'capacity' => 4, 'active' => true]);
+        foreach ([2, 9999] as $extra) {
+            $this->postJson('/api/v1/restaurant/reservations', [
+                ...$this->payload(),
+                'additional_table_ids' => [$extra],
+                'party_size' => 6,
+            ])->assertUnprocessable();
+        }
+        $this->assertSame(0, DB::connection('tenant')->table('reservations')->count());
+    }
 }

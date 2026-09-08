@@ -32,6 +32,7 @@ import {
   Form,
   DataTable,
 } from '@platzhirsch/ui-runtime/components';
+const Waitlist = lazy(() => import('@platzhirsch/reservation-ui/Waitlist.tsx'));
 const Support = lazy(() => import('@platzhirsch/support-ui/Support.tsx'));
 const SystemGuide = lazy(() => import('@platzhirsch/system-guide-ui'));
 import { billingManifest } from '@platzhirsch/billing-ui';
@@ -117,6 +118,7 @@ const restaurantNav = [
   ['reporting', 'Erweiterte Auswertungen', LayoutDashboard],
   ['module-shop', 'Modul-Shop', Code2],
   ['reservations', 'Reservierungen', CalendarDays],
+  ['waitlist', 'Warteliste', Clock],
   ['table-plan', 'Tischplan', Armchair],
   ['tables', 'Tische', Armchair],
   ['rooms', 'Räume', DoorOpen],
@@ -187,6 +189,7 @@ const pagePermission: Record<string, string> = {
   reporting: 'reporting.read',
   'module-shop': 'modules.manage',
   reservations: 'reservation.read',
+  waitlist: 'waitlist.read',
   'table-plan': 'reservation.read',
   tables: 'restaurant.configure',
   rooms: 'restaurant.configure',
@@ -470,6 +473,12 @@ function Content({
         </Suspense>
       );
   }
+  if (page === 'waitlist')
+    return (
+      <Suspense fallback={<Loading />}>
+        <Waitlist tenant={tenant} user={user} />
+      </Suspense>
+    );
   if (['overview', 'reservations', 'table-plan'].includes(page))
     return (
       <Suspense fallback={<Loading />}>

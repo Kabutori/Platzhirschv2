@@ -208,6 +208,11 @@ class WidgetController
                 'duration_minutes' => 'sometimes|integer',
                 'request_key' => 'required|uuid',
             ]);
+            abort_if(
+                !empty($data['additional_table_ids']),
+                422,
+                'Tischkombinationen bitte direkt mit dem Restaurant abstimmen.',
+            );
             $data['status'] = 'confirmed';
             $data['duration_minutes'] = (int) $client->duration_minutes;
             $reservation = $service->save($data, $tenant->timezone, null, 'widget');

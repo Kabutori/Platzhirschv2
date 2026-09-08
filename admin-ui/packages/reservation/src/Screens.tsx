@@ -130,9 +130,9 @@ export function RestaurantResource({ resource, tenant }: { resource: string; ten
       <div className="toolbar">
         <p className="muted">
           {resource === 'hours'
-            ? 'Mehrere Zeitfenster pro Tag möglich. Buchungen müssen vollständig in ein Zeitfenster passen.'
+            ? 'Mehrere Zeitfenster pro Tag möglich. Liegt die Schließzeit vor der Öffnung, endet das Zeitfenster am Folgetag.'
             : resource === 'special-days'
-              ? 'Sondertage ersetzen die regulären Öffnungszeiten.'
+              ? 'Sondertage ersetzen den gesamten Kalendertag, einschließlich hineinreichender Öffnungszeiten vom Vortag.'
               : 'Deine Restaurant-Konfiguration'}
         </p>
         <button className="primary" onClick={() => setForm({})}>
@@ -246,6 +246,15 @@ export function Reservations({
         tables.data
           ?.filter((r: Row) => r.active)
           .map((r: Row) => ({ value: r.id, label: `${r.name} · ${r.capacity} Plätze` })) || [],
+    },
+    {
+      key: 'additional_table_ids',
+      label: 'Weitere Tische kombinieren',
+      multiple: true,
+      help: 'Optional: aktive Tische im selben Raum. Mehrfachauswahl mit Strg/Cmd; jeder Tisch wird im gesamten Zeitraum blockiert.',
+      options: (tables.data || [])
+        .filter((t: Row) => t.active)
+        .map((t: Row) => ({ value: t.id, label: t.name + ' · ' + t.capacity + ' Plätze' })),
     },
     { key: 'party_size', label: 'Personen', type: 'number', required: true, min: 1, max: 50, default: 2 },
     {

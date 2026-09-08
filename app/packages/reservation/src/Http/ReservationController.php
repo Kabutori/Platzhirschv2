@@ -50,13 +50,13 @@ class ReservationController
             'hours' => [
                 'weekday' => 'required|integer|min:1|max:7',
                 'opens' => 'required|date_format:H:i',
-                'closes' => 'required|date_format:H:i|after:opens',
+                'closes' => 'required|date_format:H:i|different:opens',
             ],
             'special-days' => [
                 'date' => 'required|date_format:Y-m-d',
                 'closed' => 'required|boolean',
                 'opens' => 'nullable|required_if:closed,false|date_format:H:i',
-                'closes' => 'nullable|required_if:closed,false|date_format:H:i|after:opens',
+                'closes' => 'nullable|required_if:closed,false|date_format:H:i|different:opens',
                 'note' => 'nullable|string|max:250',
             ],
         };
@@ -91,7 +91,9 @@ class ReservationController
         abort_unless(isset(self::RESOURCES[$resource]), 404);
         $db = $this->db->connection('tenant');
         abort_if(
-            $resource === 'tables' && $db->table('reservations')->where('table_id', $id)->exists(),
+            $resource === 'tables' &&
+                ($db->table('reservations')->where('table_id', $id)->exists() ||
+                    $db->table('reservation_extra_tables')->where('table_id', $id)->exists()),
             409,
             'Tisch hat Reservierungen. Bitte deaktivieren statt löschen.',
         );
@@ -110,7 +112,7 @@ class ReservationController
         $r->validate(['date' => 'required|date_format:Y-m-d']);
         $tenant = $r->attributes->get('tenant');
         $day = CarbonImmutable::parse($r->input('date'), $tenant->timezone)->startOfDay();
-        return $this->db
+        $rows = $this->db
             ->connection('tenant')
             ->table('reservations')
             ->join('dining_tables', 'table_id', '=', 'dining_tables.id')
@@ -119,6 +121,21 @@ class ReservationController
             ->where('starts_at', '<', $day->addDay()->utc())
             ->orderBy('starts_at')
             ->get();
+        $extra = $this->db
+            ->connection('tenant')
+            ->table('reservation_extra_tables')
+            ->join('dining_tables', 'table_id', '=', 'dining_tables.id')
+            ->whereIn('reservation_id', $rows->pluck('id'))
+            ->get(['reservation_id', 'table_id', 'name'])
+            ->groupBy('reservation_id');
+        foreach ($rows as $row) {
+            $members = $extra->get($row->id, collect());
+            $row->additional_table_ids = $members->pluck('table_id')->all();
+            if ($members->isNotEmpty()) {
+                $row->table_name .= ' + ' . $members->pluck('name')->join(' + ');
+            }
+        }
+        return $rows;
     }
     public function saveReservation(Request $r, ReservationGateway $service, ?int $id = null)
     {
@@ -140,7 +157,15 @@ class ReservationController
         $db->transaction(function () use ($db, $id) {
             $reservation = $db->table('reservations')->find($id);
             abort_unless($reservation, 404);
-            $db->table('dining_tables')->where('id', $reservation->table_id)->lockForUpdate()->first();
+            $ids = [
+                $reservation->table_id,
+                ...$db
+                    ->table('reservation_extra_tables')
+                    ->where('reservation_id', $id)
+                    ->pluck('table_id')
+                    ->all(),
+            ];
+            $db->table('dining_tables')->whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get();
             $db->table('reservations')
                 ->where('id', $id)
                 ->update([

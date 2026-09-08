@@ -62,7 +62,10 @@ export default function TablePlan({
   const current = reservations.filter((r) => !['cancelled', 'no_show', 'completed'].includes(r.status));
   function bookings(id: number) {
     return current.filter(
-      (r) => r.table_id === id && clock(r.starts_at, timezone) <= time && clock(r.ends_at, timezone) > time,
+      (r) =>
+        (r.table_id === id || (r.additional_table_ids || []).includes(id)) &&
+        clock(r.starts_at, timezone) <= time &&
+        clock(r.ends_at, timezone) > time,
     );
   }
   async function save(table: Row, x: number, y: number) {
@@ -319,14 +322,16 @@ export default function TablePlan({
             )}
           </div>
           {reservations
-            .filter((r) => r.table_id === selected)
+            .filter((r) => r.table_id === selected || (r.additional_table_ids || []).includes(selected))
             .map((r) => (
               <button className="floor-booking" key={r.id} disabled={!canWrite} onClick={() => edit(r)}>
                 {clock(r.starts_at, timezone)}–{clock(r.ends_at, timezone)} · {r.guest_name} · {r.party_size}{' '}
                 Personen · {r.status}
               </button>
             ))}
-          {!reservations.some((r) => r.table_id === selected) && <p>Keine Reservierungen.</p>}
+          {!reservations.some(
+            (r) => r.table_id === selected || (r.additional_table_ids || []).includes(selected),
+          ) && <p>Keine Reservierungen.</p>}
         </section>
       )}
     </div>
