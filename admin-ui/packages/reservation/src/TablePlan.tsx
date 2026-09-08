@@ -113,6 +113,7 @@ export default function TablePlan({
         <label>
           Raum
           <select
+            aria-label="Raum"
             value={room}
             onChange={(e) => {
               setRoom(e.target.value);

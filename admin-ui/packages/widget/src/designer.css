@@ -58,7 +58,7 @@ dialog:has(.widget-designer) {
 .preview-launch {
   display: block;
   background: var(--designer-accent);
-  color: #121212;
+  color: var(--designer-on-accent);
   padding: 12px;
   text-align: center;
 }

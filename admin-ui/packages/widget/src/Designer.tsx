@@ -23,6 +23,14 @@ export default function Designer({
     [busy, setBusy] = useState(false),
     [error, setError] = useState<unknown>();
   const en = language === 'en';
+  const rgb = accent
+    .slice(1)
+    .match(/../g)
+    .map((v: string) => {
+      const n = parseInt(v, 16) / 255;
+      return n <= 0.04045 ? n / 12.92 : ((n + 0.055) / 1.055) ** 2.4;
+    });
+  const onAccent = rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722 > 0.179 ? '#000000' : '#ffffff';
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (busy) return;
@@ -74,7 +82,7 @@ export default function Designer({
         <div className="designer-fields">
           <label>
             Position
-            <select value={position} onChange={(e) => setPosition(e.target.value)}>
+            <select aria-label="Position" value={position} onChange={(e) => setPosition(e.target.value)}>
               <option value="inline">Im Seiteninhalt</option>
               <option value="bottom-right">Unten rechts</option>
               <option value="bottom-left">Unten links</option>
@@ -84,7 +92,7 @@ export default function Designer({
           </label>
           <label>
             Sprache
-            <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+            <select aria-label="Sprache" value={language} onChange={(e) => setLanguage(e.target.value)}>
               <option value="de">Deutsch</option>
               <option value="en">English</option>
             </select>
@@ -142,7 +150,7 @@ export default function Designer({
         <p className="muted">Darstellungsvorschau mit Beispieldaten; es wird keine Reservierung versendet.</p>
         <div
           className={'designer-preview ' + position}
-          style={{ '--designer-accent': accent } as CSSProperties}
+          style={{ '--designer-accent': accent, '--designer-on-accent': onAccent } as CSSProperties}
         >
           <div className="preview-surface">
             {brand && <span className="preview-brand">P · Platzhirsch</span>}

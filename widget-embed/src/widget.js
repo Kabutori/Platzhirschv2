@@ -106,7 +106,8 @@
         while (walker.nextNode()) {
           const node = walker.currentNode;
           const trimmed = node.textContent.trim();
-          if (english[trimmed]) node.textContent = node.textContent.replace(trimmed, this.t(trimmed));
+          if (node.parentElement.tagName !== 'H2' && english[trimmed])
+            node.textContent = node.textContent.replace(trimmed, this.t(trimmed));
         }
         section
           .querySelectorAll('[aria-label]')
@@ -122,8 +123,20 @@
           this.config.language === 'en'
             ? `Times in ${this.config.timezone} · Duration: ${this.config.duration_minutes} minutes`
             : `Uhrzeiten in ${this.config.timezone} · Reservierungsdauer: ${this.config.duration_minutes} Minuten`;
-        if (/^#[a-f0-9]{6}$/i.test(this.config.accent || ''))
+        if (/^#[a-f0-9]{6}$/i.test(this.config.accent || '')) {
           this.style.setProperty('--accent', this.config.accent);
+          const rgb = this.config.accent
+            .slice(1)
+            .match(/../g)
+            .map((v) => {
+              const n = parseInt(v, 16) / 255;
+              return n <= 0.04045 ? n / 12.92 : ((n + 0.055) / 1.055) ** 2.4;
+            });
+          this.style.setProperty(
+            '--on-accent',
+            rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722 > 0.179 ? '#000000' : '#ffffff',
+          );
+        }
         this.form = this.root.querySelector('form');
         this.form.hidden = false;
         this.form.elements.party_size.max = String(this.config.max_party_size || 50);

@@ -526,5 +526,16 @@ class RestaurantTest extends TestCase
             ->assertJsonPath('max_party_size', 4)
             ->assertJsonPath('position', 'inline');
         $this->patchJson('/api/v1/restaurant/widget/999999', $design)->assertNotFound();
+        $other = Tenant::create([
+            'name' => 'Other restaurant',
+            'email' => 'other@example.test',
+            'status' => 'active',
+        ]);
+        DB::table('widget_clients')
+            ->where('id', $id)
+            ->update(['tenant_id' => $other->id]);
+        $this->patchJson('/api/v1/restaurant/widget/' . $id, $design)->assertNotFound();
+        $this->user->update(['role' => 'staff']);
+        $this->patchJson('/api/v1/restaurant/widget/' . $id, $design)->assertForbidden();
     }
 }
