@@ -56,7 +56,9 @@ jobs:
         if: always()
         with:
           name: role-design-preview
-          path: admin-ui/test-results/roles-*.png
+          path: |
+            admin-ui/test-results/roles-*.png
+            admin-ui/test-results/modules-*.png
           if-no-files-found: ignore
   windows-syntax:
     runs-on: windows-latest

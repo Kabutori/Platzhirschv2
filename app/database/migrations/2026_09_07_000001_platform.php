@@ -89,39 +89,12 @@ return new class extends Migration {
             $t->string('ip', 45)->nullable();
             $t->timestamp('created_at');
         });
-        Schema::create('support_tickets', function (Blueprint $t) {
-            $t->id();
-            $t->foreignId('tenant_id')->constrained();
-            $t->foreignId('user_id')->constrained();
-            $t->string('subject');
-            $t->string('status')->default('open');
-            $t->string('priority')->default('normal');
-            $t->timestamps();
-        });
-        Schema::create('support_messages', function (Blueprint $t) {
-            $t->id();
-            $t->foreignId('ticket_id')->constrained('support_tickets');
-            $t->foreignId('user_id')->constrained();
-            $t->text('body');
-            $t->boolean('internal')->default(false);
-            $t->timestamp('created_at');
-        });
-        Schema::create('widget_clients', function (Blueprint $t) {
-            $t->id();
-            $t->foreignId('tenant_id')->constrained();
-            $t->string('token_hash', 64)->unique();
-            $t->json('origins');
-            $t->timestamp('expires_at');
-            $t->timestamps();
-        });
+
     }
     public function down(): void
     {
         foreach (
             [
-                'widget_clients',
-                'support_messages',
-                'support_tickets',
                 'audit_entries',
                 'failed_jobs',
                 'jobs',

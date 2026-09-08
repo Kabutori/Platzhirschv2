@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@platzhirsch/ui-runtime/api';
 export default function Shop({ tenant }: { tenant?: string }) {
   const q = useQueryClient();
+  const requestKeys = useRef<Record<string, string>>({});
   const data = useQuery({
     queryKey: ['module-shop', tenant],
     queryFn: () => api('v1/restaurant/modules', 'GET', undefined, tenant),
@@ -16,6 +17,7 @@ export default function Shop({ tenant }: { tenant?: string }) {
     setError('');
     try {
       await api('v1/restaurant/modules/' + path, 'POST', body, tenant);
+      if (path === 'orders') delete requestKeys.current[code];
       setNotice(
         path === 'orders'
           ? 'Bestellung erfasst. Die Administration bestätigt die externe Zahlung.'
@@ -47,7 +49,7 @@ export default function Shop({ tenant }: { tenant?: string }) {
         </p>
       )}
       {data.error && <p role="alert">{data.error.message}</p>}
-      <div className="module-grid">
+      <div className="module-cards">
         {data.data?.products.map((p: any) => {
           const entitlement = data.data.entitlements.find((e: any) => e.module_code === p.module_code);
           const pending = data.data.orders.some(
@@ -55,7 +57,7 @@ export default function Shop({ tenant }: { tenant?: string }) {
           );
           const usable = entitlement && new Date(entitlement.paid_until) > new Date();
           return (
-            <section className="panel" key={p.module_code}>
+            <section className="panel padded module-card" key={p.module_code}>
               <p className="eyebrow">ERWEITERUNG</p>
               <h3>{p.module_code === 'reporting' ? 'Erweiterte Auswertungen' : p.module_code}</h3>
               <p>Zeiträume auswerten und Berichte speichern. Rollenrechte begrenzen den Zugriff.</p>
@@ -67,19 +69,28 @@ export default function Shop({ tenant }: { tenant?: string }) {
                     ) + ' / Monat'}
               </strong>
               <p>
-                Status: {entitlement?.status || 'Nicht gebucht'}
+                Status:{' '}
+                {(
+                  {
+                    active: 'Gekauft & aktiviert',
+                    inactive: 'Gekauft · nicht aktiv',
+                    activating: 'Wird aktiviert',
+                    error: 'Aktivierung fehlgeschlagen',
+                  } as Record<string, string>
+                )[entitlement?.status] || 'Nicht gekauft'}
                 {usable
                   ? ' · gültig bis ' + new Date(entitlement.paid_until).toLocaleDateString('de-DE')
                   : ''}
               </p>
-              <div className="actions">
+              <div className="toolbar">
                 <button
                   disabled={busy || !p.available || p.amount_cents == null || pending}
                   onClick={() => {
                     if (confirm('Kostenpflichtige Bestellung zum angezeigten Monatspreis senden?'))
                       void action(p.module_code, 'orders', {
                         module_code: p.module_code,
-                        request_key: crypto.randomUUID(),
+                        request_key: (requestKeys.current[p.module_code] ||= crypto.randomUUID()),
+                        expected_amount_cents: p.amount_cents,
                       });
                   }}
                 >
@@ -104,7 +115,7 @@ export default function Shop({ tenant }: { tenant?: string }) {
           );
         })}
       </div>
-      <section className="panel">
+      <section className="panel padded">
         <h3>Bestellungen</h3>
         <div className="table-scroll">
           <table>

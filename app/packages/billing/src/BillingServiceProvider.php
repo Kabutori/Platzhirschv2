@@ -7,6 +7,10 @@ class BillingServiceProvider extends ServiceProvider implements Module
 {
     public function register(): void
     {
+        $this->app->bind(
+            \App\Contracts\Module\ModuleAccess::class,
+            \App\Modules\Billing\PublicApi\Entitlements::class,
+        );
         if (!$this->app->bound(ModuleRegistry::class)) {
             $this->app->singleton(ModuleRegistry::class);
         }

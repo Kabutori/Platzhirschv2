@@ -47,7 +47,7 @@ export default function Reports({ tenant, canManage = false }: { tenant?: string
       </form>
       <p>Bis zu 93 Kalendertage. Gruppierung nach der Zeitzone des Restaurants.</p>
       {(error || q.error) && <p role="alert">{error || q.error?.message}</p>}
-      <section className="panel">
+      <section className="panel padded">
         <div className="table-scroll">
           <table>
             <thead>
@@ -87,7 +87,7 @@ export default function Reports({ tenant, canManage = false }: { tenant?: string
           <button disabled={busy || !q.data}>Zeitraum speichern</button>
         </form>
       )}
-      <section className="panel">
+      <section className="panel padded">
         <h3>Gespeicherte Zeiträume</h3>
         {q.data?.saved.map((s: any) => (
           <div className="toolbar" key={s.id}>

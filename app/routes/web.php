@@ -1,13 +1,6 @@
 <?php
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{
-    AuthController,
-    PlatformController,
-    RestaurantController,
-    SupportController,
-    WidgetController,
-    RoleController,
-};
+use App\Http\Controllers\{PlatformController, RestaurantController};
 
 Route::get('/', fn() => redirect('/administration/login'));
 Route::get('/admin/{path?}', function () {
@@ -24,22 +17,6 @@ Route::get('/{portal}/{path?}', function () {
     ->where('path', '.*');
 // Same-origin browser API deliberately uses Laravel's web middleware: real sessions + CSRF.
 Route::prefix('api')->group(function () {
-    Route::get('csrf', [AuthController::class, 'csrf']);
-    Route::get('bootstrap-status', [AuthController::class, 'status']);
-    Route::post('bootstrap/first-admin', [AuthController::class, 'bootstrap'])->middleware(
-        'throttle:bootstrap',
-    );
-    Route::prefix('v1/admin/auth')->group(function () {
-        Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login');
-        Route::post('forgot-password', [AuthController::class, 'forgot'])->middleware('throttle:3,1');
-        Route::post('reset-password', [AuthController::class, 'reset'])->middleware('throttle:5,1');
-        Route::middleware('auth')->group(function () {
-            Route::get('me', [AuthController::class, 'me']);
-            Route::post('logout', [AuthController::class, 'logout']);
-            Route::post('mfa/begin', [AuthController::class, 'beginMfa'])->middleware('throttle:5,1');
-            Route::post('mfa/confirm', [AuthController::class, 'confirmMfa'])->middleware('throttle:5,1');
-        });
-    });
     Route::prefix('v1/admin')
         ->middleware(['auth', 'system'])
         ->group(function () {
@@ -74,32 +51,8 @@ Route::prefix('api')->group(function () {
         ->group(function () {
             Route::get('profile', [RestaurantController::class, 'profile']);
             Route::patch('profile', [RestaurantController::class, 'updateProfile']);
-            Route::get('reservations', [RestaurantController::class, 'reservations']);
-            Route::get('export', [RestaurantController::class, 'export']);
-            Route::post('reservations', [RestaurantController::class, 'saveReservation']);
-            Route::patch('reservations/{id}', [RestaurantController::class, 'saveReservation']);
-            Route::post('reservations/{id}/cancel', [RestaurantController::class, 'cancel']);
-            Route::get('roles', [RoleController::class, 'index']);
-            Route::post('roles', [RoleController::class, 'save']);
-            Route::patch('roles/{id}', [RoleController::class, 'save']);
-            Route::delete('roles/{id}', [RoleController::class, 'delete']);
             Route::patch('team/{id}', [RestaurantController::class, 'updateTeam']);
             Route::get('team', [RestaurantController::class, 'team']);
             Route::post('team', [RestaurantController::class, 'createTeam']);
-            Route::get('widget', [WidgetController::class, 'list']);
-            Route::post('widget', [WidgetController::class, 'create']);
-            Route::delete('widget/{id}', [WidgetController::class, 'revoke']);
-            Route::get('{resource}', [RestaurantController::class, 'index']);
-            Route::post('{resource}', [RestaurantController::class, 'save']);
-            Route::patch('{resource}/{id}', [RestaurantController::class, 'save']);
-            Route::delete('{resource}/{id}', [RestaurantController::class, 'delete']);
-        });
-    Route::prefix('v1/support')
-        ->middleware('auth')
-        ->group(function () {
-            Route::get('/', [SupportController::class, 'index']);
-            Route::post('/', [SupportController::class, 'create']);
-            Route::get('{id}', [SupportController::class, 'show']);
-            Route::post('{id}/messages', [SupportController::class, 'reply']);
         });
 });

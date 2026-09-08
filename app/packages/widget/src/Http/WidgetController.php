@@ -1,15 +1,22 @@
 <?php
-namespace App\Http\Controllers;
-use App\Models\Tenant;
-use App\Services\{TenantDatabase, ReservationService, Audit};
+namespace App\Modules\Widget\Http;
+use App\Contracts\Module\{TenantRuntime, AuditSink};
+use App\Modules\Reservation\PublicApi\ReservationGateway as ReservationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\DatabaseManager;
 class WidgetController
 {
+    public function __construct(
+        private DatabaseManager $db,
+        private TenantRuntime $runtime,
+        private AuditSink $audit,
+        private ReservationService $reservations,
+    ) {}
     public function list(Request $r)
     {
         abort_unless($r->user()->hasPermission('widget.manage'), 403);
-        return DB::table('widget_clients')
+        return $this->db
+            ->table('widget_clients')
             ->where('tenant_id', $r->attributes->get('tenant')->id)
             ->get(['id', 'origins', 'expires_at', 'created_at', 'duration_minutes', 'accent']);
     }
@@ -38,7 +45,7 @@ class WidgetController
             $origins[] = rtrim(strtolower($url), '/');
         }
         $token = bin2hex(random_bytes(32));
-        $id = DB::table('widget_clients')->insertGetId([
+        $id = $this->db->table('widget_clients')->insertGetId([
             'tenant_id' => $r->attributes->get('tenant')->id,
             'token_hash' => hash('sha256', $token),
             'origins' => json_encode($origins),
@@ -48,7 +55,7 @@ class WidgetController
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        Audit::record('widget.created', $id, $r->attributes->get('tenant')->id);
+        $this->audit->record('widget.created', $id, $r->attributes->get('tenant')->id);
         return response()->json(
             [
                 'id' => $id,
@@ -70,19 +77,21 @@ class WidgetController
     {
         abort_unless($r->user()->hasPermission('widget.manage'), 403);
         abort_unless(
-            DB::table('widget_clients')
+            $this->db
+                ->table('widget_clients')
                 ->where('tenant_id', $r->attributes->get('tenant')->id)
                 ->where('id', $id)
                 ->delete(),
             404,
         );
-        Audit::record('widget.revoked', $id, $r->attributes->get('tenant')->id);
+        $this->audit->record('widget.revoked', $id, $r->attributes->get('tenant')->id);
         return response()->noContent();
     }
     private function run(Request $r, string $token, \Closure $callback)
     {
         abort_unless(preg_match('/^[a-f0-9]{64}$/D', $token), 404);
-        $client = DB::table('widget_clients')
+        $client = $this->db
+            ->table('widget_clients')
             ->where('token_hash', hash('sha256', $token))
             ->where('expires_at', '>', now())
             ->first();
@@ -90,31 +99,25 @@ class WidgetController
         $origin = $r->header('Origin');
         $allowed = [...json_decode($client->origins, true), rtrim(config('app.url'), '/')];
         abort_if($origin && !in_array($origin, $allowed, true), 403);
-        $tenant = Tenant::findOrFail($client->tenant_id);
-        abort_unless($tenant->status === 'active', 403);
-        $database = app(TenantDatabase::class);
-        $database->connect($tenant);
         try {
-            try {
-                $response = response()->json($callback($tenant, $client));
-            } catch (\Throwable $error) {
-                // Allowed origins must also receive validation and conflict responses.
-                // Otherwise browsers hide useful booking errors behind a CORS failure.
-                $handler = app(\Illuminate\Contracts\Debug\ExceptionHandler::class);
-                $handler->report($error);
-                $response = $handler->render($r, $error);
-            }
-            if ($origin) {
-                $response->headers->set('Access-Control-Allow-Origin', $origin);
-                $response->headers->set('Vary', 'Origin');
-            }
-            $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-            $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-            return $response;
-        } finally {
-            $database->disconnect();
+            $response = $this->runtime->withTenant(
+                (int) $client->tenant_id,
+                fn($tenant) => response()->json($callback($tenant, $client)),
+            );
+        } catch (\Throwable $error) {
+            $handler = app(\Illuminate\Contracts\Debug\ExceptionHandler::class);
+            $handler->report($error);
+            $response = $handler->render($r, $error);
         }
+        if ($origin) {
+            $response->headers->set('Access-Control-Allow-Origin', $origin);
+            $response->headers->set('Vary', 'Origin');
+        }
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        return $response;
     }
+
     public function config(Request $r, string $token)
     {
         return $this->run(
@@ -125,13 +128,7 @@ class WidgetController
                 'timezone' => $tenant->timezone,
                 'duration_minutes' => $client->duration_minutes,
                 'accent' => $client->accent,
-                'tables' => DB::connection('tenant')
-                    ->table('dining_tables')
-                    ->where('active', true)
-                    ->get(['id', 'name', 'capacity']),
-                'hours' => DB::connection('tenant')
-                    ->table('opening_hours')
-                    ->get(['weekday', 'opens', 'closes']),
+                ...$this->reservations->catalog(),
             ],
         );
     }
@@ -160,7 +157,7 @@ class WidgetController
     {
         return $this->run($r, $token, function ($tenant, $client) use ($r, $service) {
             $data = $r->validate([
-                ...RestaurantController::reservationRules(),
+                ...\App\Modules\Reservation\PublicApi\ReservationRules::rules(),
                 'email' => 'required|email|max:254',
                 'consent' => 'required|accepted',
                 'website' => 'nullable|string|max:0',
@@ -170,7 +167,7 @@ class WidgetController
             $data['status'] = 'confirmed';
             $data['duration_minutes'] = (int) $client->duration_minutes;
             $reservation = $service->save($data, $tenant->timezone, null, 'widget');
-            Audit::record('widget.booked', $reservation->id, $tenant->id);
+            $this->audit->record('widget.booked', $reservation->id, $tenant->id);
             return [
                 'id' => $reservation->id,
                 'message' => 'Reservierung gespeichert. Bitte notiere deine Buchungsnummer.',

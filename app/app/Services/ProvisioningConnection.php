@@ -19,7 +19,7 @@ class ProvisioningConnection
         if ($serverId) {
             $base = array_replace($base, app(ServerDirectory::class)->connection($serverId));
         }
-        if ($serverId && ($secret['server_version'] ?? null) !== $base['server_version']) {
+        if ($serverId && ($secret['server_version'] ?? null) !== (int) $base['server_version']) {
             throw new \RuntimeException('server_authorization_stale');
         }
         $account = $secret['account_host'] ?? '127.0.0.1';

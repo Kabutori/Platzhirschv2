@@ -7,10 +7,12 @@
   ],
   "exports": {
     "./api": "./src/api.ts",
-    "./types": "./src/types.ts"
+    "./types": "./src/types.ts",
+    "./components": "./src/components.tsx"
   },
   "peerDependencies": {
     "react": "^19.2.0",
+    "@tanstack/react-query": "^5.90.0",
     "lucide-react": "^0.468.0"
   }
 }

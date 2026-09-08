@@ -1,10 +1,11 @@
 <?php
-namespace App\Services;
-use App\Contracts\Module\ReservationReports;
-use Illuminate\Support\Facades\DB;
+namespace App\Modules\Reservation\Application;
+use App\Contracts\Module\ReservationReports as ReportContract;
+use Illuminate\Database\DatabaseManager;
 use Carbon\Carbon;
-class ReservationReportAdapter implements ReservationReports
+class ReservationReports implements ReportContract
 {
+    public function __construct(private DatabaseManager $db) {}
     public function daily(string $from, string $to): array
     {
         $timezone = request()->attributes->get('tenant')->timezone;
@@ -12,7 +13,8 @@ class ReservationReportAdapter implements ReservationReports
         $end = Carbon::parse($to, $timezone)->addDay()->startOfDay()->utc();
         $days = [];
         foreach (
-            DB::connection('tenant')
+            $this->db
+                ->connection('tenant')
                 ->table('reservations')
                 ->where('starts_at', '>=', $start)
                 ->where('starts_at', '<', $end)

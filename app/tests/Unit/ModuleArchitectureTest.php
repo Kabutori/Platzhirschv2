@@ -21,7 +21,7 @@ class ModuleArchitectureTest extends TestCase
     private function moduleFiles(): array
     {
         $paths = [];
-        foreach (['identity', 'provisioning', 'billing', 'reporting'] as $module) {
+        foreach (['identity', 'provisioning', 'billing', 'reporting', 'support', 'reservation', 'widget'] as $module) {
             $it = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator(__DIR__ . '/../../packages/' . $module . '/src'),
             );

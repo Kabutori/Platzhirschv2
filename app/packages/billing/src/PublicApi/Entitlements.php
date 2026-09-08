@@ -1,8 +1,18 @@
 <?php
 namespace App\Modules\Billing\PublicApi;
 use Illuminate\Database\DatabaseManager;
-class Entitlements
+class Entitlements implements \App\Contracts\Module\ModuleAccess
 {
+    public function enabled(int $tenantId): array
+    {
+        return $this->db
+            ->table('billing_entitlements')
+            ->where('tenant_id', $tenantId)
+            ->where('status', 'active')
+            ->where('paid_until', '>', now())
+            ->pluck('module_code')
+            ->all();
+    }
     public function __construct(private DatabaseManager $db) {}
     public function active(int $tenant, string $module): bool
     {

@@ -25,12 +25,13 @@ class InstalledDatabaseDirectory implements InstalledDatabaseAccess
                 ->get()
             as $tenant
         ) {
+            $placement = app(TenantDatabase::class)->configuration($tenant);
             $rows[] = [
                 'id' => (string) $tenant->id,
                 'name' => $tenant->name,
                 'scope' => 'Restaurant',
-                'host' => $config['host'],
-                'port' => $config['port'],
+                'host' => $placement['host'],
+                'port' => $placement['port'],
                 'database' => $tenant->database_name,
                 'username' => $tenant->database_user,
                 'status' => $tenant->status,

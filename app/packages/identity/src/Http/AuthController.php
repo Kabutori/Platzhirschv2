@@ -1,21 +1,32 @@
 <?php
-namespace App\Http\Controllers;
-use App\Models\User;
-use App\Services\Audit;
-use App\Services\Totp;
+namespace App\Modules\Identity\Http;
+use App\Modules\Identity\Domain\User;
+use App\Contracts\Module\{AuditSink, ModuleAccess};
+use App\Modules\Identity\Application\Totp;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{Auth, DB, Hash, Password};
+use Illuminate\Database\DatabaseManager;
+use Illuminate\Contracts\Hashing\Hasher;
+use Illuminate\Contracts\Auth\PasswordBroker;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class AuthController
 {
+    public function __construct(
+        private DatabaseManager $db,
+        private Hasher $hash,
+        private PasswordBroker $passwords,
+        private AuditSink $audit,
+        private ModuleAccess $modules,
+    ) {}
     public function csrf()
     {
         return response()->json(['token' => csrf_token()]);
     }
     public function status()
     {
-        return ['bootstrapped' => (bool) DB::table('bootstrap_state')->where('id', 1)->value('completed')];
+        return [
+            'bootstrapped' => (bool) $this->db->table('bootstrap_state')->where('id', 1)->value('completed'),
+        ];
     }
     public function bootstrap(Request $r)
     {
@@ -32,18 +43,19 @@ class AuthController
             'email' => 'required|email|max:254',
             'password' => ['required', 'confirmed', PasswordRule::min(12)],
         ]);
-        return DB::transaction(function () use ($data) {
-            $state = DB::table('bootstrap_state')->where('id', 1)->lockForUpdate()->first();
+        return $this->db->transaction(function () use ($data) {
+            $state = $this->db->table('bootstrap_state')->where('id', 1)->lockForUpdate()->first();
             abort_if(
                 $state->completed || User::where('role', 'system_admin')->exists(),
                 409,
                 'Einrichtung bereits abgeschlossen.',
             );
             $user = User::create([...$data, 'email' => strtolower($data['email']), 'role' => 'system_admin']);
-            DB::table('bootstrap_state')
+            $this->db
+                ->table('bootstrap_state')
                 ->where('id', 1)
                 ->update(['completed' => true]);
-            Audit::record('bootstrap.completed', $user->id);
+            $this->audit->record('bootstrap.completed', $user->id);
             return response()->json(['user' => $user], 201);
         });
     }
@@ -57,7 +69,7 @@ class AuthController
         $user = User::where('email', strtolower($data['email']))->first();
         // Perform a hash check for unknown accounts as well.
         $hash = $user?->password ?? '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi';
-        $valid = Hash::check($data['password'], $hash);
+        $valid = $this->hash->check($data['password'], $hash);
         abort_unless($user && $valid && $user->active, 401, 'Anmeldung fehlgeschlagen.');
         $portal = $r->attributes->get('portal');
         abort_if(
@@ -70,17 +82,17 @@ class AuthController
             if (empty($data['mfa_code'])) {
                 return ['mfa_required' => true];
             }
-            DB::transaction(function () use ($user, $data) {
+            $this->db->transaction(function () use ($user, $data) {
                 $locked = User::lockForUpdate()->findOrFail($user->id);
                 $step = Totp::verify($locked->mfa_secret, $data['mfa_code'], $locked->mfa_last_step);
                 abort_if($step === false, 401, 'Bestätigungscode ungültig oder bereits benutzt.');
                 $locked->update(['mfa_last_step' => $step]);
             });
         }
-        Auth::login($user);
+        auth()->login($user);
         $r->session()->regenerate();
         $user->update(['last_login_at' => now()]);
-        Audit::record('auth.login', $user->id, $user->tenant_id);
+        $this->audit->record('auth.login', $user->id, $user->tenant_id);
         return ['user' => $this->identity($user)];
     }
     public function me(Request $r)
@@ -95,11 +107,7 @@ class AuthController
             'mfa_enabled' => (bool) $u->mfa_secret,
             'scopes' => $u->isSystem() ? ['system'] : ['customer'],
             'permissions' => $u->permissions(),
-            'enabled_modules' =>
-                $u->tenant_id &&
-                app(\App\Modules\Billing\PublicApi\Entitlements::class)->active($u->tenant_id, 'reporting')
-                    ? ['reporting']
-                    : [],
+            'enabled_modules' => $u->tenant_id ? $this->modules->enabled($u->tenant_id) : [],
             'installed_modules' => $u->isSystem()
                 ? array_column(app(\App\Core\Module\ModuleRegistry::class)->catalog(), 'code')
                 : [],
@@ -107,8 +115,8 @@ class AuthController
     }
     public function logout(Request $r)
     {
-        Audit::record('auth.logout');
-        Auth::logout();
+        $this->audit->record('auth.logout');
+        auth()->logout();
         if ($r->attributes->get('portal')) {
             $r->session()->forget('mfa_pending_' . $r->attributes->get('portal'));
             $r->session()->regenerate();
@@ -122,7 +130,7 @@ class AuthController
     {
         $r->validate(['email' => 'required|email']);
         if (config('mail.default') !== 'log') {
-            Password::sendResetLink(['email' => strtolower($r->input('email'))]);
+            $this->passwords->sendResetLink(['email' => strtolower($r->input('email'))]);
         }
         return ['message' => 'Falls das Konto existiert, wurde ein Link angefordert.'];
     }
@@ -133,19 +141,19 @@ class AuthController
             'token' => 'required|string',
             'password' => ['required', 'confirmed', PasswordRule::min(12)],
         ]);
-        $status = Password::reset($data, function (User $u, string $password) {
+        $status = $this->passwords->reset($data, function (User $u, string $password) {
             $u->password = $password;
             $u->setRememberToken(bin2hex(random_bytes(30)));
             $u->save();
-            DB::table('sessions')->where('user_id', $u->id)->delete();
+            $this->db->table('sessions')->where('user_id', $u->id)->delete();
         });
-        abort_unless($status === Password::PASSWORD_RESET, 422, 'Link ungültig oder abgelaufen.');
+        abort_unless($status === PasswordBroker::PASSWORD_RESET, 422, 'Link ungültig oder abgelaufen.');
         return ['message' => 'Passwort geändert.'];
     }
     public function beginMfa(Request $r)
     {
         $r->validate(['password' => 'required|string']);
-        abort_unless(Hash::check($r->input('password'), $r->user()->password), 403);
+        abort_unless($this->hash->check($r->input('password'), $r->user()->password), 403);
         abort_if($r->user()->mfa_secret, 409, 'MFA ist bereits aktiv.');
         $secret = Totp::secret();
         $r->session()->put('mfa_pending_' . ($r->attributes->get('portal') ?? 'web'), [
@@ -171,7 +179,7 @@ class AuthController
         abort_if($step === false, 422, 'Code ungültig.');
         $r->user()->update(['mfa_secret' => $pending['secret'], 'mfa_last_step' => $step]);
         $r->session()->forget('mfa_pending_' . ($r->attributes->get('portal') ?? 'web'));
-        Audit::record('auth.mfa_enabled');
+        $this->audit->record('auth.mfa_enabled');
         return ['message' => 'Zwei-Faktor-Anmeldung aktiviert.'];
     }
 }

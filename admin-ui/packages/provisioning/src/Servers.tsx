@@ -12,6 +12,7 @@ type Server = {
   username: string;
   tls_required: boolean;
   version: number;
+  provisioning_enabled?: boolean;
 };
 const messages: Record<string, string> = {
   connected: 'Verbindung erfolgreich',
@@ -118,8 +119,16 @@ export default function Servers() {
             {server.host}:{server.port} · {server.database} ·{' '}
             {server.tls_required ? 'TLS erforderlich' : 'TLS nicht erzwungen'}
           </p>
+          <p className="notice">
+            {server.provisioning_enabled
+              ? 'Für Mandanten freigegeben · Verbindung gegen Änderungen gesperrt'
+              : 'Noch keine Provisionierungsfreigabe. Der Windows-Administrator kann diesen Server lokal autorisieren.'}
+          </p>
           <div className="toolbar">
-            <button disabled={!permits('provisioning.servers.manage')} onClick={() => edit(server)}>
+            <button
+              disabled={server.provisioning_enabled || !permits('provisioning.servers.manage')}
+              onClick={() => edit(server)}
+            >
               Bearbeiten
             </button>
             {['connection', 'permissions'].map((check) => (

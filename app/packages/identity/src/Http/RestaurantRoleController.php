@@ -1,11 +1,13 @@
 <?php
-namespace App\Http\Controllers;
-use App\Services\{Permissions, Audit};
+namespace App\Modules\Identity\Http;
+use App\Modules\Identity\Application\Permissions;
+use App\Contracts\Module\AuditSink;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\DatabaseManager;
 use Illuminate\Validation\Rule;
-class RoleController
+class RestaurantRoleController
 {
+    public function __construct(private DatabaseManager $db, private AuditSink $audit) {}
     private function tenant(Request $r): int
     {
         abort_unless($r->user()->hasPermission('roles.manage'), 403);
@@ -16,7 +18,8 @@ class RoleController
         $tenant = $this->tenant($r);
         return [
             'catalog' => Permissions::catalog(),
-            'roles' => DB::table('restaurant_roles')
+            'roles' => $this->db
+                ->table('restaurant_roles')
                 ->where('tenant_id', $tenant)
                 ->orderBy('name')
                 ->get()
@@ -51,8 +54,8 @@ class RoleController
             422,
             'Für Buchungsänderungen und Export muss auch Lesezugriff erlaubt sein.',
         );
-        return DB::transaction(function () use ($id, $tenant, $data) {
-            $query = DB::table('restaurant_roles')->where('tenant_id', $tenant)->where('id', $id);
+        return $this->db->transaction(function () use ($id, $tenant, $data) {
+            $query = $this->db->table('restaurant_roles')->where('tenant_id', $tenant)->where('id', $id);
             if ($id) {
                 $role = $query->lockForUpdate()->first();
                 abort_unless($role, 404);
@@ -68,7 +71,7 @@ class RoleController
                     'updated_at' => now(),
                 ]);
             } else {
-                $id = DB::table('restaurant_roles')->insertGetId([
+                $id = $this->db->table('restaurant_roles')->insertGetId([
                     'tenant_id' => $tenant,
                     'name' => $data['name'],
                     'permissions' => json_encode($data['permissions']),
@@ -76,23 +79,23 @@ class RoleController
                     'updated_at' => now(),
                 ]);
             }
-            Audit::record('role.saved', $id, $tenant);
+            $this->audit->record('role.saved', $id, $tenant);
             return response()->json(['id' => $id], 200);
         });
     }
     public function delete(Request $r, int $id)
     {
         $tenant = $this->tenant($r);
-        return DB::transaction(function () use ($tenant, $id) {
-            $query = DB::table('restaurant_roles')->where('tenant_id', $tenant)->where('id', $id);
+        return $this->db->transaction(function () use ($tenant, $id) {
+            $query = $this->db->table('restaurant_roles')->where('tenant_id', $tenant)->where('id', $id);
             abort_unless($query->lockForUpdate()->first(), 404);
             abort_if(
-                DB::table('users')->where('restaurant_role_id', $id)->exists(),
+                $this->db->table('users')->where('restaurant_role_id', $id)->exists(),
                 409,
                 'Rolle ist noch Benutzern zugewiesen.',
             );
             $query->delete();
-            Audit::record('role.deleted', $id, $tenant);
+            $this->audit->record('role.deleted', $id, $tenant);
             return response()->noContent();
         });
     }

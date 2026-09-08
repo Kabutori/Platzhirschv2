@@ -29,11 +29,11 @@ export default function Administration() {
       </p>
       {error && <p role="alert">{error}</p>}
       {q.error && <p role="alert">{q.error.message}</p>}
-      <section className="panel">
+      <section className="panel padded">
         <h3>Modulangebote</h3>
         {q.data?.products.map((p: any) => (
           <form
-            className="form-grid"
+            className="fields"
             key={p.module_code}
             onSubmit={(e) => {
               e.preventDefault();
@@ -68,11 +68,11 @@ export default function Administration() {
           </form>
         ))}
       </section>
-      <section className="panel">
+      <section className="panel padded">
         <h3>Aufträge</h3>
         {q.data?.orders.length === 0 && <p>Noch keine Bestellungen.</p>}
         {q.data?.orders.map((o: any) => (
-          <div key={o.id} className="panel">
+          <div key={o.id} className="panel padded">
             <strong>
               #{o.id} · Restaurant #{o.tenant_id} · {o.module_code}
             </strong>

@@ -35,10 +35,10 @@ export default function Placement() {
       ))}
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
-      <section className="panel">
+      <section className="panel padded">
         <h3>Restaurant umziehen</h3>
         <form
-          className="form-grid"
+          className="fields"
           onSubmit={async (e) => {
             e.preventDefault();
             const form = e.currentTarget;
@@ -109,7 +109,7 @@ export default function Placement() {
           <button disabled={busy}>Geprüften Umzug starten</button>
         </form>
       </section>
-      <section className="panel">
+      <section className="panel padded">
         <h3>Aufträge</h3>
         <div className="table-scroll">
           <table>

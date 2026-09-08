@@ -1,18 +1,23 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Modules\Support\Http;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\DatabaseManager;
 use Illuminate\Validation\Rule;
-use App\Services\Audit;
+use App\Contracts\Module\{AuditSink, AccountDirectory, TenantDirectory};
 class SupportController
 {
+    public function __construct(
+        private DatabaseManager $db,
+        private AuditSink $audit,
+        private AccountDirectory $accounts,
+        private TenantDirectory $tenants,
+    ) {}
     private function scope(Request $r)
     {
         abort_unless($r->user()->hasPermission('support.access'), 403);
-        return DB::table('support_tickets')->when(
-            !$r->user()->isSystem(),
-            fn($q) => $q->where('tenant_id', $r->user()->tenant_id),
-        );
+        return $this->db
+            ->table('support_tickets')
+            ->when(!$r->user()->isSystem(), fn($q) => $q->where('tenant_id', $r->user()->tenant_id));
     }
     public function index(Request $r)
     {
@@ -22,30 +27,34 @@ class SupportController
     {
         $ticket = $this->scope($r)->where('id', $id)->first();
         abort_unless($ticket, 404);
+        $messages = $this->db
+            ->table('support_messages')
+            ->where('ticket_id', $id)
+            ->when(!$r->user()->isSystem(), fn($q) => $q->where('internal', false))
+            ->orderBy('id')
+            ->get();
+        $names = $this->accounts->names($messages->pluck('user_id')->all());
         return [
             'ticket' => $ticket,
-            'messages' => DB::table('support_messages')
-                ->join('users', 'users.id', '=', 'support_messages.user_id')
-                ->where('ticket_id', $id)
-                ->when(!$r->user()->isSystem(), fn($q) => $q->where('internal', false))
-                ->select('support_messages.*', 'users.name as author')
-                ->orderBy('support_messages.id')
-                ->get(),
+            'messages' => $messages->map(
+                fn($m) => [...(array) $m, 'author' => $names[$m->user_id] ?? 'Gelöschtes Konto'],
+            ),
         ];
     }
+
     public function create(Request $r)
     {
         abort_unless($r->user()->hasPermission('support.access'), 403);
         $data = $r->validate([
             'subject' => 'required|string|max:200',
             'body' => 'required|string|max:10000',
-            'tenant_id' => 'nullable|exists:tenants,id',
+            'tenant_id' => 'nullable|integer',
             'priority' => ['required', Rule::in(['low', 'normal', 'high'])],
         ]);
         $tenant = $r->user()->isSystem() ? $data['tenant_id'] ?? null : $r->user()->tenant_id;
-        abort_unless($tenant, 422, 'Restaurant auswählen.');
-        $id = DB::transaction(function () use ($r, $data, $tenant) {
-            $id = DB::table('support_tickets')->insertGetId([
+        abort_unless($tenant && $this->tenants->exists((int) $tenant), 422, 'Restaurant auswählen.');
+        $id = $this->db->transaction(function () use ($r, $data, $tenant) {
+            $id = $this->db->table('support_tickets')->insertGetId([
                 'tenant_id' => $tenant,
                 'user_id' => $r->user()->id,
                 'subject' => $data['subject'],
@@ -53,14 +62,14 @@ class SupportController
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            DB::table('support_messages')->insert([
+            $this->db->table('support_messages')->insert([
                 'ticket_id' => $id,
                 'user_id' => $r->user()->id,
                 'body' => $data['body'],
                 'internal' => false,
                 'created_at' => now(),
             ]);
-            Audit::record('support.created', $id, $tenant);
+            $this->audit->record('support.created', $id, $tenant);
             return $id;
         });
         return response()->json(['id' => $id], 201);
@@ -75,19 +84,20 @@ class SupportController
             'status' => ['sometimes', Rule::in(['open', 'in_progress', 'closed'])],
         ]);
         abort_if(($data['internal'] ?? false) && !$r->user()->isSystem(), 403);
-        DB::transaction(function () use ($r, $id, $data) {
-            DB::table('support_messages')->insert([
+        $this->db->transaction(function () use ($r, $id, $data) {
+            $this->db->table('support_messages')->insert([
                 'ticket_id' => $id,
                 'user_id' => $r->user()->id,
                 'body' => $data['body'],
                 'internal' => $data['internal'] ?? false,
                 'created_at' => now(),
             ]);
-            DB::table('support_tickets')
+            $this->db
+                ->table('support_tickets')
                 ->where('id', $id)
                 ->update(['status' => $data['status'] ?? 'open', 'updated_at' => now()]);
         });
-        Audit::record('support.replied', $id, $ticket->tenant_id);
+        $this->audit->record('support.replied', $id, $ticket->tenant_id);
         return $this->show($r, $id);
     }
 }

@@ -36,7 +36,11 @@ class ModuleController
     public function order(Request $r)
     {
         $tenant = $this->tenant($r);
-        $d = $r->validate(['module_code' => 'required|string|max:60', 'request_key' => 'required|uuid']);
+        $d = $r->validate([
+            'module_code' => 'required|string|max:60',
+            'request_key' => 'required|uuid',
+            'expected_amount_cents' => 'required|integer|min:0',
+        ]);
         return $this->db->transaction(function () use ($tenant, $d) {
             $this->db
                 ->table('billing_products')
@@ -64,16 +68,20 @@ class ModuleController
                 'Modul wird noch nicht angeboten.',
             );
             $this->registry->get($d['module_code']);
-            $id = $this->db
-                ->table('billing_orders')
-                ->insertGetId([
-                    'tenant_id' => $tenant,
-                    ...$d,
-                    'amount_cents' => $product->amount_cents,
-                    'currency' => $product->currency,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+            abort_unless(
+                (int) $product->amount_cents === $d['expected_amount_cents'],
+                409,
+                'Preis wurde geändert. Angebot neu laden.',
+            );
+            $id = $this->db->table('billing_orders')->insertGetId([
+                'tenant_id' => $tenant,
+                'module_code' => $d['module_code'],
+                'request_key' => $d['request_key'],
+                'amount_cents' => $product->amount_cents,
+                'currency' => $product->currency,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             $this->audit->record('billing.order_created', (string) $id);
             return response()->json($this->db->table('billing_orders')->find($id), 201);
         });
@@ -208,17 +216,15 @@ class ModuleController
                 ->first();
             $start =
                 $row && Carbon::parse($row->paid_until)->isFuture() ? Carbon::parse($row->paid_until) : now();
-            $this->db
-                ->table('billing_entitlements')
-                ->updateOrInsert(
-                    ['tenant_id' => $order->tenant_id, 'module_code' => $order->module_code],
-                    [
-                        'paid_until' => $start->addMonthNoOverflow(),
-                        'status' => $row->status ?? 'inactive',
-                        'created_at' => $row->created_at ?? now(),
-                        'updated_at' => now(),
-                    ],
-                );
+            $this->db->table('billing_entitlements')->updateOrInsert(
+                ['tenant_id' => $order->tenant_id, 'module_code' => $order->module_code],
+                [
+                    'paid_until' => $start->addMonthNoOverflow(),
+                    'status' => $row->status ?? 'inactive',
+                    'created_at' => $row->created_at ?? now(),
+                    'updated_at' => now(),
+                ],
+            );
             $this->db
                 ->table('billing_orders')
                 ->where('id', $id)

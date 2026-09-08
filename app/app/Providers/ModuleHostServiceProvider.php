@@ -7,12 +7,20 @@ class ModuleHostServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
-            \App\Contracts\Module\ActivationDispatcher::class,
-            \App\Services\ModuleActivationDispatcher::class,
+            \App\Contracts\Module\TenantRuntime::class,
+            \App\Services\ModuleTenantRuntime::class,
         );
         $this->app->bind(
-            \App\Contracts\Module\ReservationReports::class,
-            \App\Services\ReservationReportAdapter::class,
+            \App\Contracts\Module\AccountDirectory::class,
+            \App\Services\ModuleDirectories::class,
+        );
+        $this->app->bind(
+            \App\Contracts\Module\TenantDirectory::class,
+            \App\Services\ModuleDirectories::class,
+        );
+        $this->app->bind(
+            \App\Contracts\Module\ActivationDispatcher::class,
+            \App\Services\ModuleActivationDispatcher::class,
         );
         if (!$this->app->bound(ModuleRegistry::class)) {
             $this->app->singleton(ModuleRegistry::class);

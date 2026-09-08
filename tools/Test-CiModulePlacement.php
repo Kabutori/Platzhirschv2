@@ -85,7 +85,11 @@ try {
         'restaurant',
         'POST',
         'v1/restaurant/modules/orders',
-        ['module_code' => 'reporting', 'request_key' => (string) Illuminate\Support\Str::uuid()],
+        [
+            'module_code' => 'reporting',
+            'expected_amount_cents' => 1900,
+            'request_key' => (string) Illuminate\Support\Str::uuid(),
+        ],
         201,
     );
     callApi('restaurant', 'POST', 'v1/restaurant/modules/reporting/activation', ['enabled' => true], 422);

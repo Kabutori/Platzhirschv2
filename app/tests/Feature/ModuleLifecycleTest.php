@@ -53,6 +53,7 @@ class ModuleLifecycleTest extends TestCase
         return $this->actingAs($this->owner)
             ->postJson('/api/v1/restaurant/modules/orders', [
                 'module_code' => 'reporting',
+                'expected_amount_cents' => 1900,
                 'request_key' => (string) \Illuminate\Support\Str::uuid(),
             ])
             ->assertCreated()
@@ -63,6 +64,7 @@ class ModuleLifecycleTest extends TestCase
         $this->actingAs($this->owner)
             ->postJson('/api/v1/restaurant/modules/orders', [
                 'module_code' => 'reporting',
+                'expected_amount_cents' => 1900,
                 'request_key' => (string) \Illuminate\Support\Str::uuid(),
             ])
             ->assertUnprocessable();
@@ -76,6 +78,7 @@ class ModuleLifecycleTest extends TestCase
         $order = DB::table('billing_orders')->find($id);
         $this->postJson('/api/v1/restaurant/modules/orders', [
             'module_code' => 'reporting',
+            'expected_amount_cents' => 1900,
             'request_key' => $order->request_key,
         ])
             ->assertOk()
