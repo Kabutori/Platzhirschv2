@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 const root = new URL('../', import.meta.url);
-const tokens = (await readFile(new URL('admin-ui/src/tokens.css', root), 'utf8')).replace(':root', ':host');
+const tokens = (await readFile(new URL('admin-ui/packages/design-tokens/tokens.css', root), 'utf8')).replace(':root', ':host');
 const css = await readFile(new URL('src/widget.css', import.meta.url), 'utf8');
 const source = await readFile(new URL('src/widget.js', import.meta.url), 'utf8');
 await writeFile(

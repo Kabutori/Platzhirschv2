@@ -1,5 +1,5 @@
 import { ShieldCheck } from 'lucide-react';
-import type { ModuleUiManifest } from '../../module-host/types';
+import type { ModuleUiManifest } from '@platzhirsch/ui-runtime/types';
 export const identityManifest = {
   code: 'identity',
   nav: [

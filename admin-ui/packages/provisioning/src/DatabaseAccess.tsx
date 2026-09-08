@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Database, Eye, EyeOff, Copy, X } from 'lucide-react';
-import { api } from '../../api';
+import { api } from '@platzhirsch/ui-runtime/api';
 type Connection = {
   id: string;
   name: string;

@@ -1,10 +1,10 @@
-const DatabaseAccess = lazy(() => import('./modules/provisioning/DatabaseAccess'));
-import { identityManifest } from './modules/identity/manifest';
+const DatabaseAccess = lazy(() => import('@platzhirsch/provisioning-ui/DatabaseAccess.tsx'));
+import { identityManifest } from '@platzhirsch/identity-ui';
 import ModuleCatalog from './module-host/Catalog';
 const PlatformRoles = lazy(identityManifest.nav[0].screen);
 import { portal } from './api';
 import { Suspense, lazy } from 'react';
-import { provisioningManifest } from './modules/provisioning/manifest';
+import { provisioningManifest } from '@platzhirsch/provisioning-ui';
 import { navigationFor } from './module-host/registry';
 const provisioningNavigation = provisioningManifest.nav[0];
 const DatabaseServers = lazy(provisioningNavigation.screen);

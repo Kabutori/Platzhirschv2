@@ -7,6 +7,7 @@ class ProvisioningServiceProvider extends ServiceProvider implements Module
 {
     public function register(): void
     {
+        if (!$this->app->bound(ModuleRegistry::class)) $this->app->singleton(ModuleRegistry::class);
         $this->app->make(ModuleRegistry::class)->register($this);
     }
     public function boot(): void

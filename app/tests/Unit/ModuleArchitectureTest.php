@@ -5,7 +5,7 @@ class ModuleArchitectureTest extends TestCase
 {
     public function test_new_modules_do_not_import_facades_or_legacy_models(): void
     {
-        foreach ($this->phpFiles('Modules') as $file) {
+        foreach ($this->moduleFiles() as $file) {
             $source = file_get_contents($file);
             $this->assertStringNotContainsString('Illuminate\\Support\\Facades\\', $source, $file);
             $this->assertStringNotContainsString('App\\Models\\', $source, $file);
@@ -17,6 +17,15 @@ class ModuleArchitectureTest extends TestCase
         foreach ($this->phpFiles('Core') as $file) {
             $this->assertStringNotContainsString('App\\Modules\\', file_get_contents($file), $file);
         }
+    }
+    private function moduleFiles(): array
+    {
+        $paths = [];
+        foreach (['identity', 'provisioning'] as $module) {
+            $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(__DIR__.'/../../packages/'.$module.'/src'));
+            foreach ($it as $file) if ($file->isFile() && $file->getExtension() === 'php') $paths[] = $file->getPathname();
+        }
+        return $paths;
     }
     private function phpFiles(string $directory): array
     {

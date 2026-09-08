@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { LockKeyhole, Plus, Pencil, Trash2, Search } from 'lucide-react';
-import { api } from '../../api';
+import { api } from '@platzhirsch/ui-runtime/api';
 type Role = {
   id: number;
   name: string;

@@ -1,5 +1,5 @@
 import { Database } from 'lucide-react';
-import type { ModuleUiManifest } from '../../module-host/types';
+import type { ModuleUiManifest } from '@platzhirsch/ui-runtime/types';
 export const provisioningManifest = {
   code: 'provisioning',
   nav: [

@@ -6,7 +6,7 @@ class ModuleHostServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(ModuleRegistry::class);
+        if (!$this->app->bound(ModuleRegistry::class)) $this->app->singleton(ModuleRegistry::class);
         $this->app->bind(
             \App\Modules\Provisioning\PublicApi\InstalledDatabaseAccess::class,
             \App\Services\InstalledDatabaseDirectory::class,
