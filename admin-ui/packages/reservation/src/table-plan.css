@@ -1,0 +1,83 @@
+.floor-stage {
+  position: relative;
+  height: 480px;
+  margin: 20px 24px;
+  background-image: radial-gradient(var(--border-strong) 1px, transparent 1px);
+  background-size: 20px 20px;
+  border: 1px solid var(--border);
+}
+.floor-table {
+  position: absolute;
+  width: 110px;
+  height: 86px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background: var(--surface);
+  border: 2px solid var(--success-border);
+  white-space: normal;
+}
+.floor-table.square {
+  width: 95px;
+  height: 95px;
+}
+.floor-table.round {
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+}
+.floor-table.occupied {
+  border-color: var(--accent);
+}
+.floor-table.inactive {
+  border-color: var(--border);
+  color: var(--muted);
+}
+.floor-table[aria-pressed='true'] {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+.floor-table small {
+  font-size: 11px;
+}
+.floor-toggle {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+.floor-toggle input {
+  width: auto;
+}
+.floor-booking {
+  display: block;
+  margin: 8px 0;
+  text-align: left;
+}
+.floor-plan .toolbar label {
+  min-width: 150px;
+}
+.floor-plan .toolbar {
+  flex-wrap: wrap;
+}
+.floor-plan .padded {
+  padding: 16px 24px;
+}
+@media (max-width: 600px) {
+  .floor-stage {
+    height: 540px;
+    margin: 16px 12px;
+  }
+  .floor-table {
+    width: 90px;
+    height: 82px;
+  }
+  .floor-table.square,
+  .floor-table.round {
+    width: 86px;
+    height: 86px;
+  }
+}

@@ -1,0 +1,85 @@
+.timeline-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 20px;
+}
+.table-timeline {
+  min-width: 940px;
+}
+.timeline-row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+.timeline-row:first-child {
+  border-top: 0;
+}
+.timeline-row > strong {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.timeline-row > strong small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.timeline-hours {
+  height: 20px;
+  position: relative;
+}
+.timeline-hours span {
+  position: absolute;
+  font-size: 11px;
+  color: var(--muted);
+}
+.timeline-track {
+  position: relative;
+  background: var(--bg);
+  background-image: linear-gradient(to right, var(--border) 1px, transparent 1px);
+  background-size: 8.333333% 100%;
+}
+.timeline-booking {
+  position: absolute;
+  height: 30px;
+  min-height: 30px;
+  min-width: 0;
+  padding: 4px 7px;
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 11px;
+  border: 0;
+  border-radius: 0;
+  box-sizing: border-box;
+}
+.timeline-booking.seated {
+  background: #a5ba9b;
+  color: #152015;
+}
+.timeline-booking.completed {
+  background: #78838f;
+  color: #111;
+}
+.timeline-now {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--danger);
+  z-index: 2;
+  pointer-events: none;
+}
+.timeline-empty {
+  display: block;
+  padding: 12px;
+  color: var(--muted);
+  font-size: 11px;
+}
