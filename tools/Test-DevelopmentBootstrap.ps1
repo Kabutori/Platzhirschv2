@@ -22,3 +22,5 @@ New-Item -ItemType Directory -Path $foreign|Out-Null
 if($LASTEXITCODE -eq 0){throw 'Existing non-repository folder was accepted.'}
 if((Get-Content (Join-Path $foreign 'keep.txt') -Raw) -ne 'keep foreign files'){throw 'Existing folder was modified.'}
 Write-Host 'Development bootstrap passed: release BAT clones, creates branch, preserves existing work and refuses foreign folders.'
+# The rejected foreign directory intentionally left a native exit code of 1.
+exit 0
