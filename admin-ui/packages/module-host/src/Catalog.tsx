@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Blocks, LockKeyhole } from 'lucide-react';
-import { api } from '../api';
+import { api } from '@platzhirsch/ui-runtime/api';
 type Module = {
   code: string;
   version: string;
@@ -10,10 +10,28 @@ type Module = {
   permissions: { code: string; label: string; permissions: { code: string; label: string }[] }[];
 };
 const labels: Record<string, { name: string; description: string }> = {
+  customer: { name: 'Customer', description: 'Restaurantprofile, Mandantenanlage und Testrestaurants.' },
+  reservation: {
+    name: 'Reservation',
+    description: 'Räume, Tische, Öffnungszeiten und konfliktgeprüfte Reservierungen.',
+  },
+  widget: {
+    name: 'Widget',
+    description: 'Einbettbare Buchungsoberfläche mit Herkunfts- und Verfügbarkeitsprüfung.',
+  },
+  support: { name: 'Support', description: 'Tickets, Antworten und interne Notizen.' },
+  billing: {
+    name: 'Billing',
+    description: 'Modulangebote, Bestellungen, Zahlungsfreigaben und Nutzungszeiträume.',
+  },
+  reporting: {
+    name: 'Reporting',
+    description: 'Zeitraumauswertungen und gespeicherte Berichte mit eigener Mandantenmigration.',
+  },
   identity: { name: 'Identity', description: 'Plattformrollen, Berechtigungen und Rollenzuordnung.' },
   provisioning: {
     name: 'Provisioning',
-    description: 'Datenbankserver registrieren und ihre Verbindung und Rechte prüfen.',
+    description: 'Datenbankserver, SQL-Zugriff, Provisionierung und geprüfte Mandantenumzüge.',
   },
 };
 export default function Catalog() {

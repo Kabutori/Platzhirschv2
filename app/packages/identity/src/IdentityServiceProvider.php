@@ -7,6 +7,10 @@ class IdentityServiceProvider extends ServiceProvider implements Module
 {
     public function register(): void
     {
+        $this->app->bind(
+            \App\Contracts\Module\AccountProvisioner::class,
+            Application\AccountProvisioner::class,
+        );
         if (!$this->app->bound(ModuleRegistry::class)) {
             $this->app->singleton(ModuleRegistry::class);
         }

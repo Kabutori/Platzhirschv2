@@ -7,6 +7,14 @@ class ModuleHostServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
+            \App\Contracts\Module\ProvisioningDispatcher::class,
+            \App\Services\ProvisioningDispatcher::class,
+        );
+        $this->app->bind(
+            \App\Contracts\Module\ServerTargets::class,
+            fn($app) => $app->make(\App\Modules\Provisioning\PublicApi\ServerDirectory::class),
+        );
+        $this->app->bind(
             \App\Contracts\Module\TenantRuntime::class,
             \App\Services\ModuleTenantRuntime::class,
         );
@@ -33,6 +41,18 @@ class ModuleHostServiceProvider extends ServiceProvider
     }
     public function boot(): void
     {
-        $this->app->booted(fn() => $this->app->make(ModuleRegistry::class)->validate(['provisioning']));
+        $this->app->booted(
+            fn() => $this->app
+                ->make(ModuleRegistry::class)
+                ->validate([
+                    'identity',
+                    'customer',
+                    'provisioning',
+                    'reservation',
+                    'widget',
+                    'billing',
+                    'support',
+                ]),
+        );
     }
 }

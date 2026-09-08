@@ -5,7 +5,8 @@
   "require": {
     "php": "^8.3",
     "platzhirsch/contracts": "0.1.0",
-    "illuminate/support": "^13.0"
+    "platzhirsch/module-host": "0.1.0",
+    "laravel/framework": "^13.0"
   },
   "autoload": {
     "psr-4": {

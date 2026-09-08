@@ -1,3 +1,5 @@
+const Tenants = lazy(() => import('@platzhirsch/customer-ui').then((m) => ({ default: m.Tenants })));
+const Profile = lazy(() => import('@platzhirsch/customer-ui').then((m) => ({ default: m.Profile })));
 import {
   Login,
   ResetPassword,
@@ -38,12 +40,12 @@ const BillingAdministration = lazy(() => import('@platzhirsch/billing-ui/Adminis
 const Placement = lazy(() => import('@platzhirsch/provisioning-ui/Placement.tsx'));
 const DatabaseAccess = lazy(() => import('@platzhirsch/provisioning-ui/DatabaseAccess.tsx'));
 import { identityManifest } from '@platzhirsch/identity-ui';
-import ModuleCatalog from './module-host/Catalog';
+import ModuleCatalog from '@platzhirsch/module-host/Catalog.tsx';
 const PlatformRoles = lazy(identityManifest.nav[0].screen);
 import { portal } from './api';
 import { Suspense, lazy } from 'react';
 import { provisioningManifest } from '@platzhirsch/provisioning-ui';
-import { navigationFor } from './module-host/registry';
+import { navigationFor } from '@platzhirsch/module-host';
 const provisioningNavigation = provisioningManifest.nav[0];
 const DatabaseServers = lazy(provisioningNavigation.screen);
 import React, { useEffect, useRef, useState, FormEvent, ReactNode } from 'react';
@@ -355,7 +357,12 @@ function Content({
     );
   if (scope === 'system') {
     if (page === 'dashboard') return <Dashboard go={go} />;
-    if (page === 'tenants') return <Tenants user={user} />;
+    if (page === 'tenants')
+      return (
+        <Suspense fallback={<Loading />}>
+          <Tenants user={user} />
+        </Suspense>
+      );
     if (page === 'users') return <UsersPage user={user} />;
     if (page === 'roles')
       return (
@@ -416,7 +423,12 @@ function Content({
       </Suspense>
     );
   if (page === 'team') return <UsersPage tenant={tenant} team user={user} />;
-  if (page === 'profile') return <Profile tenant={tenant} />;
+  if (page === 'profile')
+    return (
+      <Suspense fallback={<Loading />}>
+        <Profile tenant={tenant} />
+      </Suspense>
+    );
   return (
     <Suspense fallback={<Loading />}>
       <RestaurantResource resource={page} tenant={tenant} />
@@ -493,192 +505,6 @@ function AuditPage() {
     </section>
   );
 }
-function Tenants({ user }: { user: Row }) {
-  const q = useData('v1/admin/tenants');
-  const servers = useQuery({
-    queryKey: ['tenant-create-servers'],
-    queryFn: () => api('v1/admin/database-servers'),
-    enabled: user.role === 'system_admin',
-  });
-  const qc = useQueryClient();
-  const [form, setForm] = useState<Row | null>(null);
-  const [demo, setDemo] = useState(false);
-  const [demoNotice, setDemoNotice] = useState('');
-  const [search, setSearch] = useState('');
-  const [error, setError] = useState<unknown>();
-  useEffect(() => {
-    const timer = setInterval(() => q.refetch(), 10000);
-    return () => clearInterval(timer);
-  }, []);
-  const fields: Field[] = [
-    ...(!form?.id
-      ? [
-          {
-            key: 'server_id',
-            label: 'Datenbankserver',
-            type: 'select' as const,
-            options: [
-              { value: '', label: 'Lokaler Server' },
-              ...(servers.data?.servers || [])
-                .filter((s: Row) => s.provisioning_enabled)
-                .map((s: Row) => ({ value: String(s.id), label: s.name })),
-            ],
-          },
-        ]
-      : []),
-    { key: 'name', label: 'Restaurantname', required: true },
-    { key: 'email', label: 'Kontakt-E-Mail', type: 'email', required: true },
-    { key: 'phone', label: 'Telefon' },
-    { key: 'address', label: 'Adresse', type: 'textarea' },
-    ...(!form?.id ? [{ key: 'timezone', label: 'Zeitzone', default: 'Europe/Berlin', required: true }] : []),
-  ];
-  async function action(row: Row, path: string, method: string, data?: Row) {
-    try {
-      await api('v1/admin/tenants/' + row.id + path, method, data);
-      await qc.invalidateQueries();
-    } catch (e) {
-      setError(e);
-    }
-  }
-  return (
-    <>
-      <div className="toolbar">
-        <div className="search">
-          <Search size={17} />
-          <input
-            aria-label="Mandanten suchen"
-            placeholder="Restaurant suchen …"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <button className="primary" disabled={user.role !== 'system_admin'} onClick={() => setForm({})}>
-          <Plus size={16} />
-          Mandant anlegen
-        </button>
-        <button disabled={user.role !== 'system_admin'} onClick={() => setDemo(true)}>
-          Testrestaurant einrichten
-        </button>
-      </div>
-      <ErrorBox error={error} />
-      {demoNotice && (
-        <p className="notice">
-          {demoNotice} <a href="/restaurant/login">Restaurant-Login öffnen</a>
-        </p>
-      )}
-      {demo && (
-        <Modal title="Testrestaurant einrichten" close={() => setDemo(false)}>
-          <p>
-            Erstellt einen eigenen Restaurantzugang, einen Testraum, drei Tische und tägliche Öffnungszeiten
-            von 10 bis 23 Uhr.
-          </p>
-          <Form
-            fields={[
-              { key: 'name', label: 'Restaurantname', default: 'Mein Testrestaurant', required: true },
-              { key: 'owner_name', label: 'Name des Restaurant-Administrators', required: true },
-              { key: 'email', label: 'Login-E-Mail', type: 'email', required: true },
-              {
-                key: 'password',
-                label: 'Login-Passwort (mindestens 12 Zeichen)',
-                type: 'password',
-                required: true,
-              },
-              {
-                key: 'password_confirmation',
-                label: 'Passwort wiederholen',
-                type: 'password',
-                required: true,
-              },
-            ]}
-            label="Testrestaurant erstellen"
-            onSave={async (data) => {
-              await api('v1/admin/test-restaurant', 'POST', data);
-              setDemo(false);
-              setDemoNotice(
-                'Testrestaurant wird eingerichtet. Sobald der Status Aktiv ist, kannst du dich mit deiner Login-E-Mail und deinem gewählten Passwort anmelden.',
-              );
-              await qc.invalidateQueries();
-            }}
-          />
-        </Modal>
-      )}
-      <section className="panel">
-        {q.isPending ? (
-          <Loading />
-        ) : q.error ? (
-          <ErrorBox error={q.error} />
-        ) : (
-          <DataTable
-            rows={q.data.data.filter((r: Row) => r.name.toLowerCase().includes(search.toLowerCase()))}
-            columns={[
-              {
-                key: 'name',
-                label: 'Restaurant',
-                render: (r) => (
-                  <div className="cell-title">
-                    <strong>{r.name}</strong>
-                    <small>#{String(r.id).padStart(5, '0')}</small>
-                  </div>
-                ),
-              },
-              { key: 'email', label: 'Kontakt' },
-              { key: 'status', label: 'Status', render: (r) => <Badge value={r.status} /> },
-              {
-                key: 'created_at',
-                label: 'Seit',
-                render: (r) => new Date(r.created_at).toLocaleDateString('de-DE'),
-              },
-            ]}
-            actions={(r) =>
-              user.role !== 'system_admin' ? null : (
-                <>
-                  <button onClick={() => setForm(r)}>Bearbeiten</button>
-                  {r.status === 'failed' ? (
-                    <button onClick={() => action(r, '/retry', 'POST')}>Erneut einrichten</button>
-                  ) : (
-                    ['active', 'blocked'].includes(r.status) && (
-                      <button
-                        onClick={() => {
-                          if (
-                            confirm(r.status === 'active' ? 'Restaurant sperren?' : 'Restaurant freigeben?')
-                          )
-                            action(r, '', 'PATCH', { status: r.status === 'active' ? 'blocked' : 'active' });
-                        }}
-                      >
-                        {r.status === 'active' ? 'Sperren' : 'Freigeben'}
-                      </button>
-                    )
-                  )}
-                </>
-              )
-            }
-          />
-        )}
-      </section>
-      <p className="muted note">
-        Ein neuer Mandant erhält eine eigene Datenbank. Anschließend legst du unter „Benutzer“ den
-        Restaurantzugang an.
-      </p>
-      {form && (
-        <Modal title={form.id ? 'Mandant bearbeiten' : 'Neuer Mandant'} close={() => setForm(null)}>
-          <Form
-            fields={fields}
-            initial={form}
-            onSave={async (data) => {
-              await api(
-                'v1/admin/tenants' + (form.id ? '/' + form.id : ''),
-                form.id ? 'PATCH' : 'POST',
-                data,
-              );
-              setForm(null);
-              await qc.invalidateQueries();
-            }}
-          />
-        </Modal>
-      )}
-    </>
-  );
-}
 function Health() {
   const q = useData('v1/admin/health');
   return (
@@ -712,36 +538,6 @@ function Health() {
             </React.Fragment>
           ))}
         </dl>
-      )}
-    </section>
-  );
-}
-function Profile({ tenant }: { tenant?: string }) {
-  const q = useData('v1/restaurant/profile', tenant);
-  const [notice, setNotice] = useState('');
-  return (
-    <section className="panel padded">
-      <h2>Restaurant-Stammdaten</h2>
-      {notice && <div className="notice">{notice}</div>}
-      {q.isPending ? (
-        <Loading />
-      ) : q.error ? (
-        <ErrorBox error={q.error} />
-      ) : (
-        <Form
-          fields={[
-            { key: 'name', label: 'Restaurantname', required: true },
-            { key: 'email', label: 'Kontakt-E-Mail', type: 'email', required: true },
-            { key: 'phone', label: 'Telefon' },
-            { key: 'address', label: 'Adresse', type: 'textarea' },
-          ]}
-          initial={q.data}
-          onSave={async (data) => {
-            await api('v1/restaurant/profile', 'PATCH', data, tenant);
-            setNotice('Profil gespeichert.');
-            await q.refetch();
-          }}
-        />
       )}
     </section>
   );

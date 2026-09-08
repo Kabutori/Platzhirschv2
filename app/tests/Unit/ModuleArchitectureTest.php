@@ -21,7 +21,19 @@ class ModuleArchitectureTest extends TestCase
     private function moduleFiles(): array
     {
         $paths = [];
-        foreach (['identity', 'provisioning', 'billing', 'reporting', 'support', 'reservation', 'widget'] as $module) {
+        foreach (
+            [
+                'identity',
+                'provisioning',
+                'billing',
+                'reporting',
+                'support',
+                'reservation',
+                'widget',
+                'customer',
+            ]
+            as $module
+        ) {
             $it = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator(__DIR__ . '/../../packages/' . $module . '/src'),
             );
@@ -36,7 +48,7 @@ class ModuleArchitectureTest extends TestCase
     private function phpFiles(string $directory): array
     {
         $files = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator(__DIR__ . '/../../app/' . $directory),
+            new \RecursiveDirectoryIterator(__DIR__ . '/../../packages/module-host/src'),
         );
         $paths = [];
         foreach ($files as $file) {

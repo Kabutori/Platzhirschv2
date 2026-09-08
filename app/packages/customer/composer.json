@@ -1,5 +1,5 @@
 {
-  "name": "platzhirsch/identity",
+  "name": "platzhirsch/customer",
   "version": "0.1.0",
   "type": "library",
   "require": {
@@ -10,13 +10,13 @@
   },
   "autoload": {
     "psr-4": {
-      "App\\Modules\\Identity\\": "src/"
+      "App\\Modules\\Customer\\": "src/"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "App\\Modules\\Identity\\IdentityServiceProvider"
+        "App\\Modules\\Customer\\CustomerServiceProvider"
       ]
     }
   }
