@@ -76,7 +76,7 @@ MAIL_PASSWORD="..."
 MAIL_FROM_ADDRESS=reservierung@example.org
 ```
 
-Danach als Administrator `C:\Platzhirsch\runtime\php\php.exe C:\Platzhirsch\app\artisan config:cache` ausführen und den Anwendungspool `Platzhirsch` neu starten. Niemals `.env` oder Schlüsseldateien nach Git committen. Ohne SMTP werden keine Passwort-Reset-Geheimnisse in das Mail-Log geschrieben. Automatische Reservierungsbestätigungen sind noch nicht implementiert.
+Danach als Administrator `C:\Platzhirsch\runtime\php\php.exe C:\Platzhirsch\app\artisan config:cache` ausführen und den Anwendungspool `Platzhirsch` neu starten. Niemals `.env` oder Schlüsseldateien nach Git committen. Ohne SMTP werden keine Passwort-Reset-Geheimnisse in das Mail-Log geschrieben. Automatische Reservierungsnachrichten werden danach je Restaurant unter „Buchungsnachrichten“ ausdrücklich aktiviert. SMS/Twilio, Erinnerungen und die Grenzen der Versandstatus sind in [RESTAURANT-ABLAEUFE.md](RESTAURANT-ABLAEUFE.md) beschrieben.
 
 ## Hintergrundbetrieb und Rechte
 

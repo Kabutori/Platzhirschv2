@@ -12,7 +12,7 @@ Die älteren Dateien KONZEPT.md, ADMIN-UI.md und BACKEND-BASIS.md enthalten auch
 - Rollenoberfläche mit horizontaler Rollenauswahl, Gruppenschaltern und Rechtezeilen nach der Vorlage. Modul-Shop mit Basismodulen, Erweiterungskacheln, Kaufstatus und Aktivierungsschaltern. Dunkle kantige Oberfläche mit den lokal gelieferten Schriften und zentralen Designtokens.
 - Mandanten, Konten, Restaurantprofile, Audit, Systemstatus, Räume, Tische, Öffnungszeiten und Sondertage.
 - Testrestaurant mit gewähltem Besitzerzugang, eigenem Schema, Raum, drei Tischen und sieben Öffnungstagen.
-- Reservierungen mit Zeitzone, Kapazitäts-/Öffnungsprüfung, Konfliktprüfung unter Datenbanksperren, Storno, Tageszahlen, Tischbelegung und CSV-Export.
+- Reservierungen mit Zeitzone, Kapazitäts-/Öffnungsprüfung, Konfliktprüfung unter Datenbanksperren, Storno, Tageszahlen, Tischbelegung sowie CSV-/XLSX-Export und Browser-Drucken/PDF.
 - Öffentliche Buchungsseite und Shadow-DOM-Widget mit Verfügbarkeit, Ablauf/Widerruf, zulässigen Website-Ursprüngen und serverseitiger Buchungsdauer.
 - Support-Tickets, Antworten und interne Notizen mit Mandantentrennung.
 - Systemadministrator kann eingeschränkte SQL-Anwendungszugänge sehen und nach Kennwortprüfung kurzzeitig anzeigen. Worker- und MySQL-Root-Zugänge werden nicht im Web ausgegeben.
@@ -27,6 +27,20 @@ Die älteren Dateien KONZEPT.md, ADMIN-UI.md und BACKEND-BASIS.md enthalten auch
 - Acht Installer-Schritte mit Uhrzeiten, Laufzeitmeldungen, Dateiprüfungsfortschritt und geschütztem Statusprotokoll ohne erzeugte Geheimnisse.
 
 Diese Änderungen durchlaufen eine neue Anwendungs- und Windows-Prüfung. Die weiter unten aufgeführten älteren Prüfläufe bestätigen sie noch nicht. Die jeweils erfolgreich veröffentlichte Release-Version ist maßgeblich.
+
+## Restaurantbetrieb, Konten und Designabgleich
+
+- Öffnungsfenster und Buchungen über Mitternacht mit Sondertagsvorrang, UTC-Dauer und Ablehnung mehrdeutiger/nicht existierender Startzeiten bei Zeitumstellung.
+- Warteliste mit eigenen Rechten, Kontaktdaten, Status und transaktionaler Übernahme. Konflikte erhalten den offenen Eintrag.
+- Haupttisch plus weitere aktive Tische im selben Raum; summierte Plätze und Konfliktprüfung aller beteiligten Tische. Das Widget berücksichtigt kombinierte Belegungen, bietet selbst aber einzelne Tische an.
+- Optionaler SMTP-/Twilio-Versand für Bestätigungen, Änderungen, Storno und Erinnerungen; Konfiguration und Status je Restaurant. Standardmäßig deaktiviert. Kein Live-Anbietertest oder Zustellnachweis.
+- OIDC mit expliziter Kontoverknüpfung, PKCE/Nonce/Signaturprüfung und weiterhin lokaler MFA. Ein fest konfigurierter Anbieter pro Installation; Details in [SSO.md](SSO.md).
+- Neue Restaurantrollen nach Einmalvorschau und Kennwort/TOTP in bis zu 50 ausgewählten Mandanten erstellen. Kein Überschreiben bestehender Rollen oder automatisches Ändern von Benutzerzuordnungen.
+- Buchungsdialog mit Kalender, Viertelstunden-Auswahl und Walk-in. Der Kalender bleibt auf schmalen Bildschirmen innerhalb des sichtbaren Bereichs.
+- Reporting trennt Storno, No-show und eingetroffene/abgeschlossene Buchungen. Gästezahl ohne Storno und No-show; Gruppierung nach lokalem Starttag.
+- Alle 183 Buttons der konkreten Designreferenz sind mit Codebefund, Umsetzungspfad und Restabweichung erfasst. Eine vollständige visuelle Abnahme ist damit ausdrücklich nicht erreicht. Siehe [DESIGN-FORTSCHRITT.md](DESIGN-FORTSCHRITT.md) und [DESIGN-BUTTON-INVENTAR.csv](DESIGN-BUTTON-INVENTAR.csv).
+
+Bedienung, Konfiguration und Grenzen: [RESTAURANT-ABLAEUFE.md](RESTAURANT-ABLAEUFE.md).
 
 ## Module, Kauf und Serverbetrieb
 
@@ -51,6 +65,10 @@ Offline-Snapshot und Wiederherstellung sind für dieselbe lokale Maschine, Versi
 
 ## Prüfstand
 
+- [Anwendungsprüfung 34255350221](https://github.com/Kabutori/Platzhirschv2/actions/runs/34255350221): 89 PHP-Tests mit 687 Assertions, 29 Chromium-Browsertests, Frontend-Build, Abhängigkeitsprüfungen und PowerShell-Prüfung erfolgreich. Sieben bereits vorhandene PHPUnit-Notices bleiben. Dieser Lauf enthält alle neuen Fachfunktionen; die anschließende mobile Kalenderkorrektur und der vollständige Windows-Paketbau werden separat erneut geprüft.
+- Nachrichten- und SSO-Tests verwenden simulierte Anbieter; echte Anbieterzugänge sind nicht Teil der CI. Die Windows-Integrationskette ersetzt keine Live-Abnahme dieser externen Dienste.
+- Die folgenden älteren Läufe dokumentieren frühere Meilensteine:
+
 - [Anwendungsprüfung 34192895027](https://github.com/Kabutori/Platzhirschv2/actions/runs/34192895027): 71 PHP-Tests, 484 Assertions; Frontend-Build, Abhängigkeitsprüfung, zwölf Chromium-Browsertests und PowerShell-5.1-Syntax erfolgreich. PHPUnit meldet zusätzlich sieben Notices, keine fehlgeschlagenen Tests.
 - Browserprüfungen arbeiten mit API-Mocks und erzeugen Desktop-/Mobilaufnahmen. Zusätzlich prüfen Windows-Jobs die tatsächliche Installation hinter IIS mit echten MySQL-Datenbanken.
 - [Windows-Prüfung 34190594946](https://github.com/Kabutori/Platzhirschv2/actions/runs/34190594946) hat auf Server 2022 und 2025 die erste vollständige Modul-/Serverkette bestanden: lokale Sicherung/Wiederherstellung, Bestellung, Freigabe, Aktivierung, zweite MySQL-Instanz, direkte Serverzuordnung und Umzug samt Reporting-Daten und erhaltener Quelle.
@@ -62,9 +80,9 @@ Offline-Snapshot und Wiederherstellung sind für dieselbe lokale Maschine, Versi
 - Automatischer Zahlungsanbieter, automatische Abbuchungen/Verlängerungen, Rechnungen, Rückerstattungen und Testphasenpolitik. Die vorhandene Freigabe ist eine manuelle externe Zahlungsbestätigung.
 - Separate Paket-Repositories, private Paketregistries und unabhängige Modul-Releases. Erweiterte Clusterplanung, Massenumzüge und automatische Bereinigung alter/abgebrochener Kopien.
 - Versionsübergreifende Updates und Rollback, Wiederherstellung auf neuer Maschine, koordinierte Wiederherstellung verteilter Datenbanken, echte Neustartabnahme, externe CA-/Netzwerkabnahme, große Datenmengen und Lasttests.
-- SSO, organisationsübergreifender Rollen-Rollout und vollständige Listenpaginierung.
-- Marketing-Website, Selbstregistrierung, E-Mail-Verifikation, automatische Buchungs-E-Mails/SMS, Odoo-/Wetterintegrationen und weitergehende Berichte/Exportformate.
-- Buchungen über Mitternacht, Tischkombinationen und Warteliste.
+- Live-Abnahme des OIDC-Anbieters, weitere SSO-Verfahren, Organisationshierarchie, fortlaufende Synchronisierung bestehender Rollen und vollständige Listenpaginierung. Die Rollout-Auswahl liest bisher nur die erste Mandantenseite.
+- Marketing-Website, Selbstregistrierung, E-Mail-Verifikation, Odoo-/Wetterintegrationen, Umsatz-/Kassenberichte und direkter serverseitiger PDF-Download. Nachrichten-Zustellwebhooks und ein kontrollierter Wiederholungsassistent fehlen.
+- Raumbezogene Sperrzeiträume, vordefinierte kombinierbare Tischgruppen, automatische Kombinationssuche im Widget und interaktive Buchungsvorschau im Designer.
 - Vollständige visuelle 1:1-Abnahme aller Designansichten sowie durchgängige Tastatur-, Bildschirmleser- und Browser-Ende-zu-Ende-Abnahme.
 
 Ein bestehendes System anderer Version darf nicht durch Löschen seiner Installation oder Daten an der Versionsprüfung vorbeigeführt werden. Für neue Vorschauen bis zur Update-Implementierung eine getrennte Installation verwenden.
