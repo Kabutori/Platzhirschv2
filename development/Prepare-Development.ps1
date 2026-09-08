@@ -27,7 +27,7 @@ function Refresh-ToolPath {
             if([IO.Directory]::Exists($directory) -and -not $usable.Contains($directory)){$usable.Add($directory)}
         }
     }
-    $env:PATH=$usable -join ';' 
+    $env:PATH=$usable -join ';'
 }
 function Ensure-Tool([string]$command,[string]$package){
     if(Get-Command $command -ErrorAction SilentlyContinue){return}
@@ -60,8 +60,8 @@ try {
             if($LASTEXITCODE -ne 0 -or $origin.Trim().TrimEnd('/') -notin @($repository,$repository.Substring(0,$repository.Length-4),'git@github.com:Kabutori/Platzhirschv2.git')){throw 'Im Zielordner liegt ein anderes Repository. Es wird nicht geaendert.'}
             Say "Vorhandene Entwicklung verwenden: $checkout (kein Pull, Reset oder Branchwechsel)."
         } else {
-            $parent=Split-Path $checkout -Parent
-            New-Item -ItemType Directory -Path $parent -Force|Out-Null
+            $parent=[IO.Path]::GetDirectoryName($checkout)
+            [IO.Directory]::CreateDirectory($parent)|Out-Null
             Say "Quellcode von GitHub nach $checkout laden. Bei privatem Repository bitte bei Git anmelden."
             Git @('clone','--branch','codex/windows-application','--',$repository,$checkout)
             $branch='dev/local-'+(Get-Date -Format 'yyyyMMdd-HHmmss')
