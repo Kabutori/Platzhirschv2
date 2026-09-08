@@ -392,7 +392,7 @@ export function Reservations({
           </label>
           <label>
             Status
-            <select value={status} onChange={(e) => setStatus(e.target.value)}>
+            <select aria-label="Status" value={status} onChange={(e) => setStatus(e.target.value)}>
               <option value="">Alle Status</option>
               {['confirmed', 'seated', 'completed', 'no_show', 'cancelled'].map((value) => (
                 <option key={value} value={value}>
