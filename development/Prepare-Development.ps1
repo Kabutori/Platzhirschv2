@@ -20,7 +20,14 @@ $repository='https://github.com/Kabutori/Platzhirschv2.git'
 function Say([string]$text){Write-Host "[DEV-Einrichtung] $text"}
 function Refresh-ToolPath {
     $paths=@($env:PATH,[Environment]::GetEnvironmentVariable('Path','Machine'),[Environment]::GetEnvironmentVariable('Path','User'),"$env:ProgramFiles\Git\cmd","$env:ProgramFiles\nodejs","$env:LOCALAPPDATA\Programs\Git\cmd")
-    $env:PATH=($paths|Where-Object {$_}) -join ';'
+    $usable=New-Object 'System.Collections.Generic.List[string]'
+    foreach($group in $paths){
+        foreach($entry in ([string]$group -split ';')){
+            $directory=[Environment]::ExpandEnvironmentVariables($entry.Trim().Trim('"'))
+            if([IO.Directory]::Exists($directory) -and -not $usable.Contains($directory)){$usable.Add($directory)}
+        }
+    }
+    $env:PATH=$usable -join ';' 
 }
 function Ensure-Tool([string]$command,[string]$package){
     if(Get-Command $command -ErrorAction SilentlyContinue){return}
@@ -33,6 +40,7 @@ function Ensure-Tool([string]$command,[string]$package){
 }
 function Git([string[]]$arguments){& git.exe @arguments;if($LASTEXITCODE -ne 0){throw 'Git-Vorgang fehlgeschlagen. Vorhandene Dateien bleiben erhalten; Ausgabe oben pruefen.'}}
 try {
+    Say 'Installierte Entwicklerwerkzeuge pruefen'
     Refresh-ToolPath
     Ensure-Tool 'git.exe' 'Git.Git'
     Ensure-Tool 'node.exe' 'OpenJS.NodeJS.LTS'
@@ -66,6 +74,8 @@ try {
     Say "IDE-Ordner: $checkout"
     if($PrepareOnly){Say 'Quellcode vorbereitet. Keine Datenbank und kein Webserver gestartet.';exit 0}
     Say 'Entwicklungsumgebung starten. Die Produktionsinstallation wird nicht veraendert.'
-    & $runner -RuntimePath $RuntimePath -PhpPath $PhpPath -MySqlBin $MySqlBin -WebPort $WebPort -ApiPort $ApiPort -DatabasePort $DatabasePort -SmokeTest:$SmokeTest -NoBrowser:$NoBrowser -LocalComposer:$LocalComposer
+    $options=@{RuntimePath=$RuntimePath;PhpPath=$PhpPath;MySqlBin=$MySqlBin;WebPort=$WebPort;ApiPort=$ApiPort;DatabasePort=$DatabasePort;SmokeTest=$SmokeTest;NoBrowser=$NoBrowser}
+    if($LocalComposer){$options.LocalComposer=$true}
+    & $runner @options
     exit $LASTEXITCODE
-} catch {Write-Host "DEV-Einrichtung angehalten: $($_.Exception.Message)" -ForegroundColor Red;exit 1}
+} catch {Write-Host "DEV-Einrichtung angehalten (Zeile $($_.InvocationInfo.ScriptLineNumber)): $($_.Exception.Message)" -ForegroundColor Red;exit 1}
