@@ -9,7 +9,7 @@ return [
     'table' => 'sessions',
     'store' => null,
     'lottery' => [2, 100],
-    'cookie' => 'platzhirsch_session',
+    'cookie' => env('SESSION_COOKIE', 'platzhirsch_session'),
     'path' => '/',
     'domain' => null,
     'secure' => (bool) env('SESSION_SECURE_COOKIE', true),

@@ -9,6 +9,8 @@ on:
       - 'tools/**'
       - 'docs/**'
       - 'Install.bat'
+      - 'Start-Development.bat'
+      - 'development/**'
       - '.github/workflows/windows-package.yml'
   workflow_dispatch:
     inputs:
@@ -90,9 +92,28 @@ jobs:
           $zip = Get-ChildItem package-download -Filter '*.zip' | Select-Object -First 1
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           [IO.Compression.ZipFile]::ExtractToDirectory($zip.FullName, 'C:\ph-package')
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Install and test IIS, MySQL and application
         shell: powershell
         run: ./tools/Test-WindowsInstallation.ps1 -PackagePath C:\ph-package
+      - name: Test isolated development startup and restart
+        shell: powershell
+        run: |
+          ./Start-Development.bat -RuntimePath C:\ph-ci\runtime -SmokeTest -NoBrowser
+          if($LASTEXITCODE -ne 0){throw 'Development startup failed'}
+          $before=(Get-FileHash .development/state.json).Hash
+          ./Start-Development.bat -RuntimePath C:\ph-ci\runtime -SmokeTest -NoBrowser
+          if($LASTEXITCODE -ne 0){throw 'Development restart failed'}
+          if((Get-FileHash .development/state.json).Hash -ne $before){throw 'Development keys changed'}
+          foreach($port in @(5173,8000,33018)){
+            if(Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue){throw 'Development process leaked'}
+          }
   publish:
     needs: [package, installation]
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository

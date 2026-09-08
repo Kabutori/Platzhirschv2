@@ -4,7 +4,11 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 
-return Application::configure(basePath: dirname(__DIR__))
+if (getenv('APP_ENV') === 'local' && getenv('PLATZHIRSCH_DEV_STORAGE')) {
+    require dirname(__DIR__, 2) . '/development/autoload.php';
+}
+
+$application = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__ . '/../routes/web.php',
         api: __DIR__ . '/../routes/api.php',
@@ -26,3 +30,9 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->create();
+
+// Explicit storage isolation for the local development launcher.
+if (getenv('APP_ENV') === 'local' && getenv('PLATZHIRSCH_DEV_STORAGE')) {
+    $application->useStoragePath(getenv('PLATZHIRSCH_DEV_STORAGE'));
+}
+return $application;

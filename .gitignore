@@ -15,3 +15,6 @@ node_modules/
 app/.phpunit.cache/
 admin-ui/test-results/
 admin-ui/playwright-report/
+
+.development/
+app/storage/app/private/*
