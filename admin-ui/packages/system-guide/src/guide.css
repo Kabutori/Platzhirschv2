@@ -14,6 +14,8 @@
 }
 .system-guide .sg-tabs {
   display: flex;
+  flex-direction: row;
+  overflow: visible;
   flex-wrap: wrap;
   gap: 6px;
   border-bottom: 1px solid var(--border);
@@ -126,6 +128,9 @@
 .system-guide .sg-detail {
   min-width: 0;
   border-top: 2px solid var(--accent);
+}
+.system-guide .sg-detail dd {
+  font-family: var(--sans);
 }
 .system-guide dt {
   color: var(--muted);

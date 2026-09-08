@@ -32,6 +32,9 @@ test('graph, learning journey and configured database metadata remain distinct',
   page.on('pageerror', (e) => errors.push(e.message));
   const requests = await setup(page);
   await expect(page.locator('.sg-connections g')).toHaveCount(5);
+  const firstTab = await page.getByRole('button', { name: 'Systemkarte', exact: true }).boundingBox();
+  const secondTab = await page.getByRole('button', { name: 'Dateien & Daten', exact: true }).boundingBox();
+  expect(firstTab.y).toBe(secondTab.y);
   await page.locator('[data-guide-node=tenant]').click();
   await expect(page.locator('.sg-detail')).toContainText('ph_t_');
   await page.getByRole('button', { name: 'Buchung verfolgen', exact: true }).click();
