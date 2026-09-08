@@ -69,6 +69,17 @@ test('waitlist conversion preserves entry on conflict and supports table combina
     fullPage: true,
     animations: 'disabled',
   });
+  await page.setViewportSize({ width: 390, height: 844 });
+  const calendar = dialog.getByRole('dialog', { name: 'Reservierungsdatum wählen' });
+  const bounds = await calendar.boundingBox();
+  expect(bounds.x).toBeGreaterThanOrEqual(0);
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(390);
+  expect(bounds.y + bounds.height).toBeLessThanOrEqual(844);
+  await page.screenshot({
+    path: 'test-results/design-booking-calendar-mobile.png',
+    fullPage: true,
+    animations: 'disabled',
+  });
   await dialog.getByRole('button', { name: 'Heute auswählen' }).click();
   await dialog.locator('summary').click();
   await dialog.getByRole('button', { name: '18:15', exact: true }).click();
