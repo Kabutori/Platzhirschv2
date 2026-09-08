@@ -79,7 +79,7 @@ class SsoTest extends TestCase
             'https://id.example.test/keys' => Http::response(['keys' => [$this->jwk]]),
         ]);
     }
-    private function callback(array $query, string $portal = 'administration')
+    private function completeCallback(array $query, string $portal = 'administration')
     {
         $this->flushHeaders();
         return $this->get(
@@ -138,7 +138,7 @@ class SsoTest extends TestCase
         ])->fresh();
         $q = $this->start();
         $this->provider($q, ['email' => $user->email]);
-        $this->callback($q)->assertRedirect('/administration/login');
+        $this->completeCallback($q)->assertRedirect('/administration/login');
         $this->assertGuest('administration');
         DB::table('identity_sso_accounts')->insert([
             'user_id' => $user->id,
@@ -149,20 +149,20 @@ class SsoTest extends TestCase
         ]);
         $q = $this->start();
         $this->provider($q);
-        $this->callback($q)->assertRedirect('/administration/login');
+        $this->completeCallback($q)->assertRedirect('/administration/login');
         $this->withHeader('X-Platzhirsch-Portal', 'administration')
             ->getJson('/api/v1/admin/auth/me')
             ->assertOk()
             ->assertJsonPath('id', $user->id);
         $before = count(Http::recorded());
-        $this->callback($q)->assertRedirect('/administration/login');
+        $this->completeCallback($q)->assertRedirect('/administration/login');
         $this->assertCount($before, Http::recorded());
     }
     public function test_wrong_state_never_calls_provider_and_portals_do_not_mix(): void
     {
         $q = $this->start();
         $q['state'] = 'wrong';
-        $this->callback($q)->assertRedirect('/administration/login');
+        $this->completeCallback($q)->assertRedirect('/administration/login');
         Http::assertNothingSent();
         $this->assertGuest('administration');
         $user = User::create([
@@ -178,7 +178,7 @@ class SsoTest extends TestCase
         ]);
         $q = $this->start('restaurant');
         $this->provider($q);
-        $this->callback($q, 'restaurant')->assertRedirect('/restaurant/login');
+        $this->completeCallback($q, 'restaurant')->assertRedirect('/restaurant/login');
         $this->assertGuest('restaurant');
     }
     public function test_link_requires_password_and_sso_login_keeps_local_mfa(): void
@@ -196,13 +196,13 @@ class SsoTest extends TestCase
             ->assertForbidden();
         $q = $this->start('administration', 'link', ['password' => 'long-test-password']);
         $this->provider($q);
-        $this->callback($q)->assertRedirect('/administration/login#account');
+        $this->completeCallback($q)->assertRedirect('/administration/login#account');
         $this->assertSame(1, DB::table('identity_sso_accounts')->count());
         $user->update(['mfa_secret' => $secret]);
         auth('administration')->logout();
         $q = $this->start();
         $this->provider($q);
-        $this->callback($q)->assertRedirect('/administration/login');
+        $this->completeCallback($q)->assertRedirect('/administration/login');
         $this->assertGuest('administration');
         $this->withHeader('X-Platzhirsch-Portal', 'administration')
             ->getJson('/api/v1/admin/auth/sso/status')
