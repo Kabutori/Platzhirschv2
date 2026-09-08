@@ -24,7 +24,7 @@ async function mock(page, readOnly = false) {
         tenant_id: 1,
         permissions: readOnly
           ? ['reservation.read']
-          : ['reservation.read', 'restaurant.configure', 'widget.manage'],
+          : ['reservation.read', 'reservation.export', 'restaurant.configure', 'widget.manage'],
       };
     else if (path.endsWith('/csrf')) body = { token: 'csrf' };
     else if (path.endsWith('/profile')) body = { name: 'Restaurant', timezone: 'Europe/Berlin' };
@@ -67,6 +67,12 @@ test('favorites persist in this portal and keep other permitted pages reachable'
   await expect(page.getByRole('button', { name: 'Einstellungen', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: /Weitere/ }).click();
   await expect(page.getByRole('button', { name: 'Einstellungen', exact: true })).toBeVisible();
+  const order = await page
+    .getByRole('navigation', { name: 'Hauptnavigation' })
+    .getByRole('button')
+    .allTextContents();
+  expect(order.indexOf('Tischplan')).toBeLessThan(order.indexOf('Weitere'));
+  expect(order.indexOf('Weitere')).toBeLessThan(order.indexOf('Einstellungen'));
   expect(await page.evaluate(() => localStorage.getItem('platzhirsch.ui.v1.administration:1'))).toBeNull();
 });
 test('table layout saves keyboard movement and read-only users cannot reposition', async ({ page }) => {
@@ -105,4 +111,39 @@ test('widget designer edits appearance without issuing a new link', async ({ pag
   expect(writes[0]).toMatchObject({ language: 'en', position: 'bottom-right', max_party_size: 5 });
   await expect(page.getByText(/Widget-Einstellungen gespeichert/)).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Dein neuer Buchungslink' })).toHaveCount(0);
+});
+
+test('template preference cards control CSV visibility, survive reload and remain portal scoped', async ({
+  page,
+}) => {
+  await mock(page);
+  await page.goto('/restaurant/login');
+  await expect(page.getByRole('button', { name: 'CSV', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Einstellungen', exact: true }).click();
+  await page.getByRole('switch', { name: 'CSV anbieten', exact: true }).uncheck();
+  await page.getByRole('button', { name: 'Reservierungen', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'CSV', exact: true })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'CSV', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Einstellungen', exact: true }).click();
+  await page.getByRole('switch', { name: 'CSV anbieten', exact: true }).check();
+  await page.getByRole('switch', { name: 'Exporte anzeigen', exact: true }).uncheck();
+  await expect(page.getByRole('switch', { name: 'CSV anbieten', exact: true })).toHaveCount(0);
+  await page.getByRole('switch', { name: 'Exporte anzeigen', exact: true }).check();
+  await expect(page.getByRole('switch', { name: 'CSV anbieten', exact: true })).toBeChecked();
+  await page.getByRole('switch', { name: 'Favoriten in der Navigation', exact: true }).check();
+  await page.getByRole('checkbox', { name: 'Tischplan', exact: true }).check();
+  await page.getByRole('button', { name: /Weitere Bereiche ausklappen/ }).click();
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot({ path: 'test-results/design-preferences-desktop.png', fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.screenshot({ path: 'test-results/design-preferences-mobile.png', fullPage: true });
+  expect(await page.evaluate(() => localStorage.getItem('platzhirsch.ui.v1.administration:1'))).toBeNull();
+});
+test('export settings do not appear without the export permission', async ({ page }) => {
+  await mock(page, true);
+  await page.goto('/restaurant/login');
+  await page.getByRole('button', { name: 'Einstellungen', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Export-Formate', exact: true })).toHaveCount(0);
 });

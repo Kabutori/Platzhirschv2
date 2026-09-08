@@ -1,3 +1,4 @@
+import { Toggle } from '@platzhirsch/ui-runtime/controls';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { LockKeyhole, Plus, Pencil, Trash2, Search } from 'lucide-react';
@@ -14,31 +15,6 @@ type Role = {
 };
 type Family = { module: string; code: string; label: string; permissions: { code: string; label: string }[] };
 const same = (a: string[], b: string[]) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
-function Switch({
-  label,
-  checked,
-  disabled,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  disabled: boolean;
-  onChange: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-label={label}
-      aria-checked={checked}
-      disabled={disabled}
-      className="rights-switch"
-      onClick={onChange}
-    >
-      <span />
-    </button>
-  );
-}
 function Editor({
   role,
   roles,
@@ -198,7 +174,9 @@ function Editor({
                   {count}/{codes.length}
                 </small>
               </button>
-              <Switch
+              <Toggle
+                group
+                mixed={count > 0 && count < codes.length}
                 label={'Alle Rechte: ' + f.label}
                 checked={count === codes.length}
                 disabled={role.locked || busy}
@@ -233,7 +211,7 @@ function Editor({
                 <strong>{p.label}</strong>
                 <code>{p.code}</code>
               </div>
-              <Switch
+              <Toggle
                 label={p.label}
                 checked={role.locked || checked.includes(p.code)}
                 disabled={role.locked || busy}

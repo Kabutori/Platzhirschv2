@@ -9,7 +9,8 @@
     "./api": "./src/api.ts",
     "./types": "./src/types.ts",
     "./components": "./src/components.tsx",
-    "./preferences": "./src/preferences.tsx"
+    "./preferences": "./src/preferences.tsx",
+    "./controls": "./src/controls.tsx"
   },
   "peerDependencies": {
     "react": "^19.2.0",

@@ -1,6 +1,7 @@
+import { Toggle } from '@platzhirsch/ui-runtime/controls';
 import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Save } from 'lucide-react';
+import { Plus, Trash2, Save, Search } from 'lucide-react';
 import { api } from '@platzhirsch/ui-runtime/api';
 import { useData, Loading, ErrorBox, Modal, type Row } from '@platzhirsch/ui-runtime/components';
 function Editor({
@@ -32,8 +33,9 @@ function Editor({
           permissions: Object.entries(catalog).map(([code, label]) => ({ code, label })),
         },
       ];
-  const [group, setGroup] = useState(groups[0]?.code);
-  const active = groups.find((g) => g.code === group) || groups[0];
+  const [search, setSearch] = useState('');
+  const [group, setGroup] = useState(groups[0]?.module + ':' + groups[0]?.code);
+  const active = groups.find((g) => g.module + ':' + g.code === group) || groups[0];
   const dirty =
     name !== (role.name || '') ||
     JSON.stringify([...checked].sort()) !== JSON.stringify([...(role.permissions || [])].sort());
@@ -70,61 +72,82 @@ function Editor({
           <input required maxLength={120} value={name} onChange={(e) => setName(e.target.value)} />
         </label>
         <span className="rights-status">{dirty ? 'Ungespeicherte Änderungen' : 'Gespeicherte Rechte'}</span>
-        <button className="primary" disabled={busy || !name.trim()}>
+        <button className="primary" disabled={busy || !name.trim() || (!!role.id && !dirty)}>
           <Save size={16} />
           Speichern
         </button>
       </div>
       <ErrorBox error={error} />
       <div className="rights-workspace">
-        <nav className="section-tabs" aria-label="Berechtigungsgruppen">
-          {groups.map((g) => (
-            <button
-              type="button"
-              key={g.module + g.code}
-              aria-pressed={g.code === group}
-              onClick={() => setGroup(g.code)}
-            >
-              {g.label}
-            </button>
-          ))}
-        </nav>
-        <section className="panel padded">
-          <div className="toolbar">
-            <h3>{active?.label}</h3>
-            {active && (
-              <label>
-                Gruppe aktivieren
-                <input
-                  type="checkbox"
-                  role="switch"
-                  checked={active.permissions.every((p: Row) => checked.includes(p.code))}
-                  onChange={(e) => {
-                    const codes: string[] = active.permissions.map((p: Row) => p.code);
+        <div className="rights-groups" aria-label="Berechtigungsgruppen">
+          {groups.map((g) => {
+            const codes: string[] = g.permissions.map((p: Row) => p.code);
+            const count = codes.filter((code) => checked.includes(code)).length;
+            return (
+              <div
+                key={g.module + ':' + g.code}
+                className={'rights-group' + (g === active ? ' selected' : '')}
+              >
+                <button
+                  type="button"
+                  className="rights-group-select"
+                  aria-pressed={g === active}
+                  onClick={() => setGroup(g.module + ':' + g.code)}
+                >
+                  {g.label}
+                  <small>
+                    {count}/{codes.length}
+                  </small>
+                </button>
+                <Toggle
+                  group
+                  label={'Alle Rechte: ' + g.label}
+                  checked={count === codes.length}
+                  mixed={count > 0 && count < codes.length}
+                  disabled={busy}
+                  onChange={() =>
                     setChecked(
-                      e.target.checked
-                        ? Array.from(new Set([...checked, ...codes]))
-                        : checked.filter((c) => !codes.includes(c)),
-                    );
-                  }}
+                      count === codes.length
+                        ? checked.filter((c) => !codes.includes(c))
+                        : [...new Set([...checked, ...codes])],
+                    )
+                  }
                 />
-              </label>
-            )}
-          </div>
-          {active?.permissions.map((p: Row) => (
-            <label className="preference-row" key={p.code}>
-              <span>
-                <strong>{p.label}</strong>
-                <small>{p.code}</small>
-              </span>
-              <input
-                type="checkbox"
-                role="switch"
-                checked={checked.includes(p.code)}
-                onChange={() => toggle(p.code)}
-              />
-            </label>
-          ))}
+              </div>
+            );
+          })}
+        </div>
+        <div className="rights-search">
+          <Search size={16} />
+          <input
+            aria-label="Berechtigungen suchen"
+            placeholder="Berechtigung oder Code suchen …"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <span className="muted">{active?.module}</span>
+        </div>
+        <section className="panel rights-list" aria-label={active?.label}>
+          {active?.permissions
+            .filter((p: Row) => (p.label + ' ' + p.code).toLowerCase().includes(search.toLowerCase()))
+            .map((p: Row) => (
+              <div className="rights-row" key={p.code}>
+                <div>
+                  <strong>{p.label}</strong>
+                  <code>{p.code}</code>
+                </div>
+                <Toggle
+                  label={p.label}
+                  checked={checked.includes(p.code)}
+                  disabled={busy}
+                  onChange={() => toggle(p.code)}
+                />
+              </div>
+            ))}
+          {active &&
+            !active.permissions.some((p: Row) =>
+              (p.label + ' ' + p.code).toLowerCase().includes(search.toLowerCase()),
+            ) && <p className="padded">Keine passenden Berechtigungen.</p>}
         </section>
       </div>
       <p className="muted">
@@ -163,7 +186,7 @@ export default function RestaurantRoles({ tenant }: { tenant?: string }) {
       ) : (
         q.data && (
           <>
-            <nav className="rights-roletabs section-tabs" aria-label="Restaurantrollen">
+            <nav className="rights-roletabs" aria-label="Restaurantrollen">
               {q.data.roles.map((r: Row) => (
                 <button
                   key={r.id}

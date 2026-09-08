@@ -1,3 +1,4 @@
+import { usePreferences } from '@platzhirsch/ui-runtime/preferences';
 import TablePlan from './TablePlan';
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -215,6 +216,7 @@ export function Reservations({
   go: (s: string) => void;
   user: Row;
 }) {
+  const { value: preferences } = usePreferences();
   const [date, setDate] = useState(today());
   const q = useData('v1/restaurant/reservations?date=' + date, tenant);
   const tables = useData('v1/restaurant/tables', tenant);
@@ -319,10 +321,12 @@ export function Reservations({
           <button onClick={() => setDate(today())}>Heute</button>
         </div>
         <div className="button-row">
-          <button disabled={!allowed(user, 'reservation.export')} onClick={download}>
-            <Download size={16} />
-            CSV
-          </button>
+          {preferences.exportEnabled && preferences.csvEnabled && (
+            <button disabled={!allowed(user, 'reservation.export')} onClick={download}>
+              <Download size={16} />
+              CSV
+            </button>
+          )}
           <button
             disabled={!allowed(user, 'reservation.write')}
             className="primary"

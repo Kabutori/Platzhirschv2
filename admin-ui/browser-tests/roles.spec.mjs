@@ -65,3 +65,53 @@ test('read-only role hides administration and disables booking and export', asyn
   await expect(page.getByRole('button', { name: 'Team', exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Support', exact: true })).toHaveCount(0);
 });
+test('restaurant groups use module identity and show partial selection like platform roles', async ({
+  page,
+}) => {
+  await page.route('**/api/**', async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    let body = [];
+    if (path.endsWith('/auth/me')) body = admin;
+    else if (path.endsWith('/profile')) body = { timezone: 'Europe/Berlin' };
+    else if (path.endsWith('/roles'))
+      body = {
+        catalog: {},
+        roles: [{ id: 1, name: 'Empfang', version: 1, permissions: ['reservation.read'] }],
+        families: [
+          {
+            module: 'reservation',
+            code: 'manage',
+            label: 'Reservierungen',
+            permissions: [
+              { code: 'reservation.read', label: 'Buchungen ansehen' },
+              { code: 'reservation.write', label: 'Buchungen bearbeiten' },
+            ],
+          },
+          {
+            module: 'widget',
+            code: 'manage',
+            label: 'Widget',
+            permissions: [{ code: 'widget.manage', label: 'Widget gestalten' }],
+          },
+        ],
+      };
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
+  });
+  await page.goto('/restaurant/login');
+  await page.getByRole('button', { name: 'Rollen & Rechte', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Speichern', exact: true })).toBeDisabled();
+  const group = page.getByRole('checkbox', { name: 'Alle Rechte: Reservierungen', exact: true });
+  await expect(group).toHaveAttribute('aria-checked', 'mixed');
+  await page.locator('.rights-group-select').filter({ hasText: 'Widget' }).click();
+  await expect(page.getByRole('switch', { name: 'Widget gestalten', exact: true })).toBeVisible();
+  await page.locator('.rights-group-select').filter({ hasText: 'Reservierungen' }).click();
+  await expect(page.getByRole('switch', { name: 'Buchungen ansehen', exact: true })).toBeChecked();
+  await page.getByRole('textbox', { name: 'Berechtigungen suchen', exact: true }).fill('reservation.write');
+  await expect(page.getByRole('switch', { name: 'Buchungen ansehen', exact: true })).toHaveCount(0);
+  await page.getByRole('switch', { name: 'Buchungen bearbeiten', exact: true }).check();
+  await expect(group).toBeChecked();
+  await expect(page.getByRole('button', { name: 'Speichern', exact: true })).toBeEnabled();
+  await page.getByRole('textbox', { name: 'Berechtigungen suchen', exact: true }).fill('');
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot({ path: 'test-results/roles-restaurant-groups.png', fullPage: true });
+});

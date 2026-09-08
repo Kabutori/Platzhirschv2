@@ -261,6 +261,25 @@ function ShellBody({ user }: { user: Row }) {
             (!pagePermission[key] || allowed(user, pagePermission[key])),
         );
   const title = nav.find(([key]) => key === page)?.[1] || 'Platzhirsch';
+  function navButton(key: string, label: string, Icon: typeof Menu) {
+    return (
+      <button
+        key={key}
+        className={key === page ? 'active' : ''}
+        onClick={() => {
+          setPage(key);
+          setMobile(false);
+        }}
+        title={label}
+        aria-label={label}
+        aria-current={key === page ? 'page' : undefined}
+      >
+        <Icon size={17} />
+        <span className="nav-text">{label}</span>
+        {key === page && <ChevronRight size={14} />}
+      </button>
+    );
+  }
   return (
     <div className={preferences.collapsed ? 'app compact-navigation' : 'app'}>
       <aside className={mobile ? 'sidebar open' : 'sidebar'}>
@@ -288,34 +307,28 @@ function ShellBody({ user }: { user: Row }) {
         <div className="nav-label">{scope === 'system' ? 'PLATTFORM-VERWALTUNG' : 'DEIN RESTAURANT'}</div>
         <nav aria-label="Hauptnavigation">
           {nav
-            .filter(([key]) => !preferences.favoritesEnabled || preferences.favorites.includes(key) || more)
-            .sort(([a], [b]) =>
-              preferences.favoritesEnabled
-                ? Number(preferences.favorites.includes(b)) - Number(preferences.favorites.includes(a))
-                : 0,
-            )
-            .map(([key, label, Icon]) => (
-              <button
-                key={key}
-                className={key === page ? 'active' : ''}
-                onClick={() => {
-                  setPage(key);
-                  setMobile(false);
-                }}
-                title={label}
-                aria-label={label}
-                aria-current={key === page ? 'page' : undefined}
-              >
-                <Icon size={17} />
-                <span className="nav-text">{label}</span>
-                {key === page && <ChevronRight size={14} />}
-              </button>
-            ))}
+            .filter(([key]) => !preferences.favoritesEnabled || preferences.favorites.includes(key))
+            .map(([key, label, Icon]) => navButton(key, label, Icon))}
           {preferences.favoritesEnabled && nav.some(([key]) => !preferences.favorites.includes(key)) && (
-            <button aria-expanded={more} onClick={() => setMore(!more)}>
-              <ChevronRight size={17} />
-              <span className="nav-text">{more ? 'Weniger' : 'Weitere'}</span>
-            </button>
+            <>
+              <button
+                className="nav-more"
+                aria-label={more ? 'Weitere Bereiche einklappen' : 'Weitere Bereiche ausklappen'}
+                aria-expanded={more}
+                aria-controls="remaining-navigation"
+                onClick={() => setMore(!more)}
+              >
+                <ChevronRight size={17} style={{ transform: more ? 'rotate(90deg)' : undefined }} />
+                <span className="nav-text">Weitere</span>
+              </button>
+              {more && (
+                <div id="remaining-navigation" className="remaining-navigation">
+                  {nav
+                    .filter(([key]) => !preferences.favorites.includes(key))
+                    .map(([key, label, Icon]) => navButton(key, label, Icon))}
+                </div>
+              )}
+            </>
           )}
         </nav>
         <div className="user">
@@ -362,7 +375,10 @@ function ShellBody({ user }: { user: Row }) {
         <main>
           <ErrorBox error={error || preferenceError} />
           {page === 'preferences' ? (
-            <PreferencesPage items={nav} />
+            <PreferencesPage
+              items={nav}
+              canExport={scope === 'restaurant' && allowed(user, 'reservation.export')}
+            />
           ) : (
             <Content key={scope + page} scope={scope} page={page} user={user} go={setPage} />
           )}
