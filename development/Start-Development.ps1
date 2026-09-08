@@ -105,7 +105,9 @@ error_log="$dev\php.log"
             [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
             $installer="$dev\tools\composer-setup.php"
             try {
-                $expected=(Invoke-WebRequest -UseBasicParsing 'https://composer.github.io/installer.sig' -TimeoutSec 60).Content.Trim()
+                $signature=(Invoke-WebRequest -UseBasicParsing 'https://composer.github.io/installer.sig' -TimeoutSec 60).Content
+                if($signature -is [byte[]]){$signature=[Text.Encoding]::UTF8.GetString($signature)}
+                $expected=([string]$signature).Trim()
                 if($expected -notmatch '^[a-fA-F0-9]{96}$'){throw 'Ungueltige Composer-Pruefsumme.'}
                 Invoke-WebRequest -UseBasicParsing 'https://getcomposer.org/installer' -OutFile $installer -TimeoutSec 60
                 if((Get-FileHash $installer -Algorithm SHA384).Hash -ne $expected){throw 'Composer-Installer-Pruefsumme stimmt nicht.'}
