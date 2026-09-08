@@ -151,6 +151,9 @@ try {
         'repair_failed',
     );
     callApi('restaurant', 'GET', 'v1/restaurant/reporting?from=' . $date . '&to=' . $date, null, 403);
+    // This fixture deliberately repeats activation several times. Respect the
+    // production five-per-minute limit before testing activation after repair.
+    sleep(61);
     callApi('restaurant', 'POST', 'v1/restaurant/modules/reporting/activation', ['enabled' => true], 202);
     waitTenant($demo->id);
     // A second independent MySQL data directory, bound only to loopback by the parent script.
