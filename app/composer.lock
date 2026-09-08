@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6bbcc81928280114ff9e7ddff4aa67a2",
+    "content-hash": "8fa28599ee8e50cd11cf7f2a16a19e63",
     "packages": [
         {
             "name": "brick/math",
@@ -2492,6 +2492,310 @@
                 }
             ],
             "time": "2026-08-24T00:54:40+00:00"
+        },
+        {
+            "name": "platzhirsch/billing",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/billing",
+                "reference": "dc550bf6514169a931ed0d3f9ca47c7f4828936c"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\Billing\\BillingServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Billing\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "platzhirsch/contracts",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/contracts",
+                "reference": "7c1dd7198f43e1976ba578c4a0e0e5ba03f8d64b"
+            },
+            "require": {
+                "php": "^8.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "App\\Contracts\\Module\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "platzhirsch/customer",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/customer",
+                "reference": "7988794600f9d5bf2736430d2c8ab3792d40c7b5"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\Customer\\CustomerServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Customer\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "platzhirsch/identity",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/identity",
+                "reference": "3d5d73396d60db52d925283ff1019e2265ddf65d"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\Identity\\IdentityServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Identity\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "platzhirsch/module-host",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/module-host",
+                "reference": "04c64d89c5daade4ebe940a23721b29200049de4"
+            },
+            "require": {
+                "php": "^8.3",
+                "platzhirsch/contracts": "0.1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "App\\Core\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "platzhirsch/provisioning",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/provisioning",
+                "reference": "b945dc04ebb0276e4e5e80d96f4f0a73deaac2e2"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\Provisioning\\ProvisioningServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Provisioning\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "platzhirsch/reporting",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/reporting",
+                "reference": "36c0c1c438502fc5691be1837740a5761210f5bf"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/billing": "0.1.0",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.0",
+                "platzhirsch/reservation": "0.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\Reporting\\ReportingServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Reporting\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "platzhirsch/reservation",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/reservation",
+                "reference": "b9bb7456bf0f35a4a1d7a451b2dad059a5552eed"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\Reservation\\ReservationServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Reservation\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "platzhirsch/support",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/support",
+                "reference": "639b0117bd703b3effe8d0f0b2024b978567de98"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\Support\\SupportServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Support\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "platzhirsch/widget",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/widget",
+                "reference": "ad9b165eb9352c692afc78b624093fba10986f7b"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.0",
+                "platzhirsch/reservation": "0.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\Widget\\WidgetServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Widget\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
         },
         {
             "name": "psr/clock",

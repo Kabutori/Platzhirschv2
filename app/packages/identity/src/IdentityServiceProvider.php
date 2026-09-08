@@ -70,7 +70,6 @@ class IdentityServiceProvider extends ServiceProvider implements Module
                 'permissions' => [
                     ['code' => 'platform.audit.read', 'label' => 'Audit Log ansehen'],
                     ['code' => 'platform.health.read', 'label' => 'Systemstatus ansehen'],
-                    ['code' => 'support.access', 'label' => 'Support-Tickets bearbeiten'],
                 ],
             ],
         ];

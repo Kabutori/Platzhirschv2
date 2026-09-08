@@ -47,6 +47,11 @@ class CustomerServiceProvider extends ServiceProvider implements Module
     }
     public function permissions(): array
     {
-        return [];
+        return json_decode(
+            '[{"code": "profile", "scope": "restaurant", "label": "Restaurantprofil", "permissions": [{"code": "restaurant.profile", "label": "Restaurantprofil bearbeiten"}]}]',
+            true,
+            512,
+            JSON_THROW_ON_ERROR,
+        );
     }
 }

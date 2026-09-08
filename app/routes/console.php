@@ -112,3 +112,91 @@ Artisan::command('server:authorize {server} {--credentials-file=}', function () 
     $this->info('Server für Mandanten-Provisionierung freigegeben.');
     return 0;
 });
+
+Artisan::command('module:repair {operation} {--acknowledge-partial-migrations}', function () {
+    if (!$this->option('acknowledge-partial-migrations')) {
+        $this->error(
+            'Zuerst teilweise ausgeführte Migrationen prüfen. Danach mit --acknowledge-partial-migrations erneut starten. Es werden keine Tabellen gelöscht oder Daten zurückgesetzt.',
+        );
+        return 1;
+    }
+    $op = DB::table('tenant_operations')->find((int) $this->argument('operation'));
+    if (!$op || $op->kind !== 'module_enable' || $op->status !== 'failed') {
+        $this->error('Kein fehlgeschlagener Modulauftrag.');
+        return 1;
+    }
+    $database = app(\App\Services\TenantDatabase::class);
+    try {
+        $database->lock($op->tenant_id);
+        $tenant = \App\Models\Tenant::findOrFail($op->tenant_id);
+        if ($tenant->status !== 'upgrading' || $tenant->placement_version != $op->expected_version) {
+            throw new \RuntimeException('state_changed');
+        }
+        [$pdo, $host] = app(\App\Services\ProvisioningConnection::class)->open($tenant->server_id);
+        if (!preg_match('/^ph_t_[a-f0-9]{24}$/D', $tenant->database_name)) {
+            throw new \RuntimeException('identifier_invalid');
+        }
+        $account = $pdo->quote($tenant->database_user) . '@' . $pdo->quote($host);
+        $grant = str_replace('_', '\\_', $tenant->database_name);
+        $matched = false;
+        foreach ($pdo->query('SHOW GRANTS FOR ' . $account)->fetchAll(\PDO::FETCH_COLUMN) as $line) {
+            if (
+                !preg_match('/^GRANT (.+?) ON `([^`]+)`\.\* TO /', $line, $m) ||
+                str_replace('\\', '', $m[2]) !== $tenant->database_name
+            ) {
+                continue;
+            }
+            $privileges = array_map('trim', explode(',', $m[1]));
+            $allowed = [
+                'SELECT',
+                'INSERT',
+                'UPDATE',
+                'DELETE',
+                'CREATE',
+                'ALTER',
+                'INDEX',
+                'DROP',
+                'REFERENCES',
+            ];
+            if (array_diff($privileges, $allowed)) {
+                throw new \RuntimeException('unexpected_privileges');
+            }
+            $ddl = array_intersect($privileges, ['CREATE', 'ALTER', 'INDEX', 'DROP', 'REFERENCES']);
+            if ($ddl) {
+                $pdo->exec('REVOKE ' . implode(',', $ddl) . " ON `$grant`.* FROM $account");
+            }
+            $matched = true;
+        }
+        if (!$matched) {
+            throw new \RuntimeException('grant_not_found');
+        }
+        DB::transaction(function () use ($tenant, $op) {
+            $current = \App\Models\Tenant::whereKey($tenant->id)->lockForUpdate()->firstOrFail();
+            if ($current->status !== 'upgrading' || $current->placement_version != $op->expected_version) {
+                throw new \RuntimeException('state_changed');
+            }
+            app(\App\Modules\Billing\PublicApi\Entitlements::class)->finish(
+                $tenant->id,
+                $op->module_code,
+                'error',
+                '',
+            );
+            $current->update(['status' => 'active']);
+            DB::table('tenant_operations')
+                ->where('id', $op->id)
+                ->update(['error_code' => 'repaired_activation_retry_required', 'updated_at' => now()]);
+            \App\Services\Audit::record('module.repaired', $op->id, $tenant->id);
+        });
+        $this->info(
+            'DDL-Rechte entzogen; Restaurant freigegeben. Das Modul bleibt gesperrt und kann nach Prüfung seiner Migration erneut aktiviert werden.',
+        );
+        return 0;
+    } catch (\Throwable) {
+        $this->error(
+            'Reparatur nicht abgeschlossen. Auftrag, Serverzugang und Datenbankrechte lokal prüfen.',
+        );
+        return 1;
+    } finally {
+        $database->disconnect();
+    }
+});

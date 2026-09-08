@@ -1109,3 +1109,6 @@ button.rights-switch[aria-checked='true'] span {
 .module-detail .rights-row {
   flex-wrap: wrap;
 }
+
+.shop-grid { grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); margin: 16px 0 28px; }
+.shop-grid .toolbar { gap: 14px; flex-wrap: wrap; }

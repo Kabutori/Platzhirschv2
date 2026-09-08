@@ -47,6 +47,11 @@ class WidgetServiceProvider extends ServiceProvider implements Module
     }
     public function permissions(): array
     {
-        return [];
+        return json_decode(
+            '[{"code": "widget", "scope": "restaurant", "label": "Buchungswidget", "permissions": [{"code": "widget.manage", "label": "Buchungswidget verwalten"}]}]',
+            true,
+            512,
+            JSON_THROW_ON_ERROR,
+        );
     }
 }

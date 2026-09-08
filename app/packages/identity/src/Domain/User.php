@@ -44,7 +44,12 @@ class User extends Authenticatable
             return [];
         }
         if (!$this->restaurant_role_id) {
-            return \App\Modules\Identity\Application\Permissions::STAFF;
+            return array_values(
+                array_intersect(
+                    \App\Modules\Identity\Application\Permissions::STAFF,
+                    array_keys(\App\Modules\Identity\Application\Permissions::catalog()),
+                ),
+            );
         }
         // Resolve on every request; a stale or foreign role must never grant rights.
         $json = app('db')

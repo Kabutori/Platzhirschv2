@@ -18,6 +18,8 @@ export const today = () =>
   new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 export const labels: Record<string, string> = {
   active: 'Aktiv',
+  moving: 'Wird umgezogen',
+  upgrading: 'Modulmigration läuft',
   blocked: 'Gesperrt',
   provisioning: 'Wird eingerichtet',
   failed: 'Einrichtung fehlgeschlagen',

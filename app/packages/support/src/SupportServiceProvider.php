@@ -47,6 +47,11 @@ class SupportServiceProvider extends ServiceProvider implements Module
     }
     public function permissions(): array
     {
-        return [];
+        return json_decode(
+            '[{"code": "support", "scope": "both", "label": "Support", "permissions": [{"code": "support.access", "label": "Support-Tickets lesen und bearbeiten"}]}]',
+            true,
+            512,
+            JSON_THROW_ON_ERROR,
+        );
     }
 }

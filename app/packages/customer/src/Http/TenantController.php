@@ -91,21 +91,28 @@ class TenantController
             'address' => 'nullable|string|max:2000',
             'status' => ['sometimes', Rule::in(['active', 'blocked'])],
         ]);
-        abort_if(
-            isset($data['status']) && !in_array($tenant->status, ['active', 'blocked']),
-            409,
-            'Provisionierung zuerst abschließen.',
-        );
-        $tenant->update($data);
-        $this->audit->record('tenant.updated', $tenant->id, $tenant->id);
-        return $tenant;
+        return $this->db->transaction(function () use ($tenant, $data) {
+            $tenant = Tenant::whereKey($tenant->id)->lockForUpdate()->firstOrFail();
+            abort_if(
+                isset($data['status']) && !in_array($tenant->status, ['active', 'blocked']),
+                409,
+                'Wartungsauftrag zuerst abschließen.',
+            );
+            $tenant->update($data);
+            $this->audit->record('tenant.updated', $tenant->id, $tenant->id);
+            return $tenant;
+        });
     }
+
     public function retryTenant(Tenant $tenant)
     {
-        abort_unless($tenant->status === 'failed', 409);
-        $tenant->update(['status' => 'provisioning']);
-        $this->provisioning->create($tenant->id);
-        $this->audit->record('tenant.retry', $tenant->id, $tenant->id);
-        return response()->json($tenant, 202);
+        return $this->db->transaction(function () use ($tenant) {
+            $tenant = Tenant::whereKey($tenant->id)->lockForUpdate()->firstOrFail();
+            abort_unless($tenant->status === 'failed', 409);
+            $tenant->update(['status' => 'provisioning']);
+            $this->provisioning->create($tenant->id);
+            $this->audit->record('tenant.retry', $tenant->id, $tenant->id);
+            return response()->json($tenant, 202);
+        });
     }
 }

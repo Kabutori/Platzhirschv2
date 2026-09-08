@@ -21,7 +21,9 @@ export default function Shop({ tenant }: { tenant?: string }) {
       setNotice(
         path === 'orders'
           ? 'Bestellung erfasst. Die Administration bestätigt die externe Zahlung.'
-          : 'Modulstatus wird aktualisiert. Während der Migration ist das Restaurant kurzzeitig nicht verfügbar.',
+          : (body as { enabled?: boolean }).enabled === false
+            ? 'Modul deaktiviert. Vorhandene Daten bleiben erhalten.'
+            : 'Modulstatus wird aktualisiert. Während der Migration ist das Restaurant kurzzeitig nicht verfügbar.',
       );
       await q.invalidateQueries();
     } catch (e) {
@@ -32,8 +34,7 @@ export default function Shop({ tenant }: { tenant?: string }) {
   }
   return (
     <>
-      <p className="eyebrow">RESTAURANT · ERWEITERUNGEN</p>
-      <h2>Modul-Shop</h2>
+      <h2>Module für dein Restaurant</h2>
       <p>
         Installierte Erweiterungen für dein Restaurant freischalten. Ein bestätigter Auftrag umfasst einen
         Monat; es erfolgt keine automatische Abbuchung oder Verlängerung.
@@ -49,7 +50,30 @@ export default function Shop({ tenant }: { tenant?: string }) {
         </p>
       )}
       {data.error && <p role="alert">{data.error.message}</p>}
-      <div className="module-cards">
+      <h3>Basismodule</h3>
+      <div className="module-cards shop-grid">
+        {data.data?.core_modules?.map((code: string) => (
+          <section className="panel padded module-card" key={code}>
+            <div className="toolbar">
+              <strong>
+                {(
+                  {
+                    identity: 'Benutzer & Rechte',
+                    customer: 'Restaurantprofil',
+                    reservation: 'Reservierungen',
+                    widget: 'Buchungswidget',
+                    support: 'Support',
+                  } as Record<string, string>
+                )[code] || code}
+              </strong>
+              <span className="badge active">Aktiv</span>
+            </div>
+            <p className="muted">Im Basispaket enthalten</p>
+          </section>
+        ))}
+      </div>
+      <h3>Erweiterungen</h3>
+      <div className="module-cards shop-grid">
         {data.data?.products.map((p: any) => {
           const entitlement = data.data.entitlements.find((e: any) => e.module_code === p.module_code);
           const pending = data.data.orders.some(
@@ -101,6 +125,10 @@ export default function Shop({ tenant }: { tenant?: string }) {
                       : 'Zahlungspflichtig bestellen'}
                 </button>
                 <button
+                  className="rights-switch"
+                  role="switch"
+                  aria-label="Erweiterte Auswertungen aktivieren"
+                  aria-checked={entitlement?.status === 'active' && Boolean(usable)}
                   disabled={busy || !usable || entitlement.status === 'activating'}
                   onClick={() =>
                     void action(p.module_code, p.module_code + '/activation', {
@@ -108,7 +136,7 @@ export default function Shop({ tenant }: { tenant?: string }) {
                     })
                   }
                 >
-                  {entitlement?.status === 'active' ? 'Deaktivieren' : 'Aktivieren'}
+                  <span aria-hidden="true" />
                 </button>
               </div>
             </section>

@@ -149,4 +149,19 @@ class PlatformRoleTest extends TestCase
             'platform_role_id' => DB::table('identity_platform_roles')->where('locked', true)->value('id'),
         ])->assertUnprocessable();
     }
+    public function test_restaurant_module_permissions_are_not_assignable_in_platform_roles(): void
+    {
+        $user = \App\Models\User::create([
+            'name' => 'Admin',
+            'email' => 'root-scope@example.test',
+            'password' => 'Test-password-only',
+            'role' => 'system_admin',
+        ])->fresh();
+        $this->actingAs($user)
+            ->postJson('/api/v1/admin/platform-roles', [
+                'name' => 'Wrong scope',
+                'permissions' => ['reporting.read'],
+            ])
+            ->assertUnprocessable();
+    }
 }

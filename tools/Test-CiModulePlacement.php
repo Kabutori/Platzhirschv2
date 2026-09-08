@@ -124,6 +124,35 @@ try {
     callApi('restaurant', 'GET', 'v1/restaurant/reporting?from=' . $date . '&to=' . $date, null, 403);
     callApi('restaurant', 'POST', 'v1/restaurant/modules/reporting/activation', ['enabled' => true], 202);
     waitTenant($demo->id);
+    // Simulate a worker interruption after temporary DDL grants, then exercise local repair.
+    $demo->refresh();
+    $grant = str_replace('_', '\\_', $demo->database_name);
+    [$repairPdo, $repairHost] = app(App\Services\ProvisioningConnection::class)->open(null);
+    $account = $repairPdo->quote($demo->database_user) . '@' . $repairPdo->quote($repairHost);
+    $repairPdo->exec("GRANT CREATE,ALTER,INDEX,DROP,REFERENCES ON `$grant`.* TO $account");
+    $operation = DB::table('tenant_operations')->insertGetId([
+        'tenant_id' => $demo->id,
+        'kind' => 'module_enable',
+        'module_code' => 'reporting',
+        'status' => 'failed',
+        'expected_version' => $demo->placement_version,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $demo->update(['status' => 'upgrading']);
+    DB::table('billing_entitlements')
+        ->where('tenant_id', $demo->id)
+        ->update(['status' => 'activating']);
+    check(
+        Artisan::call('module:repair', [
+            'operation' => $operation,
+            '--acknowledge-partial-migrations' => true,
+        ]) === 0,
+        'repair_failed',
+    );
+    callApi('restaurant', 'GET', 'v1/restaurant/reporting?from=' . $date . '&to=' . $date, null, 403);
+    callApi('restaurant', 'POST', 'v1/restaurant/modules/reporting/activation', ['enabled' => true], 202);
+    waitTenant($demo->id);
     // A second independent MySQL data directory, bound only to loopback by the parent script.
     $secret = json_decode(
         file_get_contents($root . '/ci-second-credentials.json'),

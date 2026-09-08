@@ -30,6 +30,19 @@ class ModuleController
                 ->latest('id')
                 ->limit(50)
                 ->get(),
+            'core_modules' => array_values(
+                array_map(
+                    fn($m) => $m['code'],
+                    array_filter(
+                        $this->registry->catalog(),
+                        fn($m) => in_array(
+                            $m['code'],
+                            ['identity', 'customer', 'reservation', 'widget', 'support'],
+                            true,
+                        ),
+                    ),
+                ),
+            ),
             'payment_mode' => 'external_confirmation',
         ];
     }
@@ -56,6 +69,16 @@ class ModuleController
                 abort_unless($existing->module_code === $d['module_code'], 409);
                 return response()->json($existing, 200);
             }
+            abort_if(
+                $this->db
+                    ->table('billing_orders')
+                    ->where('tenant_id', $tenant)
+                    ->where('module_code', $d['module_code'])
+                    ->where('status', 'pending')
+                    ->exists(),
+                409,
+                'Für dieses Modul wartet bereits eine Bestellung auf Zahlung.',
+            );
             $product = $this->db
                 ->table('billing_products')
                 ->where('module_code', $d['module_code'])
@@ -69,7 +92,7 @@ class ModuleController
             );
             $this->registry->get($d['module_code']);
             abort_unless(
-                (int) $product->amount_cents === $d['expected_amount_cents'],
+                (int) $product->amount_cents === (int) $d['expected_amount_cents'],
                 409,
                 'Preis wurde geändert. Angebot neu laden.',
             );

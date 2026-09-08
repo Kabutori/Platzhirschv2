@@ -23,7 +23,11 @@ class RoleController
             array_values(
                 array_filter(
                     $this->registry->permissionFamilies(),
-                    fn($family) => ($family['scope'] ?? 'administration') === 'administration',
+                    fn($family) => in_array(
+                        $family['scope'] ?? 'administration',
+                        ['administration', 'both'],
+                        true,
+                    ),
                 ),
             )
             as $f
@@ -41,7 +45,11 @@ class RoleController
             'families' => array_values(
                 array_filter(
                     $this->registry->permissionFamilies(),
-                    fn($family) => ($family['scope'] ?? 'administration') === 'administration',
+                    fn($family) => in_array(
+                        $family['scope'] ?? 'administration',
+                        ['administration', 'both'],
+                        true,
+                    ),
                 ),
             ),
             'roles' => $this->db

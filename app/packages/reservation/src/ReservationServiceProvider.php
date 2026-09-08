@@ -54,6 +54,11 @@ class ReservationServiceProvider extends ServiceProvider implements Module
     }
     public function permissions(): array
     {
-        return [];
+        return json_decode(
+            '[{"code": "reservations", "scope": "restaurant", "label": "Reservierungen und Restaurantbetrieb", "permissions": [{"code": "reservation.read", "label": "Reservierungen und Belegung ansehen"}, {"code": "reservation.write", "label": "Reservierungen anlegen und bearbeiten"}, {"code": "reservation.cancel", "label": "Reservierungen stornieren"}, {"code": "reservation.export", "label": "Gästedaten exportieren"}, {"code": "restaurant.configure", "label": "Räume, Tische und Öffnungszeiten verwalten"}]}]',
+            true,
+            512,
+            JSON_THROW_ON_ERROR,
+        );
     }
 }

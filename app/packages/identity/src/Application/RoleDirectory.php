@@ -13,6 +13,9 @@ class RoleDirectory implements \App\Modules\Identity\PublicApi\RoleDirectory
         $json = $this->db->table('identity_platform_roles')->where('id', $roleId)->value('permissions');
         $catalog = [];
         foreach ($this->registry->permissionFamilies() as $family) {
+            if (!in_array($family['scope'] ?? 'administration', ['administration', 'both'], true)) {
+                continue;
+            }
             foreach ($family['permissions'] as $p) {
                 $catalog[] = $p['code'];
             }

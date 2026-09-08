@@ -151,4 +151,27 @@ class ModuleLifecycleTest extends TestCase
             ->assertOk()
             ->assertJsonCount(0, 'entitlements');
     }
+    public function test_stale_price_and_second_pending_order_are_rejected(): void
+    {
+        $this->actingAs($this->admin)
+            ->patchJson('/api/v1/admin/billing/products/reporting', [
+                'amount_cents' => 2900,
+                'available' => true,
+            ])
+            ->assertOk();
+        $payload = [
+            'module_code' => 'reporting',
+            'expected_amount_cents' => 1900,
+            'request_key' => (string) \Illuminate\Support\Str::uuid(),
+        ];
+        $this->actingAs($this->owner)
+            ->postJson('/api/v1/restaurant/modules/orders', $payload)
+            ->assertConflict();
+        $this->assertDatabaseCount('billing_orders', 0);
+        $payload['expected_amount_cents'] = 2900;
+        $this->postJson('/api/v1/restaurant/modules/orders', $payload)->assertCreated();
+        $payload['request_key'] = (string) \Illuminate\Support\Str::uuid();
+        $this->postJson('/api/v1/restaurant/modules/orders', $payload)->assertConflict();
+        $this->assertDatabaseCount('billing_orders', 1);
+    }
 }

@@ -39,7 +39,7 @@ jobs:
       - name: Prepare runtime directories
         shell: pwsh
         run: New-Item -ItemType Directory -Force app/storage/logs,app/storage/framework/sessions,app/storage/framework/views,app/storage/framework/cache,app/bootstrap/cache | Out-Null
-      - run: composer update "platzhirsch/*" --no-interaction --prefer-dist
+      - run: composer install --no-interaction --prefer-dist
         working-directory: app
       - run: composer test
         working-directory: app
