@@ -63,9 +63,9 @@ try {
             $parent=[IO.Path]::GetDirectoryName($checkout)
             [IO.Directory]::CreateDirectory($parent)|Out-Null
             Say "Quellcode von GitHub nach $checkout laden. Bei privatem Repository bitte bei Git anmelden."
-            Git @('clone','--branch','codex/windows-application','--',$repository,$checkout)
+            Git -arguments @('clone','--branch','codex/windows-application','--',$repository,$checkout)
             $branch='dev/local-'+(Get-Date -Format 'yyyyMMdd-HHmmss')
-            Git @('-C',$checkout,'switch','-c',$branch)
+            Git -arguments @('-C',$checkout,'switch','-c',$branch)
             Say "Eigener Entwicklungsbranch angelegt: $branch"
         }
     }
