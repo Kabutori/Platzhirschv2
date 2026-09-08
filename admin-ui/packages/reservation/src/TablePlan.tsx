@@ -150,9 +150,12 @@ export default function TablePlan({
             ))}
           </select>
         </label>
-        <label>
-          Belegung um ({timezone})<input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
-        </label>
+        {view === 'tiles' && (
+          <label>
+            Belegung um ({timezone})
+            <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+          </label>
+        )}
         {canConfigure && view === 'tiles' && (
           <label className="floor-toggle">
             <input
