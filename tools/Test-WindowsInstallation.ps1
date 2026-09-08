@@ -139,6 +139,23 @@ $booking.request_key=[Guid]::NewGuid().ToString()
 $null=Call-Api POST 'v1/restaurant/reservations' $booking 409
 $null=Call-Api POST "v1/restaurant/reservations/$($reservation.id)/cancel" @{} 204
 $null=Call-Api POST 'v1/restaurant/reservations' $booking 201
+# Exercise every newly provisioned reservation schema against actual MySQL.
+$notificationSettings=Call-Api GET 'v1/restaurant/notifications'
+if($notificationSettings.settings.email_enabled -or $notificationSettings.settings.sms_enabled){throw 'Buchungsversand muss standardmaessig ausgeschaltet sein.'}
+$nightDate=(Get-Date).AddDays(3).ToString('yyyy-MM-dd')
+$null=Call-Api GET "v1/restaurant/waitlist?date=$nightDate"
+$extraTable=Call-Api POST 'v1/restaurant/tables' @{name='Kombination';room_id=$room.id;capacity=4;active=$true;shape='round';layout_x=30;layout_y=40}
+foreach($day in 1..7){$null=Call-Api POST 'v1/restaurant/hours' @{weekday=$day;opens='23:00';closes='02:00'}}
+$nightBooking=@{table_id=$table.id;additional_table_ids=@($extraTable.id);guest_name='Night group';party_size=6;starts_at="${nightDate}T23:30";duration_minutes=90;request_key=[Guid]::NewGuid().ToString()}
+$nightReservation=Call-Api POST 'v1/restaurant/reservations' $nightBooking 201
+$conflicting=@{table_id=$extraTable.id;guest_name='Conflict';party_size=2;starts_at="${nightDate}T23:45";duration_minutes=30;request_key=[Guid]::NewGuid().ToString()}
+$null=Call-Api POST 'v1/restaurant/reservations' $conflicting 409
+$waiting=Call-Api POST 'v1/restaurant/waitlist' @{guest_name='Waiting guest';party_size=2;requested_at="${nightDate}T23:30";duration_minutes=90;request_key=[Guid]::NewGuid().ToString()}
+$null=Call-Api POST "v1/restaurant/waitlist/$($waiting.id)/book" @{table_id=$table.id;version=$waiting.version;starts_at="${nightDate}T23:30";duration_minutes=90} 409
+$null=Call-Api POST "v1/restaurant/reservations/$($nightReservation.id)/cancel" @{} 204
+$converted=Call-Api POST "v1/restaurant/waitlist/$($waiting.id)/book" @{table_id=$table.id;version=$waiting.version;starts_at="${nightDate}T23:30";duration_minutes=90}
+if(-not $converted.reservation_id){throw 'Wartelistenuebernahme ohne Buchungsnummer.'}
+Write-Host 'Restaurantbetrieb mit MySQL geprueft: Nachtbuchung, Tischkombination, Konflikt und Wartelistenuebernahme; Versand bleibt aus.'
 $widget=Call-Api POST 'v1/restaurant/widget' @{origins=@('https://restaurant.example');duration_minutes=90;months=1} 201
 # Stateless requests avoid session locking: both IIS requests may execute concurrently.
 Add-Type -AssemblyName System.Net.Http

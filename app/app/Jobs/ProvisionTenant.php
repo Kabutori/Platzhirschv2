@@ -50,7 +50,10 @@ class ProvisionTenant implements ShouldQueue
             $database->connect($tenant, true);
             $code = Artisan::call('migrate', [
                 '--database' => 'tenant',
-                '--path' => 'database/tenant',
+                '--path' => app(\App\Core\Module\ModuleRegistry::class)
+                    ->get('reservation')
+                    ->tenantMigrationsPath(),
+                '--realpath' => true,
                 '--force' => true,
             ]);
             if ($code !== 0) {
