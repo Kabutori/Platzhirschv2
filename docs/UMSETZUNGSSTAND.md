@@ -17,6 +17,17 @@ Die älteren Dateien KONZEPT.md, ADMIN-UI.md und BACKEND-BASIS.md enthalten auch
 - Support-Tickets, Antworten und interne Notizen mit Mandantentrennung.
 - Systemadministrator kann eingeschränkte SQL-Anwendungszugänge sehen und nach Kennwortprüfung kurzzeitig anzeigen. Worker- und MySQL-Root-Zugänge werden nicht im Web ausgegeben.
 
+## Weitere Angleichung an die Designvorlage
+
+- System-Einstellungen mit berechtigungsgesteuerten Reitern, Modul-Katalog und Angebote/Bestellungen; getrennte browserlokale Einstellungen und Favoriten je Portal/Konto.
+- Restaurantrollen mit Rollenreitern, Berechtigungsgruppen und Schaltern. Restaurantprofil mit Küche, Preisklasse, Sitzplatzangabe, Beschreibung, Website und HTTPS-Logo-Adresse.
+- Grafischer Tischplan mit Raumwahl, Tischformen, zeitabhängiger Belegung und gespeicherten Positionen per Ziehen/Pfeiltasten. Layoutbearbeitung setzt Konfigurationsrechte voraus.
+- Widget-Designer mit Vorschau, Sprache, Position, Akzentfarbe, Gruppengröße und Markenanzeige; bestehende Zugänge können ohne neuen Token bearbeitet werden. Gruppengrenzen gelten auch serverseitig.
+- Grafischer Guide unter „System verstehen“ in beiden Portalen; echte Verbindungsmetadaten weiterhin nur für Systemadministratoren im Administrationsportal.
+- Acht Installer-Schritte mit Uhrzeiten, Laufzeitmeldungen, Dateiprüfungsfortschritt und geschütztem Statusprotokoll ohne erzeugte Geheimnisse.
+
+Diese Änderungen durchlaufen eine neue Anwendungs- und Windows-Prüfung. Die weiter unten aufgeführten älteren Prüfläufe bestätigen sie noch nicht. Die jeweils erfolgreich veröffentlichte Release-Version ist maßgeblich.
+
 ## Module, Kauf und Serverbetrieb
 
 - Composer-Pakete für Identity, Customer, Reservation, Widget, Support, Billing, Reporting und Provisioning sowie Contracts und Module Host. Entsprechende npm-Pakete und gemeinsame UI-/Token-Pakete. Feste Paketversionen, Lockdateien und Composer-Autodiscovery; modulare PHP-Migrationen und getrennte UI-Dateien.
@@ -51,7 +62,7 @@ Offline-Snapshot und Wiederherstellung sind für dieselbe lokale Maschine, Versi
 - Automatischer Zahlungsanbieter, automatische Abbuchungen/Verlängerungen, Rechnungen, Rückerstattungen und Testphasenpolitik. Die vorhandene Freigabe ist eine manuelle externe Zahlungsbestätigung.
 - Separate Paket-Repositories, private Paketregistries und unabhängige Modul-Releases. Erweiterte Clusterplanung, Massenumzüge und automatische Bereinigung alter/abgebrochener Kopien.
 - Versionsübergreifende Updates und Rollback, Wiederherstellung auf neuer Maschine, koordinierte Wiederherstellung verteilter Datenbanken, echte Neustartabnahme, externe CA-/Netzwerkabnahme, große Datenmengen und Lasttests.
-- SSO, organisationsübergreifender Rollen-Rollout, Favoriten und vollständige Listenpaginierung.
+- SSO, organisationsübergreifender Rollen-Rollout und vollständige Listenpaginierung.
 - Marketing-Website, Selbstregistrierung, E-Mail-Verifikation, automatische Buchungs-E-Mails/SMS, Odoo-/Wetterintegrationen und weitergehende Berichte/Exportformate.
 - Buchungen über Mitternacht, Tischkombinationen und Warteliste.
 - Vollständige visuelle 1:1-Abnahme aller Designansichten sowie durchgängige Tastatur-, Bildschirmleser- und Browser-Ende-zu-Ende-Abnahme.

@@ -197,6 +197,9 @@ class RestaurantTest extends TestCase
             'name' => 'Other',
             'email' => 'other@example.test',
             'status' => 'active',
+            'database_name' => 'ph_t_' . str_repeat('b', 24),
+            'database_user' => 'phu_' . str_repeat('b', 24),
+            'database_password' => 'test-fixture-password',
             'database_name' => 'ph_t_' . str_repeat('c', 24),
             'database_user' => 'phu_' . str_repeat('c', 24),
             'database_password' => 'test-only',
@@ -377,6 +380,9 @@ class RestaurantTest extends TestCase
             'name' => 'Other',
             'email' => 'other@example.test',
             'status' => 'active',
+            'database_name' => 'ph_t_' . str_repeat('b', 24),
+            'database_user' => 'phu_' . str_repeat('b', 24),
+            'database_password' => 'test-fixture-password',
             'database_name' => 'other',
             'database_user' => 'other',
             'database_password' => 'test-only',
@@ -530,6 +536,9 @@ class RestaurantTest extends TestCase
             'name' => 'Other restaurant',
             'email' => 'other@example.test',
             'status' => 'active',
+            'database_name' => 'ph_t_' . str_repeat('b', 24),
+            'database_user' => 'phu_' . str_repeat('b', 24),
+            'database_password' => 'test-fixture-password',
         ]);
         DB::table('widget_clients')
             ->where('id', $id)
