@@ -203,3 +203,39 @@ foreach($key in @('rootPassword','appPassword','provisionPassword','setupToken',
 $health=Call-Api GET 'v1/admin/health'
 if($health.failed_jobs -ne 0){throw 'Queue nach Wiederherstellung fehlerhaft.'}
 Write-Host 'Snapshot-Test bestanden: Sicherung, Beschaedigungspruefung, Wiederherstellung, IIS/MySQL-Start, Mandantenzugriff und Schluesselerhalt.'
+
+# Verify module activation and tenant movement against an independent MySQL instance.
+$secondRoot='C:\ph-ci-second'
+if(Test-Path $secondRoot){throw 'Zweites Testziel existiert bereits.'}
+New-Item -ItemType Directory $secondRoot|Out-Null
+$secondPassword=[Guid]::NewGuid().ToString('N')+'Aa7!'
+Write-Output "::add-mask::$secondPassword"
+$secondIni="$secondRoot\my.ini"
+$secondInit="$secondRoot\init.sql"
+$secondText="[mysqld]`nbasedir=C:/ph-ci/runtime/mysql`ndatadir=C:/ph-ci-second/data`nport=3309`nbind-address=127.0.0.1`nmysqlx=0`nlog-error=C:/ph-ci-second/mysql.log`n"
+[IO.File]::WriteAllText($secondIni,$secondText,(New-Object Text.UTF8Encoding($false)))
+& "$target\runtime\mysql\bin\mysqld.exe" "--defaults-file=$secondIni" --initialize-insecure
+if($LASTEXITCODE -ne 0){throw 'Zweite MySQL-Instanz konnte nicht initialisiert werden.'}
+[IO.File]::WriteAllText($secondInit,"ALTER USER 'root'@'localhost' IDENTIFIED BY '$secondPassword';",(New-Object Text.UTF8Encoding($false)))
+[IO.File]::WriteAllText($secondIni,($secondText+"init-file=C:/ph-ci-second/init.sql`n"),(New-Object Text.UTF8Encoding($false)))
+$secondProcess=Start-Process "$target\runtime\mysql\bin\mysqld.exe" -ArgumentList "--defaults-file=$secondIni" -PassThru
+try {
+    $ready=$false
+    for($attempt=0;$attempt -lt 60;$attempt++){
+        $tcp=New-Object Net.Sockets.TcpClient
+        try {$tcp.Connect('127.0.0.1',3309);$ready=$true;break}catch{Start-Sleep -Seconds 1}finally{$tcp.Dispose()}
+    }
+    if(-not $ready){throw 'Zweite MySQL-Instanz nicht erreichbar.'}
+    $credentials=@{username='root';password=$secondPassword;account_host='127.0.0.1'}|ConvertTo-Json -Compress
+    [IO.File]::WriteAllText("$target\ci-second-credentials.json",$credentials,(New-Object Text.UTF8Encoding($false)))
+    $env:PH_CI_PASSWORD=$password
+    & "$target\runtime\php\php.exe" "$PSScriptRoot\Test-CiModulePlacement.php" $target
+    if($LASTEXITCODE -ne 0){throw 'Modul-/Serverumzugstest fehlgeschlagen.'}
+    $snapshotRejected=$false
+    try {& $snapshotScript -Mode Backup -InstallPath $target -Destination 'C:\ph-backups-after-placement' -Confirm:$false|Out-Null}catch{$snapshotRejected=$true}
+    if(-not $snapshotRejected){throw 'Lokaler Snapshot hat externe Datenbanken nicht erkannt.'}
+} finally {
+    Remove-Item Env:\PH_CI_PASSWORD -ErrorAction SilentlyContinue
+    Remove-Item "$target\ci-second-credentials.json",$secondInit -ErrorAction SilentlyContinue
+    Stop-Process -Id $secondProcess.Id -Force -ErrorAction SilentlyContinue
+}

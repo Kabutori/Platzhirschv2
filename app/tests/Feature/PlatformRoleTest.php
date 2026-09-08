@@ -85,7 +85,7 @@ class PlatformRoleTest extends TestCase
         $this->getJson('/api/v1/support')->assertOk();
         $this->getJson('/api/v1/admin/auth/me')
             ->assertOk()
-            ->assertJsonFragment(['installed_modules' => ['provisioning', 'identity']]);
+            ->assertJsonFragment(['installed_modules' => ['billing', 'identity', 'provisioning', 'reporting']]);
         $this->getJson('/api/v1/admin/modules')->assertForbidden();
         $this->postJson('/api/v1/admin/platform-roles', [
             'name' => 'Escalation',
@@ -139,3 +139,4 @@ class PlatformRoleTest extends TestCase
         ])->assertUnprocessable();
     }
 }
+
