@@ -3,10 +3,12 @@ namespace App\Modules\Identity\Http;
 use App\Modules\Identity\Application\{Permissions, Totp};
 use App\Contracts\Module\{AuditSink, TenantDirectory};
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{DB, Hash};
+use Illuminate\Database\DatabaseManager;
+use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Validation\Rule;
 class RoleRolloutController
 {
+    public function __construct(private DatabaseManager $db, private Hasher $hash) {}
     private function authorize(Request $r): void
     {
         abort_unless($r->user()->role === 'system_admin', 403);
@@ -47,7 +49,8 @@ class RoleRolloutController
             abort_unless($tenants->exists((int) $id), 422, 'Restaurant existiert nicht.');
         }
         abort_if(
-            DB::table('restaurant_roles')
+            $this->db
+                ->table('restaurant_roles')
                 ->whereIn('tenant_id', $d['tenant_ids'])
                 ->where('name', $d['name'])
                 ->exists(),
@@ -80,14 +83,14 @@ class RoleRolloutController
             409,
             'Vorschau abgelaufen oder bereits verwendet. Bitte neu prüfen.',
         );
-        return DB::transaction(function () use ($r, $d, $preview, $audit) {
+        return $this->db->transaction(function () use ($r, $d, $preview, $audit) {
             $user = \App\Modules\Identity\Domain\User::whereKey($r->user()->id)
                 ->lockForUpdate()
                 ->firstOrFail();
             abort_unless(
                 $user->active &&
                     $user->role === 'system_admin' &&
-                    Hash::check($d['password'], $user->password) &&
+                    $this->hash->check($d['password'], $user->password) &&
                     $user->mfa_secret,
                 403,
                 'Kennwort und eingerichtete Zwei-Faktor-Anmeldung erforderlich.',
@@ -98,10 +101,16 @@ class RoleRolloutController
             $ids = array_map('intval', $data['tenant_ids']);
             sort($ids);
             // Platform-stored roles are created in one transaction. Never alter user assignments.
-            $tenants = DB::table('tenants')->whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get();
+            $tenants = $this->db
+                ->table('tenants')
+                ->whereIn('id', $ids)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
             abort_unless($tenants->count() === count($ids), 409, 'Restaurantliste wurde geändert.');
             abort_if(
-                DB::table('restaurant_roles')
+                $this->db
+                    ->table('restaurant_roles')
                     ->whereIn('tenant_id', $ids)
                     ->where('name', $data['name'])
                     ->exists(),
@@ -110,7 +119,7 @@ class RoleRolloutController
             );
             $result = [];
             foreach ($ids as $id) {
-                $role = DB::table('restaurant_roles')->insertGetId([
+                $role = $this->db->table('restaurant_roles')->insertGetId([
                     'tenant_id' => $id,
                     'name' => $data['name'],
                     'permissions' => json_encode($data['permissions']),

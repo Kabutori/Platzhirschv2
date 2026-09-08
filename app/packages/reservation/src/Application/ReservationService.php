@@ -27,8 +27,8 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
         int $duration,
         string $timezone,
     ): \Illuminate\Support\Collection {
-        $start = CarbonImmutable::createFromFormat('!Y-m-d\\TH:i', $date, $timezone);
-        $end = $start->addMinutes($duration);
+        $start = $this->localStart($date, $timezone);
+        $end = $start->utc()->addMinutes($duration)->setTimezone($timezone);
         if ($start->lessThan(CarbonImmutable::now($timezone))) {
             $this->invalid('starts_at', 'Bitte einen zukünftigen Termin wählen.');
         }
@@ -114,8 +114,8 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
                     return $existing;
                 }
             }
-            $start = CarbonImmutable::createFromFormat('!Y-m-d\TH:i', $data['starts_at'], $timezone);
-            $end = $start->addMinutes($data['duration_minutes']);
+            $start = $this->localStart($data['starts_at'], $timezone);
+            $end = $start->utc()->addMinutes($data['duration_minutes'])->setTimezone($timezone);
             $status = $data['status'] ?? 'confirmed';
             if ($data['party_size'] > $chosen->sum('capacity')) {
                 $this->invalid('party_size', 'Zu viele Gäste für diesen Tisch.');
@@ -186,6 +186,24 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
             app(ReservationNotifications::class)->enqueue($result);
             return $result;
         }, 3);
+    }
+    private function localStart(string $value, string $timezone): CarbonImmutable
+    {
+        $start = CarbonImmutable::createFromFormat('!Y-m-d\TH:i', $value, $timezone);
+        if ($start->format('Y-m-d\TH:i') !== $value) {
+            $this->invalid('starts_at', 'Diese Uhrzeit existiert wegen der Zeitumstellung nicht.');
+        }
+        foreach ([-60, -30, 30, 60] as $minutes) {
+            if (
+                $start->utc()->addMinutes($minutes)->setTimezone($timezone)->format('Y-m-d\TH:i') === $value
+            ) {
+                $this->invalid(
+                    'starts_at',
+                    'Diese Uhrzeit ist wegen der Zeitumstellung doppeldeutig. Bitte eine eindeutige Startzeit wählen.',
+                );
+            }
+        }
+        return $start;
     }
     private function assertOpeningHours(CarbonImmutable $start, CarbonImmutable $end): void
     {

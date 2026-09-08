@@ -1,9 +1,12 @@
 <?php
 namespace App\Modules\Reservation\Application;
-use Illuminate\Support\Facades\{DB, Mail, Http};
+use Illuminate\Database\DatabaseManager;
+use Illuminate\Contracts\Mail\Mailer;
+use Illuminate\Http\Client\Factory;
 use Carbon\CarbonImmutable;
 class ReservationNotifications
 {
+    public function __construct(private DatabaseManager $db, private Mailer $mail, private Factory $http) {}
     public function readiness(): array
     {
         return [
@@ -22,7 +25,7 @@ class ReservationNotifications
     }
     public function enqueue(object $r): void
     {
-        $db = DB::connection('tenant');
+        $db = $this->db->connection('tenant');
         $settings = $db->table('reservation_notification_settings')->find(1);
         $db->table('reservation_notifications')
             ->where('reservation_id', $r->id)
@@ -56,7 +59,7 @@ class ReservationNotifications
     }
     public function dispatch(string $restaurant, string $timezone, int $limit = 20): void
     {
-        $db = DB::connection('tenant');
+        $db = $this->db->connection('tenant');
         $settings = $db->table('reservation_notification_settings')->find(1);
         if (!$settings) {
             return;
@@ -131,13 +134,14 @@ class ReservationNotifications
                     '. Bei Rückfragen kontaktieren Sie bitte das Restaurant.';
                 try {
                     if ($e->channel === 'email') {
-                        Mail::raw(
+                        $this->mail->raw(
                             $text,
                             fn($m) => $m->to($recipient)->subject('Ihre Reservierung · ' . $restaurant),
                         );
                     } else {
                         $sid = config('reservation_notifications.sms.sid');
-                        $response = Http::asForm()
+                        $response = $this->http
+                            ->asForm()
                             ->withBasicAuth($sid, config('reservation_notifications.sms.token'))
                             ->timeout(15)
                             ->withoutRedirecting()

@@ -1,17 +1,22 @@
 <?php
 namespace App\Modules\Reservation\Http;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\DatabaseManager;
 use App\Modules\Reservation\Application\ReservationNotifications;
 class NotificationController
 {
+    public function __construct(private DatabaseManager $db) {}
     public function index(Request $r, ReservationNotifications $service)
     {
         abort_unless($r->user()->hasPermission('restaurant.configure'), 403);
         return [
-            'settings' => DB::connection('tenant')->table('reservation_notification_settings')->find(1),
+            'settings' => $this->db
+                ->connection('tenant')
+                ->table('reservation_notification_settings')
+                ->find(1),
             'ready' => $service->readiness(),
-            'recent' => DB::connection('tenant')
+            'recent' => $this->db
+                ->connection('tenant')
                 ->table('reservation_notifications')
                 ->orderByDesc('id')
                 ->limit(50)
@@ -34,7 +39,11 @@ class NotificationController
                 'Versandkanal ist auf dem Server noch nicht eingerichtet.',
             );
         }
-        DB::connection('tenant')->table('reservation_notification_settings')->where('id', 1)->update($data);
+        $this->db
+            ->connection('tenant')
+            ->table('reservation_notification_settings')
+            ->where('id', 1)
+            ->update($data);
         app(\App\Contracts\Module\AuditSink::class)->record(
             'reservation.notifications_configured',
             1,

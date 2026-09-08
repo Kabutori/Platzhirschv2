@@ -2,7 +2,7 @@
 
 ## Nachtbetrieb
 
-Schließzeit vor Öffnungszeit bedeutet Folgetag, beispielsweise 18:00–02:00. Gleiche Zeiten sind ungültig, nicht „24 Stunden“. Eine Buchung muss vollständig in ein Fenster passen. Ein Sondertag ersetzt den gesamten Kalendertag und unterbindet hineinreichende Fenster des Vortags; eigene Sondertagszeiten können einen neuen Zeitraum öffnen. Reguläre Fenster werden nicht über Lücken hinweg zusammengefügt.
+Schließzeit vor Öffnungszeit bedeutet Folgetag, beispielsweise 18:00–02:00. Gleiche Zeiten sind ungültig, nicht „24 Stunden“. Eine Buchung muss vollständig in ein Fenster passen. Ein Sondertag ersetzt den gesamten Kalendertag und unterbindet hineinreichende Fenster des Vortags; eigene Sondertagszeiten können einen neuen Zeitraum öffnen. Reguläre Fenster werden nicht über Lücken hinweg zusammengefügt. Die Dauer zählt tatsächlich vergangene Minuten, auch bei Zeitumstellung. Nicht existierende und doppeldeutige Startzeiten während der Sommer-/Winterzeitumstellung werden abgewiesen; dafür ist eine eindeutige Startzeit zu wählen.
 
 ## Tischkombinationen
 

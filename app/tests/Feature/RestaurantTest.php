@@ -716,4 +716,26 @@ class RestaurantTest extends TestCase
             DB::connection('tenant')->table('reservation_notifications')->first()->status,
         );
     }
+
+    public function test_dst_missing_and_repeated_start_times_are_rejected_and_duration_is_elapsed_time(): void
+    {
+        $this->travelTo(\Carbon\CarbonImmutable::parse('2027-03-01', 'UTC'));
+        DB::connection('tenant')
+            ->table('opening_hours')
+            ->update(['opens' => '00:00:00', 'closes' => '06:00:00']);
+        foreach (['2027-03-28T02:30', '2027-10-31T02:30'] as $date) {
+            $this->postJson('/api/v1/restaurant/reservations', [
+                ...$this->payload(),
+                'starts_at' => $date,
+            ])->assertUnprocessable();
+        }
+        $r = $this->postJson('/api/v1/restaurant/reservations', [
+            ...$this->payload(),
+            'starts_at' => '2027-03-28T01:30',
+            'duration_minutes' => 120,
+        ])->assertCreated();
+        $this->assertSame('2027-03-28 00:30:00', $r->json('starts_at'));
+        $this->assertSame('2027-03-28 02:30:00', $r->json('ends_at'));
+        $this->travelBack();
+    }
 }
