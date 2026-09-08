@@ -55,6 +55,7 @@ export default function Calendar({
       }}
     >
       <button
+        type="button"
         ref={trigger}
         aria-label="Kalender öffnen"
         aria-expanded={open}
@@ -69,13 +70,13 @@ export default function Calendar({
       {open && (
         <div role="dialog" aria-label="Reservierungsdatum wählen" className="calendar-popup">
           <div className="calendar-heading">
-            <button aria-label="Vorheriger Monat" onClick={() => moveMonth(-1)}>
+            <button type="button" aria-label="Vorheriger Monat" onClick={() => moveMonth(-1)}>
               <ChevronLeft size={16} />
             </button>
             <strong aria-live="polite">
               {parse(month).toLocaleDateString('de-DE', { month: 'long', year: 'numeric', timeZone: 'UTC' })}
             </strong>
-            <button aria-label="Nächster Monat" onClick={() => moveMonth(1)}>
+            <button type="button" aria-label="Nächster Monat" onClick={() => moveMonth(1)}>
               <ChevronRight size={16} />
             </button>
           </div>
@@ -85,6 +86,7 @@ export default function Calendar({
             ))}
             {Array.from({ length: 42 }, (_, i) => shiftDate(start, i)).map((d) => (
               <button
+                type="button"
                 key={d}
                 ref={d === value ? selected : undefined}
                 className={d.slice(0, 7) !== month.slice(0, 7) ? 'outside-month' : ''}
@@ -102,7 +104,7 @@ export default function Calendar({
               </button>
             ))}
           </div>
-          <button className="calendar-today" onClick={() => choose(today)}>
+          <button type="button" className="calendar-today" onClick={() => choose(today)}>
             Heute auswählen
           </button>
         </div>

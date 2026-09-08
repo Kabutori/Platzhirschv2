@@ -1,4 +1,5 @@
 import Calendar from './Calendar';
+import BookingTools from './BookingTools';
 import Week, { shiftDate, matchesReservation } from './Week';
 import { usePreferences } from '@platzhirsch/ui-runtime/preferences';
 import TablePlan from './TablePlan';
@@ -330,6 +331,7 @@ export function Reservations({
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) {
+      printWindow?.close();
       setError(e);
     }
   }
@@ -548,6 +550,9 @@ export function Reservations({
       {form && (
         <Modal title={form.id ? 'Reservierung bearbeiten' : 'Neue Reservierung'} close={() => setForm(null)}>
           <Form
+            renderBefore={(values, change) => (
+              <BookingTools values={values} change={change} timezone={tz} walkIn={!form.id} />
+            )}
             fields={fields}
             initial={form}
             onSave={async (data) => {

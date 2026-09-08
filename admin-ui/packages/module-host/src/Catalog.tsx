@@ -116,12 +116,14 @@ export default function Catalog() {
       <section className="panel padded module-detail">
         <h3>Zubuchbare Module</h3>
         <p>
-          Aktuell sind keine zusätzlichen Module zum Kauf verfügbar. Kauf, mandantenbezogene Aktivierung und
-          deren Migrationen sind noch nicht implementiert.
+          Angebote und Bestellungen verwaltest du im gleichnamigen Reiter. Restaurants buchen freigegebene
+          Angebote im Modul-Shop; die Aktivierung erfolgt nach Zahlungsfreigabe einschließlich der
+          erforderlichen Mandantenmigrationen.
         </p>
         <p className="muted">
-          Basismodule werden zusammen mit dem geprüften Release ausgeliefert. Die vollständige Trennung in
-          unabhängige Composer- und npm-Pakete steht noch aus.
+          Basismodule liegen in eigenen Composer- und npm-Paketen und werden zusammen mit dem geprüften
+          Release ausgeliefert. Neue ausführbare Module werden im Entwicklungsprojekt registriert und beim
+          Paketbau geprüft.
         </p>
       </section>
     </>

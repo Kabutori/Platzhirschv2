@@ -3,9 +3,11 @@ test('waitlist conversion preserves entry on conflict and supports table combina
   page,
 }) => {
   let converted = false,
-    attempts = 0;
+    attempts = 0,
+    bookingWrites = 0;
   await page.route('**/api/**', async (route) => {
     const url = new URL(route.request().url());
+    if (url.pathname.endsWith('/reservations') && route.request().method() === 'POST') bookingWrites++;
     let body = [],
       status = 200;
     if (url.pathname.endsWith('/auth/me'))
@@ -58,4 +60,20 @@ test('waitlist conversion preserves entry on conflict and supports table combina
   const combo = page.getByLabel('Weitere Tische kombinieren', { exact: false });
   await combo.selectOption(['1', '2']);
   await expect(combo).toHaveValues(['1', '2']);
+  const dialog = page.getByRole('dialog', { name: 'Neue Reservierung', exact: true });
+  await dialog.getByRole('button', { name: 'Kalender öffnen' }).click();
+  await dialog.getByRole('button', { name: 'Nächster Monat' }).click();
+  await expect(dialog.getByRole('dialog', { name: 'Reservierungsdatum wählen' })).toBeVisible();
+  await page.screenshot({
+    path: 'test-results/design-booking-calendar.png',
+    fullPage: true,
+    animations: 'disabled',
+  });
+  await dialog.getByRole('button', { name: 'Heute auswählen' }).click();
+  await dialog.locator('summary').click();
+  await dialog.getByRole('button', { name: '18:15', exact: true }).click();
+  await expect(dialog.getByLabel('Beginn', { exact: false })).toHaveValue(/T18:15$/);
+  await dialog.getByRole('button', { name: 'Walk-in · jetzt eingetroffen', exact: true }).click();
+  await expect(dialog.getByLabel('Status', { exact: false })).toHaveValue('seated');
+  expect(bookingWrites).toBe(0);
 });

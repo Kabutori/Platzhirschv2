@@ -18,7 +18,7 @@ Die gemeinsame Schalter-Komponente liegt im npm-Paket `@platzhirsch/ui-runtime`.
 
 ## Bewusst noch offen
 
-- Die Vorlage bietet weitere Exportformate. Tatsächlich implementiert ist CSV; PDF/XLSX werden nicht als funktionsfähige Optionen ausgegeben.
+- Exportstand aktualisiert: CSV, echtes XLSX und Browser-Drucken/PDF sind umgesetzt. Ein direkter serverseitiger PDF-Download und Exporte aller Übersichtsseiten fehlen weiterhin.
 - Rechte dürfen nur aus registrierten Modulfunktionen stammen. Freie technische Berechtigungscodes und ein bloß simulierter mandantenübergreifender Rollout werden nicht übernommen.
 - Vollständige Abnahme sämtlicher 183 Button-Definitionen, aller Detaildialoge, Buchungs-/Tischansichten, Loginoptionen und Systemeinstellungsreiter steht weiter aus.
 - Diese Änderungen betreffen die Windows-/Laravel-Anwendung im GitHub-Projekt. Die separat veröffentlichte Sites-Designvorschau ist eine Referenz und wird hier nicht ersetzt.
@@ -33,7 +33,7 @@ Der nächste Schritt übernimmt die Suche nach Gast/Tisch, sichtbare Notizen, Ta
 
 Die Wochenansicht zeigt Montag bis Sonntag mit echten Tagesabfragen, Uhrzeit in der Restaurant-Zeitzone, Gast, Personen, Tisch, Status und Notiz. Der Tageskopf öffnet die jeweilige Liste. Mit Schreibrecht öffnet eine Buchung den vorhandenen Bearbeitungsdialog samt Versionsprüfung; lesende Rollen erhalten keine Bearbeitungsaktion. Ladefehler werden pro Tag angezeigt, statt leere Tage vorzutäuschen. Kalenderarithmetik verwendet UTC-Kalendertage, unabhängig von der Sommerzeit des Browsers. Mobile Geräte zeigen die Tage untereinander.
 
-Noch offen bleiben unter anderem der eigene Kalender-Popup-Entwurf, der Tisch-Zeitstrahl und die vollständige Abnahme aller Buchungsaktionen. Die vorhandenen Modulpakete und API-Berechtigungen bleiben maßgeblich.
+Kalender-Popup und Tisch-Zeitstrahl wurden anschließend umgesetzt (siehe nächster Abschnitt); die vollständige Abnahme aller Buchungsaktionen bleibt offen. Die vorhandenen Modulpakete und API-Berechtigungen bleiben maßgeblich.
 
 ## Kalender und Tisch-Zeitstrahl
 
@@ -45,8 +45,18 @@ Die neuen Browsertests prüfen Schaltjahr, Jahreswechsel, Fokus und Schließen, 
 
 ## Restaurantbetrieb und nachvollziehbare Einzelabnahme
 
-`DESIGN-BUTTON-INVENTAR.csv` erfasst die tatsächlichen Button-Definitionen der Referenz mit Zeile, sichtbarer Beschriftung, Aktionsbindung und umgebenden Einblendbedingungen. `tools/design/inventory.py` erzeugt sie reproduzierbar. Eine erfasste Aktion ist keine bestandene Abnahme: die Spalte bleibt bis zur tatsächlichen Einzelprüfung ausdrücklich offen. Vorhandene Screenshot-Tests ersetzen nicht die Einzelprüfung aller Vorlagefunktionen.
+`DESIGN-BUTTON-INVENTAR.csv` erfasst die tatsächlichen Button-Definitionen der Referenz mit Zeile, sichtbarer Beschriftung, Aktionsbindung und umgebenden Einblendbedingungen. `tools/design/inventory.py` erzeugt sie reproduzierbar. Eine erfasste Aktion ist keine bestandene Abnahme: die visuelle Abnahmespalte bleibt bis zur tatsächlichen Einzelprüfung ausdrücklich offen; der separate Codeabgleich enthält jetzt für alle 183 Buttons Umsetzungspfad und Restabweichung. Vorhandene Screenshot-Tests ersetzen nicht die Einzelprüfung aller Vorlagefunktionen.
 
 Neu umgesetzt: Warteliste mit eigenem Lese-/Schreibrecht, Statusfilter, Kontaktdaten, Notizen und konfliktgeprüfter Übernahme; zusätzliche Tische pro Buchung im selben Raum; Öffnungszeiten über Mitternacht mit Sondertagsvorrang. Auch Kacheln berücksichtigen hineinreichende Reservierungen. XLSX und Drucken/PDF ergänzen CSV samt getrennten Anzeigeeinstellungen. Die PDF-Funktion verwendet den Browser-Druckdialog und ist kein serverseitiger PDF-Renderer.
 
 Buchungsnachrichten besitzen eine eigene Konfigurations- und Statusansicht. Sie folgen dem vorhandenen Karten-/Formularstil; die Warteliste ergänzt die Vorlage um einen ausführbaren Restaurantablauf. Eine visuelle 1:1-Vollabnahme bleibt ausstehend.
+
+## Vollständiger Codeabgleich der 183 Button-Definitionen
+
+Alle 183 Definitionen wurden ihren aktuellen Ansichten oder einem konkreten Fehlpunkt zugeordnet. Die gepflegte Quelle ist `tools/design/assessment.json`; `inventory.py` übernimmt die Bewertung ausschließlich für den geprüften Referenz-Hash und lehnt andere Vorlagen ab. CSV-Spalten trennen Vorlagen-Bedingungen, Codebefund, Quelldatei, Restabweichung und weiterhin offene visuelle Einzelabnahme. „Funktion vorhanden“ ist keine Aussage über pixelgleiche Gestaltung oder alle Dialogzustände.
+
+Größte tatsächliche Designlücken: Sitzungsanzeige, eigenes Profil-/Avatar-Menü, Raum-Sperrzeiträume, interaktive Buchungsvorschau im Widget-Designer, Changelog-/Releaseverwaltung, Odoo, Audit-Tabs und Health-Backupreiter. Mandantenpagination und abhängige Restaurant-Auswahlen zeigen bislang nur die erste API-Seite. Diese Punkte sind ausdrücklich nicht durch die neuen Restaurantfunktionen erledigt.
+
+Buchungsdialog: Walk-in setzt die aktuelle Restaurantzeit und den Status Eingetroffen; der vorhandene Monatskalender und eine Viertelstunden-Auswahl ergänzen den frei eingebbaren Beginn. Zeitslots sind keine Verfügbarkeitsanzeige. Die Konflikt- und Öffnungszeitenprüfung bleibt serverseitig. Im Modul-Katalog wurden veraltete Behauptungen zu fehlendem Kauf/Modulpaketen korrigiert.
+
+Auswertungen unterscheiden jetzt Buchungen, Gäste ohne Storno/No-show, Stornierungen, nicht erschienene Buchungen und eingetroffene/abgeschlossene Buchungen. Der Zeitraum richtet sich weiterhin nach dem lokalen Startdatum; eine Mitternachtsbuchung zählt einmal am Starttag. Es handelt sich um Betriebskennzahlen, nicht um Umsatz- oder Kassenauswertungen.

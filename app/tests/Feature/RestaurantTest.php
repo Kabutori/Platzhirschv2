@@ -82,6 +82,27 @@ class RestaurantTest extends TestCase
             'request_key' => (string) \Illuminate\Support\Str::uuid(),
         ];
     }
+    public function test_reports_separate_no_shows_cancellations_and_arrivals(): void
+    {
+        foreach (['12:00', '14:00', '16:00'] as $time) {
+            $this->postJson('/api/v1/restaurant/reservations', $this->payload($time))->assertCreated();
+        }
+        $db = DB::connection('tenant');
+        foreach ([1 => 'no_show', 2 => 'completed', 3 => 'cancelled'] as $id => $status) {
+            $db->table('reservations')
+                ->where('id', $id)
+                ->update(['status' => $status]);
+        }
+        request()->attributes->set('tenant', $this->tenant);
+        $date = now()->addDay()->format('Y-m-d');
+        $rows = app(\App\Contracts\Module\ReservationReports::class)->daily($date, $date);
+        $this->assertCount(1, $rows);
+        $this->assertSame(2, $rows[0]['reservations']);
+        $this->assertSame(2, $rows[0]['guests']);
+        $this->assertSame(1, $rows[0]['no_show']);
+        $this->assertSame(1, $rows[0]['arrived']);
+        $this->assertSame(1, $rows[0]['cancelled']);
+    }
     public function test_reservations_overlap_but_adjacent_slots_do_not(): void
     {
         $this->postJson('/api/v1/restaurant/reservations', $this->payload())->assertCreated();

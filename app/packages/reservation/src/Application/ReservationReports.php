@@ -24,13 +24,27 @@ class ReservationReports implements ReportContract
         ) {
             $day = Carbon::parse($row->starts_at, 'UTC')->setTimezone($timezone)->format('Y-m-d');
             if (!isset($days[$day])) {
-                $days[$day] = ['date' => $day, 'reservations' => 0, 'guests' => 0, 'cancelled' => 0];
+                $days[$day] = [
+                    'date' => $day,
+                    'reservations' => 0,
+                    'guests' => 0,
+                    'cancelled' => 0,
+                    'no_show' => 0,
+                    'arrived' => 0,
+                ];
             }
             if ($row->status === 'cancelled') {
                 $days[$day]['cancelled']++;
             } else {
                 $days[$day]['reservations']++;
-                $days[$day]['guests'] += (int) $row->party_size;
+                if ($row->status === 'no_show') {
+                    $days[$day]['no_show']++;
+                } else {
+                    $days[$day]['guests'] += (int) $row->party_size;
+                }
+                if (in_array($row->status, ['seated', 'completed'], true)) {
+                    $days[$day]['arrived']++;
+                }
             }
         }
         ksort($days);

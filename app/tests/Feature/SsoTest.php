@@ -10,6 +10,7 @@ class SsoTest extends TestCase
     use RefreshDatabase;
     private \OpenSSLAsymmetricKey $key;
     private array $jwk;
+    private array $providerClaims = [];
     protected function setUp(): void
     {
         parent::setUp();
@@ -37,6 +38,12 @@ class SsoTest extends TestCase
             'e' => OpenIdProvider::encode($parts['e']),
         ];
         Http::preventStrayRequests();
+        Http::fake([
+            'https://id.example.test/token' => fn() => Http::response([
+                'id_token' => $this->token($this->providerClaims),
+            ]),
+            'https://id.example.test/keys' => fn() => Http::response(['keys' => [$this->jwk]]),
+        ]);
     }
     private function claims(string $nonce): array
     {
@@ -72,12 +79,7 @@ class SsoTest extends TestCase
     }
     private function provider(array $query, array $extra = []): void
     {
-        Http::fake([
-            'https://id.example.test/token' => Http::response([
-                'id_token' => $this->token([...$this->claims($query['nonce']), ...$extra]),
-            ]),
-            'https://id.example.test/keys' => Http::response(['keys' => [$this->jwk]]),
-        ]);
+        $this->providerClaims = [...$this->claims($query['nonce']), ...$extra];
     }
     private function completeCallback(array $query, string $portal = 'administration')
     {

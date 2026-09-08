@@ -113,11 +113,13 @@ export function Form({
   initial = {},
   onSave,
   label = 'Speichern',
+  renderBefore,
 }: {
   fields: Field[];
   initial?: Row;
   onSave: (data: Row) => Promise<void>;
   label?: string;
+  renderBefore?: (values: Row, change: (patch: Row) => void) => ReactNode;
 }) {
   const [values, setValues] = useState<Row>(() =>
     Object.fromEntries(
@@ -144,6 +146,7 @@ export function Form({
   return (
     <form onSubmit={submit}>
       <ErrorBox error={error} />
+      {renderBefore?.(values, (patch) => setValues((current) => ({ ...current, ...patch })))}
       <div className="fields">
         {fields.map((f) => (
           <label className={f.type === 'checkbox' ? 'checkfield' : ''} key={f.key}>
