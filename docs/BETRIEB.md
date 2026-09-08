@@ -191,3 +191,7 @@ Der Widget-Designer bietet eine Vorschau, deutsche/englische Oberflaeche, Akzent
 Der grafische Guide steht in beiden Portalen unter System verstehen. Tatsaechliche Datenbank-Verbindungsmetadaten bleiben auf Systemadministratoren im Administrationsportal beschraenkt.
 
 Diese Erweiterung ersetzt keinen vollstaendigen Update-Ablauf fuer bereits installierte Vorschauen. Nicht enthalten sind automatische Zahlungen, Einrichtung beliebiger SQL-Server durch die Weboberflaeche, wiederkehrende Schliesszeitraeume und Mehrtischbuchungen.
+
+## Entwicklungsumgebung starten
+
+Im vollständig entpackten neuen Release-ZIP `Start-Development.bat` starten. Die BAT holt das Git-Checkout automatisch in den Benutzerordner, legt bei erstmaligem Klonen einen Entwicklungsbranch an und startet dort die isolierte Umgebung. Vorheriges manuelles Klonen ist nicht erforderlich. Einzelheiten und Werkzeugvoraussetzungen stehen in `DEVELOPMENT.md` im Paket beziehungsweise `docs/DEVELOPMENT.md` im Repository.

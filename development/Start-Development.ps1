@@ -7,6 +7,7 @@ param(
     [ValidateRange(1024,65535)][int]$WebPort=5173,
     [ValidateRange(1024,65535)][int]$ApiPort=8000,
     [ValidateRange(1024,65535)][int]$DatabasePort=33018,
+    [switch]$LocalComposer,
     [switch]$SmokeTest,
     [switch]$NoBrowser
 )
@@ -39,7 +40,7 @@ function Launch([string]$file,[string[]]$arguments,[string]$name){
 try {
     Status 'Quellcode und Voraussetzungen pruefen'
     if(-not(Test-Path "$root\.git") -or -not(Test-Path "$root\admin-ui\src\main.tsx")){throw 'Git-Checkout erforderlich. Anleitung: docs\DEVELOPMENT.md. Das Release-ZIP ist kein Quellcode-Checkout.'}
-    foreach($tool in @('git','node','npm.cmd','composer')){if(-not(Get-Command $tool -ErrorAction SilentlyContinue)){throw "$tool fehlt. Zuerst die Voraussetzungen aus docs\DEVELOPMENT.md installieren."}}
+    foreach($tool in @('git','node','npm.cmd')){if(-not(Get-Command $tool -ErrorAction SilentlyContinue)){throw "$tool fehlt. Zuerst die Voraussetzungen aus docs\DEVELOPMENT.md installieren."}}
     if(!$PhpPath){$PhpPath=Join-Path $RuntimePath 'php\php.exe'}
     if(!$MySqlBin){$MySqlBin=Join-Path $RuntimePath 'mysql\bin'}
     $PhpPath=(Resolve-Path $PhpPath).Path;$MySqlBin=(Resolve-Path $MySqlBin).Path
@@ -95,7 +96,28 @@ error_log="$dev\php.log"
     Write-File "$dev\storage\app\private\provision.json" (@{username='ph_dev_provision';password=$state.provisionPassword}|ConvertTo-Json)
     New-Item -ItemType Directory -Path "$app\bootstrap\cache" -Force|Out-Null
     Status 'Composer- und npm-Abhaengigkeiten anhand der Lockdateien installieren'
-    Push-Location $app;try{Checked 'composer' @('install','--no-interaction','--prefer-dist')}finally{Pop-Location}
+    $composerPhar=$null
+    if($LocalComposer -or -not(Get-Command composer -ErrorAction SilentlyContinue)){
+        $composerPhar="$dev\tools\composer.phar"
+        if(-not(Test-Path $composerPhar)){
+            Status 'Composer lokal herunterladen und Installer-Pruefsumme kontrollieren'
+            New-Item -ItemType Directory -Path "$dev\tools" -Force|Out-Null
+            [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+            $installer="$dev\tools\composer-setup.php"
+            try {
+                $expected=(Invoke-WebRequest -UseBasicParsing 'https://composer.github.io/installer.sig' -TimeoutSec 60).Content.Trim()
+                if($expected -notmatch '^[a-fA-F0-9]{96}$'){throw 'Ungueltige Composer-Pruefsumme.'}
+                Invoke-WebRequest -UseBasicParsing 'https://getcomposer.org/installer' -OutFile $installer -TimeoutSec 60
+                if((Get-FileHash $installer -Algorithm SHA384).Hash -ne $expected){throw 'Composer-Installer-Pruefsumme stimmt nicht.'}
+                Checked $PhpPath @($installer,'--2',"--install-dir=$dev\tools",'--filename=composer.phar')
+            } finally {if(Test-Path $installer){Remove-Item $installer}}
+        }
+    }
+    Push-Location $app
+    try {
+        if($composerPhar){Checked $PhpPath @($composerPhar,'install','--no-interaction','--prefer-dist')}
+        else{Checked 'composer' @('install','--no-interaction','--prefer-dist')}
+    } finally {Pop-Location}
     Push-Location "$root\admin-ui";try{Checked 'npm.cmd' @('ci')}finally{Pop-Location}
     Checked 'node' @("$root\widget-embed\build.mjs")
     $ini="$dev\my.ini";$init="$dev\initialize.sql"

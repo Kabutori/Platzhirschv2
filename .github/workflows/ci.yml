@@ -69,3 +69,11 @@ jobs:
       - name: Parse installer with Windows PowerShell 5.1
         shell: powershell
         run: ./tools/Check-PowerShell.ps1
+      - name: Test automatic development checkout without installed application
+        shell: powershell
+        run: |
+          $package=Join-Path $env:RUNNER_TEMP 'dev-bootstrap-package'
+          New-Item -ItemType Directory -Path "$package\development" -Force|Out-Null
+          Copy-Item Start-Development.bat $package
+          Copy-Item development/Prepare-Development.ps1 "$package\development"
+          ./tools/Test-DevelopmentBootstrap.ps1 -PackagePath $package

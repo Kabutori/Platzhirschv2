@@ -99,16 +99,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Test release development bootstrap
+        shell: powershell
+        run: ./tools/Test-DevelopmentBootstrap.ps1 -PackagePath C:\ph-package
       - name: Install and test IIS, MySQL and application
         shell: powershell
         run: ./tools/Test-WindowsInstallation.ps1 -PackagePath C:\ph-package
       - name: Test isolated development startup and restart
         shell: powershell
         run: |
-          ./Start-Development.bat -RuntimePath C:\ph-ci\runtime -SmokeTest -NoBrowser
+          ./Start-Development.bat -RuntimePath C:\ph-ci\runtime -SmokeTest -NoBrowser -LocalComposer
           if($LASTEXITCODE -ne 0){throw 'Development startup failed'}
           $before=(Get-FileHash .development/state.json).Hash
-          ./Start-Development.bat -RuntimePath C:\ph-ci\runtime -SmokeTest -NoBrowser
+          ./Start-Development.bat -RuntimePath C:\ph-ci\runtime -SmokeTest -NoBrowser -LocalComposer
           if($LASTEXITCODE -ne 0){throw 'Development restart failed'}
           if((Get-FileHash .development/state.json).Hash -ne $before){throw 'Development keys changed'}
           foreach($port in @(5173,8000,33018)){

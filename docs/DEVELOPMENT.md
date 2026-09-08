@@ -2,32 +2,29 @@
 
 Die Entwicklungsumgebung verwendet ein echtes Git-Checkout und Vite mit Live-Aktualisierung. Eine installierte Produktionsversion kann parallel laufen. Es gibt keinen automatischen Push und keine automatische Übernahme in Produktion.
 
-## Einmal vorbereiten
+## Einfach starten
 
-Benötigt: Git, Node.js 22 mit npm, Composer 2, PHP 8.5 mit den Erweiterungen des Windows-Pakets und MySQL 8.4. Git, Node/npm und Composer müssen im PATH liegen. Nach ihrer Installation ein neues Terminal öffnen. GitHub-Anmeldung erfolgt über die IDE oder den Git Credential Manager, nicht über ein gespeichertes Token im Skript.
+Das neue Windows-Release-ZIP vollständig entpacken und **Start-Development.bat doppelklicken**. Die Datei `development/Prepare-Development.ps1` muss neben der BAT im entpackten Unterordner bleiben. Es sind keine vorherigen Git-Befehle nötig.
 
-Die PHP-/MySQL-Programmdateien einer vorhandenen Platzhirsch-Installation können verwendet werden. Standard ist `C:\Platzhirsch\runtime`; dein Windows-Benutzer muss sie lesen und ausführen können. Der Starter installiert diese Entwicklerwerkzeuge nicht selbst. Alternativ eigene portable Laufzeiten über `-PhpPath` und `-MySqlBin` angeben. Die geschützten Produktionsrechte nicht pauschal öffnen.
+Beim ersten Start:
 
-```powershell
-git clone --branch codex/windows-application https://github.com/Kabutori/Platzhirschv2.git C:\src\Platzhirschv2
-cd C:\src\Platzhirschv2
-git switch -c dev/meine-aenderungen
-.\Start-Development.bat
-```
+1. Git und Node.js prüfen. Fehlende Werkzeuge werden über WinGet installiert, wenn WinGet vorhanden ist. Windows kann dafür Bestätigungen verlangen. Ist WinGet nicht vorhanden (z. B. auf manchen Servern), nennt die BAT das fehlende Werkzeug; nach dessen Installation dieselbe BAT erneut starten. Node.js muss mindestens Version 22 haben; ältere vorhandene Versionen werden nicht stillschweigend ersetzt.
+2. Quellcode aus `Kabutori/Platzhirschv2`, Branch `codex/windows-application`, holen. Bei privatem Repository gegebenenfalls über Git/Git Credential Manager bei GitHub anmelden.
+3. Unter `%USERPROFILE%\source\Platzhirschv2` ein Git-Checkout und einen eigenen Branch `dev/local-JJJJMMTT-HHMMSS` anlegen. Den ausgegebenen Ordner in der IDE öffnen.
+4. Composer bei Bedarf lokal unter `.development/tools` installieren; der heruntergeladene Installer wird vor Ausführung mit der offiziellen SHA-384-Prüfsumme verglichen.
+5. Entwicklungsdatenbank, API, Oberfläche und Hintergrundaufgaben starten.
 
-Optional bei anderem Laufzeitordner:
+Bei späteren Starts wird das vorhandene Checkout verwendet. Keine automatischen Pulls, Resets, Branchwechsel oder Pushes. Vorhandene lokale Änderungen bleiben erhalten. Eine bereits vorhandene fremde Zielstruktur wird abgewiesen. Beim Aufruf der BAT innerhalb eines Git-Checkouts wird direkt dieses Checkout verwendet.
 
-```powershell
-.\Start-Development.bat -RuntimePath D:\Platzhirsch\runtime
-```
+PHP und MySQL müssen als Laufzeitdateien vorhanden sein. Standard ist die vorhandene Platzhirsch-Installation unter `C:\Platzhirsch\runtime`; dein Windows-Benutzer muss die Programmdateien lesen und ausführen können. Der DEV-Starter startet mit diesen Dateien eine **eigene** Datenbankinstanz. Er installiert nicht automatisch eine Produktionsinstallation. Die geschützten Produktionsrechte nicht pauschal öffnen.
 
-Oder mit getrennten, für deinen Benutzer zugänglichen Programmdateien:
+Nur bei abweichenden Ordnern brauchst du einen Befehl:
 
 ```powershell
-.\Start-Development.bat -PhpPath C:\tools\php\php.exe -MySqlBin C:\tools\mysql\bin
+.\Start-Development.bat -DevelopmentPath D:\Entwicklung\Platzhirsch -RuntimePath D:\Platzhirsch\runtime
 ```
 
-Kein Start aus dem Release-ZIP: Es enthält fertig gebaute Anwendungsteile. Die Startdatei liegt im Quellcode-Repository. Ein zusätzliches `Set-ExecutionPolicy` ist nicht nötig.
+Alternativ eigene portable Laufzeiten über `-PhpPath C:\tools\php\php.exe -MySqlBin C:\tools\mysql\bin` angeben. Ein zusätzliches `Set-ExecutionPolicy` ist nicht nötig. Ältere Release-Pakete enthalten diesen Bootstrap noch nicht.
 
 ## Was gestartet wird
 
