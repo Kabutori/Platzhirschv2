@@ -60,3 +60,17 @@ $r->middleware(['web', 'auth', 'tenant'])
         $r->post('/', [T::class, 'createTeam']);
         $r->patch('/{id}', [T::class, 'updateTeam'])->whereNumber('id');
     });
+
+app('router')
+    ->middleware(['web', 'auth', 'system'])
+    ->prefix('api/v1/admin/role-rollout')
+    ->group(function ($r) {
+        $r->get('/', [\App\Modules\Identity\Http\RoleRolloutController::class, 'catalog']);
+        $r->post('/preview', [
+            \App\Modules\Identity\Http\RoleRolloutController::class,
+            'preview',
+        ])->middleware('throttle:10,1');
+        $r->post('/apply', [\App\Modules\Identity\Http\RoleRolloutController::class, 'apply'])->middleware(
+            'throttle:5,1',
+        );
+    });

@@ -32,6 +32,7 @@ import {
   Form,
   DataTable,
 } from '@platzhirsch/ui-runtime/components';
+const ReservationNotifications = lazy(() => import('@platzhirsch/reservation-ui/Notifications.tsx'));
 const Waitlist = lazy(() => import('@platzhirsch/reservation-ui/Waitlist.tsx'));
 const Support = lazy(() => import('@platzhirsch/support-ui/Support.tsx'));
 const SystemGuide = lazy(() => import('@platzhirsch/system-guide-ui'));
@@ -44,6 +45,7 @@ const Placement = lazy(() => import('@platzhirsch/provisioning-ui/Placement.tsx'
 const DatabaseAccess = lazy(() => import('@platzhirsch/provisioning-ui/DatabaseAccess.tsx'));
 import { identityManifest } from '@platzhirsch/identity-ui';
 import ModuleCatalog from '@platzhirsch/module-host/Catalog.tsx';
+const RoleRollout = lazy(() => import('@platzhirsch/identity-ui/RoleRollout.tsx'));
 const PlatformRoles = lazy(identityManifest.nav[0].screen);
 import { portal } from './api';
 import { Suspense, lazy } from 'react';
@@ -119,6 +121,7 @@ const restaurantNav = [
   ['module-shop', 'Modul-Shop', Code2],
   ['reservations', 'Reservierungen', CalendarDays],
   ['waitlist', 'Warteliste', Clock],
+  ['notifications', 'Buchungsnachrichten', MessageSquare],
   ['table-plan', 'Tischplan', Armchair],
   ['tables', 'Tische', Armchair],
   ['rooms', 'Räume', DoorOpen],
@@ -442,6 +445,7 @@ function Content({
       return (
         <Suspense fallback={<Loading />}>
           <PlatformRoles />
+          {user.role === 'system_admin' && <RoleRollout />}
         </Suspense>
       );
     if (page === 'modules') return <ModuleCenter user={user} />;
@@ -473,6 +477,12 @@ function Content({
         </Suspense>
       );
   }
+  if (page === 'notifications')
+    return (
+      <Suspense fallback={<Loading />}>
+        <ReservationNotifications tenant={tenant} />
+      </Suspense>
+    );
   if (page === 'waitlist')
     return (
       <Suspense fallback={<Loading />}>

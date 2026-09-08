@@ -1,0 +1,184 @@
+ID,Vorlagenzeile,Bedingungen,Aktion,Beschriftung,Abnahme
+B001,36,{{ isChooser }},{{ selectCustomer }},"Restaurant Reservierungen, Tische, Räume und Öffnungszeiten verwalten",Einzelabnahme offen
+B002,40,{{ isChooser }},{{ selectSystem }},"Plattform Mandanten, Module und Systemweite Einstellungen",Einzelabnahme offen
+B003,63,{{ isNotChooser }},{{ toggleSidebar }},Einklappen,Einzelabnahme offen
+B004,69,{{ isNotChooser }} / {{ sidebarExpanded }},{{ goToChooser }},← Bereich wechseln,Einzelabnahme offen
+B005,76,{{ isNotChooser }},{{ item.select }},{{ item.label }},Einzelabnahme offen
+B006,102,{{ isNotChooser }} / {{ hasSidebarRestItems }},{{ toggleSidebarAccordion }},{{ sidebarAccordionLabel }},Einzelabnahme offen
+B007,108,{{ isNotChooser }} / {{ hasSidebarRestItems }} / {{ sidebarAccordionOpen }},{{ item.select }},{{ item.label }},Einzelabnahme offen
+B008,147,{{ isNotChooser }},{{ extendSession }},{{ sessionLabel }},Einzelabnahme offen
+B009,165,{{ isNotChooser }} / {{ showExport }},{{ exportOverview }},{{ exportLabel }},Einzelabnahme offen
+B010,172,{{ isNotChooser }} / {{ showAppSettingsSave }},{{ saveAppSettings }},Speichern,Einzelabnahme offen
+B011,176,{{ isNotChooser }} / {{ showProfileSave }},{{ saveProfile }},Speichern,Einzelabnahme offen
+B012,179,{{ isNotChooser }} / {{ showChangelogButton }},{{ openChangelogModal }},Changelog,Einzelabnahme offen
+B013,185,{{ isNotChooser }} / {{ showAction }},{{ openActionModal }},{{ actionLabel }},Einzelabnahme offen
+B014,195,{{ isNotChooser }} / {{ showUserMenu }},{{ closeUserMenu }},×,Einzelabnahme offen
+B015,201,{{ isNotChooser }} / {{ showUserMenu }},{{ p.select }},,Einzelabnahme offen
+B016,205,{{ isNotChooser }} / {{ showUserMenu }},{{ openProfileEditModal }},Profil bearbeiten,Einzelabnahme offen
+B017,206,{{ isNotChooser }} / {{ showUserMenu }},,Einstellungen,Einzelabnahme offen
+B018,207,{{ isNotChooser }} / {{ showUserMenu }},,Abmelden,Einzelabnahme offen
+B019,217,{{ isNotChooser }} / {{ showProfileModal }},{{ closeProfileModal }},×,Einzelabnahme offen
+B020,247,{{ isNotChooser }} / {{ showProfileModal }},{{ closeProfileModal }},Abbrechen,Einzelabnahme offen
+B021,248,{{ isNotChooser }} / {{ showProfileModal }},{{ saveProfileModal }},Speichern,Einzelabnahme offen
+B022,260,{{ isNotChooser }} / {{ showTableModal }},{{ closeTableEdit }},Abbrechen,Einzelabnahme offen
+B023,261,{{ isNotChooser }} / {{ showTableModal }},{{ saveTableEdit }},Speichern,Einzelabnahme offen
+B024,262,{{ isNotChooser }} / {{ showTableModal }},{{ closeTableEdit }},×,Einzelabnahme offen
+B025,294,{{ isNotChooser }} / {{ showTableModal }} / {{ canDeleteTable }},{{ deleteTableFromModal }},Tisch löschen,Einzelabnahme offen
+B026,305,{{ isNotChooser }} / {{ showSystemUserModal }},{{ closeSystemUserEdit }},×,Einzelabnahme offen
+B027,333,{{ isNotChooser }} / {{ showSystemUserModal }},{{ closeSystemUserEdit }},Abbrechen,Einzelabnahme offen
+B028,334,{{ isNotChooser }} / {{ showSystemUserModal }},{{ saveSystemUserEdit }},Speichern,Einzelabnahme offen
+B029,345,{{ isNotChooser }} / {{ showCustomerTeamModal }},{{ closeCustomerTeamEdit }},×,Einzelabnahme offen
+B030,374,{{ isNotChooser }} / {{ showCustomerTeamModal }},{{ requestDeleteCustomerTeamFromModal }},Entfernen,Einzelabnahme offen
+B031,376,{{ isNotChooser }} / {{ showCustomerTeamModal }},{{ closeCustomerTeamEdit }},Abbrechen,Einzelabnahme offen
+B032,377,{{ isNotChooser }} / {{ showCustomerTeamModal }},{{ saveCustomerTeamEdit }},Speichern,Einzelabnahme offen
+B033,390,{{ isNotChooser }} / {{ showCustomerTeamDeleteConfirm }},{{ cancelDeleteCustomerTeam }},Abbrechen,Einzelabnahme offen
+B034,391,{{ isNotChooser }} / {{ showCustomerTeamDeleteConfirm }},{{ confirmDeleteCustomerTeam }},Entfernen,Einzelabnahme offen
+B035,413,{{ isNotChooser }} / {{ showPermModal }},{{ closePermModal }},×,Einzelabnahme offen
+B036,447,{{ isNotChooser }} / {{ showPermModal }},{{ closePermModal }},Abbrechen,Einzelabnahme offen
+B037,448,{{ isNotChooser }} / {{ showPermModal }},{{ savePermModal }},{{ permModalSaveLabel }},Einzelabnahme offen
+B038,459,{{ isNotChooser }} / {{ showModuleModal }},{{ closeModuleModal }},×,Einzelabnahme offen
+B039,484,{{ isNotChooser }} / {{ showModuleModal }},{{ closeModuleModal }},Abbrechen,Einzelabnahme offen
+B040,485,{{ isNotChooser }} / {{ showModuleModal }},{{ saveModuleModal }},Anlegen,Einzelabnahme offen
+B041,496,{{ isNotChooser }} / {{ showHoursModal }},{{ closeHoursModal }},×,Einzelabnahme offen
+B042,504,{{ isNotChooser }} / {{ showHoursModal }},{{ h.toggleClosed }},,Einzelabnahme offen
+B043,510,{{ isNotChooser }} / {{ showHoursModal }},{{ closeHoursModal }},Abbrechen,Einzelabnahme offen
+B044,511,{{ isNotChooser }} / {{ showHoursModal }},{{ saveHoursModal }},Speichern,Einzelabnahme offen
+B045,525,{{ isNotChooser }} / {{ showTicketModal }},{{ closeTicketModal }},×,Einzelabnahme offen
+B046,540,{{ isNotChooser }} / {{ showTicketModal }} / {{ isPlatformRole }},{{ setReplyKindReply }},Antwort an Kunde,Einzelabnahme offen
+B047,541,{{ isNotChooser }} / {{ showTicketModal }} / {{ isPlatformRole }},{{ setReplyKindInternal }},Interne Notiz,Einzelabnahme offen
+B048,546,{{ isNotChooser }} / {{ showTicketModal }} / {{ isPlatformRole }},{{ sendTicketReplyAsSupport }},{{ sendButtonLabel }},Einzelabnahme offen
+B049,549,{{ isNotChooser }} / {{ showTicketModal }} / {{ isCustomerRole }},{{ sendTicketReplyAsCustomer }},Nachricht senden,Einzelabnahme offen
+B050,559,{{ isNotChooser }} / {{ showTicketModal }} / {{ isPlatformRole }},{{ so.select }},{{ so.label }},Einzelabnahme offen
+B051,618,{{ isNotChooser }} / {{ showReleaseModal }},{{ closeReleaseModal }},×,Einzelabnahme offen
+B052,638,{{ isNotChooser }} / {{ showReleaseModal }},{{ cat.toggle }},{{ cat.label }},Einzelabnahme offen
+B053,660,{{ isNotChooser }} / {{ showReleaseModal }},{{ closeReleaseModal }},Abbrechen,Einzelabnahme offen
+B054,661,{{ isNotChooser }} / {{ showReleaseModal }},{{ saveReleaseModal }},Veröffentlichen,Einzelabnahme offen
+B055,672,{{ isNotChooser }} / {{ showAddClusterModal }},{{ closeAddClusterModal }},×,Einzelabnahme offen
+B056,715,{{ isNotChooser }} / {{ showAddClusterModal }},{{ testNewClusterConnection }},{{ newClusterTestLabel }},Einzelabnahme offen
+B057,716,{{ isNotChooser }} / {{ showAddClusterModal }},{{ testNewClusterPermissions }},{{ newClusterPermTestLabel }},Einzelabnahme offen
+B058,719,{{ isNotChooser }} / {{ showAddClusterModal }},{{ closeAddClusterModal }},Abbrechen,Einzelabnahme offen
+B059,720,{{ isNotChooser }} / {{ showAddClusterModal }},{{ saveNewCluster }},Anlegen,Einzelabnahme offen
+B060,731,{{ isNotChooser }} / {{ showClusterModal }},{{ closeClusterModal }},×,Einzelabnahme offen
+B061,769,{{ isNotChooser }} / {{ showClusterModal }},{{ editingCluster.testConnection }},{{ editingCluster.testLabel }},Einzelabnahme offen
+B062,770,{{ isNotChooser }} / {{ showClusterModal }},{{ editingCluster.testPermissions }},{{ editingCluster.permTestLabel }},Einzelabnahme offen
+B063,783,{{ isNotChooser }} / {{ showClusterModal }},{{ toggleClusterConfirmBackup }},,Einzelabnahme offen
+B064,789,{{ isNotChooser }} / {{ showClusterModal }},{{ toggleClusterConfirmImpact }},,Einzelabnahme offen
+B065,794,{{ isNotChooser }} / {{ showClusterModal }},{{ runClusterMassMigration }},{{ clusterMigrationLabel }},Einzelabnahme offen
+B066,815,{{ isNotChooser }} / {{ showRoleModal }},{{ closeRoleModal }},×,Einzelabnahme offen
+B067,831,{{ isNotChooser }} / {{ showRoleModal }},{{ closeRoleModal }},Abbrechen,Einzelabnahme offen
+B068,832,{{ isNotChooser }} / {{ showRoleModal }},{{ saveRoleModal }},Speichern,Einzelabnahme offen
+B069,844,{{ isNotChooser }} / {{ showRoleDeleteConfirm }},{{ cancelDeleteRole }},Abbrechen,Einzelabnahme offen
+B070,845,{{ isNotChooser }} / {{ showRoleDeleteConfirm }},{{ confirmDeleteRole }},Löschen,Einzelabnahme offen
+B071,859,{{ isNotChooser }} / {{ showTenantDetail }},{{ closeTenantDetail }},×,Einzelabnahme offen
+B072,877,{{ isNotChooser }} / {{ showTenantDetail }} / {{ notEditingTenantDetail }},{{ startEditTenantDetail }},Bearbeiten,Einzelabnahme offen
+B073,913,{{ isNotChooser }} / {{ showTenantDetail }} / {{ editingTenantDetail }},{{ a.toggle }},{{ a.name }} {{ a.priceLabel }},Einzelabnahme offen
+B074,946,{{ isNotChooser }} / {{ showTenantDetail }} / {{ editingTenantDetail }},{{ cancelEditTenantDetail }},Abbrechen,Einzelabnahme offen
+B075,947,{{ isNotChooser }} / {{ showTenantDetail }} / {{ editingTenantDetail }},{{ saveTenantDetail }},Speichern,Einzelabnahme offen
+B076,959,{{ isNotChooser }} / {{ showSpecialDateModal }},{{ closeSpecialDateModal }},×,Einzelabnahme offen
+B077,989,{{ isNotChooser }} / {{ showSpecialDateModal }} / {{ isEditingSpecialDate }},{{ deleteSpecialDate }},Löschen,Einzelabnahme offen
+B078,992,{{ isNotChooser }} / {{ showSpecialDateModal }},{{ closeSpecialDateModal }},Abbrechen,Einzelabnahme offen
+B079,993,{{ isNotChooser }} / {{ showSpecialDateModal }},{{ saveNewSpecialDate }},Speichern,Einzelabnahme offen
+B080,1005,{{ isNotChooser }} / {{ showRoomModal }},{{ closeRoomEdit }},Abbrechen,Einzelabnahme offen
+B081,1006,{{ isNotChooser }} / {{ showRoomModal }},{{ saveRoomEdit }},Speichern,Einzelabnahme offen
+B082,1007,{{ isNotChooser }} / {{ showRoomModal }},{{ closeRoomEdit }},×,Einzelabnahme offen
+B083,1026,{{ isNotChooser }} / {{ showRoomModal }},{{ rc.select }},,Einzelabnahme offen
+B084,1034,{{ isNotChooser }} / {{ showRoomModal }},{{ ri.select }},,Einzelabnahme offen
+B085,1040,{{ isNotChooser }} / {{ showRoomModal }},{{ toggleRoomWeatherDependent }},Wetterabhängig?,Einzelabnahme offen
+B086,1055,{{ isNotChooser }} / {{ showRoomModal }},{{ rt.toggle }},{{ rt.num }},Einzelabnahme offen
+B087,1069,{{ isNotChooser }} / {{ showActionModal }},{{ closeActionModal }},Abbrechen,Einzelabnahme offen
+B088,1070,{{ isNotChooser }} / {{ showActionModal }},{{ saveNewReservation }},Speichern,Einzelabnahme offen
+B089,1071,{{ isNotChooser }} / {{ showActionModal }},{{ closeActionModal }},×,Einzelabnahme offen
+B090,1080,{{ isNotChooser }} / {{ showActionModal }},{{ onWalkIn }},Walk-in,Einzelabnahme offen
+B091,1087,{{ isNotChooser }} / {{ showActionModal }},{{ toggleNewResDatePicker }},{{ newResDateLabel }},Einzelabnahme offen
+B092,1091,{{ isNotChooser }} / {{ showActionModal }} / {{ showNewResDatePicker }},{{ prevNewResCalMonth }},‹,Einzelabnahme offen
+B093,1093,{{ isNotChooser }} / {{ showActionModal }} / {{ showNewResDatePicker }},{{ nextNewResCalMonth }},›,Einzelabnahme offen
+B094,1097,{{ isNotChooser }} / {{ showActionModal }} / {{ showNewResDatePicker }},{{ c.select }},{{ c.num }},Einzelabnahme offen
+B095,1107,{{ isNotChooser }} / {{ showActionModal }},{{ toggleNewResTimePicker }},{{ newResTimeLabel }},Einzelabnahme offen
+B096,1111,{{ isNotChooser }} / {{ showActionModal }} / {{ showNewResTimePicker }},{{ ts.select }},{{ ts.time }},Einzelabnahme offen
+B097,1131,{{ isNotChooser }} / {{ showActionModal }},{{ rt.select }},{{ rt.label }},Einzelabnahme offen
+B098,1136,{{ isNotChooser }} / {{ showActionModal }},{{ to.toggle }},{{ to.label }},Einzelabnahme offen
+B099,1238,{{ isNotChooser }} / {{ v.reservations }},{{ prevDay }},‹,Einzelabnahme offen
+B100,1240,{{ isNotChooser }} / {{ v.reservations }},{{ nextDay }},›,Einzelabnahme offen
+B101,1245,{{ isNotChooser }} / {{ v.reservations }} / {{ showDatePicker }},{{ prevCalMonth }},‹,Einzelabnahme offen
+B102,1247,{{ isNotChooser }} / {{ v.reservations }} / {{ showDatePicker }},{{ nextCalMonth }},›,Einzelabnahme offen
+B103,1251,{{ isNotChooser }} / {{ v.reservations }} / {{ showDatePicker }},{{ c.select }},{{ c.num }},Einzelabnahme offen
+B104,1254,{{ isNotChooser }} / {{ v.reservations }} / {{ showDatePicker }},{{ selectToday }},Heute,Einzelabnahme offen
+B105,1259,{{ isNotChooser }} / {{ v.reservations }},{{ setViewListe }},Liste,Einzelabnahme offen
+B106,1260,{{ isNotChooser }} / {{ v.reservations }},{{ setViewWoche }},Woche,Einzelabnahme offen
+B107,1277,{{ isNotChooser }} / {{ v.reservations }} / {{ isListView }},{{ r.openEdit }},,Einzelabnahme offen
+B108,1315,{{ isNotChooser }} / {{ v.tables }},{{ setGridView }},Kacheln,Einzelabnahme offen
+B109,1316,{{ isNotChooser }} / {{ v.tables }},{{ setTimelineView }},Zeitstrahl,Einzelabnahme offen
+B110,1501,{{ isNotChooser }} / {{ v.hours }},{{ openHoursModal }},,Einzelabnahme offen
+B111,1525,{{ isNotChooser }} / {{ v.hours }},{{ openSpecialDateModal }},+ Hinzufügen,Einzelabnahme offen
+B112,1539,{{ isNotChooser }} / {{ v.hours }},{{ sd.openEdit }},,Einzelabnahme offen
+B113,1569,{{ isNotChooser }} / {{ v.hours }} / {{ hasRoomClosures }},{{ c.remove }},×,Einzelabnahme offen
+B114,1576,{{ isNotChooser }} / {{ v.hours }},{{ toggleClosureFromPicker }},{{ closureFromLabel }},Einzelabnahme offen
+B115,1580,{{ isNotChooser }} / {{ v.hours }} / {{ showClosureFromPicker }},{{ prevClosureCalMonth }},‹,Einzelabnahme offen
+B116,1582,{{ isNotChooser }} / {{ v.hours }} / {{ showClosureFromPicker }},{{ nextClosureCalMonth }},›,Einzelabnahme offen
+B117,1586,{{ isNotChooser }} / {{ v.hours }} / {{ showClosureFromPicker }},{{ c.select }},{{ c.num }},Einzelabnahme offen
+B118,1593,{{ isNotChooser }} / {{ v.hours }},{{ toggleClosureToPicker }},{{ closureToLabel }},Einzelabnahme offen
+B119,1597,{{ isNotChooser }} / {{ v.hours }} / {{ showClosureToPicker }},{{ prevClosureCalMonth }},‹,Einzelabnahme offen
+B120,1599,{{ isNotChooser }} / {{ v.hours }} / {{ showClosureToPicker }},{{ nextClosureCalMonth }},›,Einzelabnahme offen
+B121,1603,{{ isNotChooser }} / {{ v.hours }} / {{ showClosureToPicker }},{{ c.select }},{{ c.num }},Einzelabnahme offen
+B122,1610,{{ isNotChooser }} / {{ v.hours }},{{ addRoomClosure }},+,Einzelabnahme offen
+B123,1642,{{ isNotChooser }} / {{ v.widget }},{{ setColorTerra }},,Einzelabnahme offen
+B124,1643,{{ isNotChooser }} / {{ v.widget }},{{ setColorSlate }},,Einzelabnahme offen
+B125,1644,{{ isNotChooser }} / {{ v.widget }},{{ setColorForest }},,Einzelabnahme offen
+B126,1674,{{ isNotChooser }} / {{ v.widget }},{{ toggleWidgetLogo }},,Einzelabnahme offen
+B127,1699,{{ isNotChooser }} / {{ v.widget }} / {{ widgetPreviewConfirmed }},{{ resetWidgetPreview }},Zurück,Einzelabnahme offen
+B128,1708,{{ isNotChooser }} / {{ v.widget }} / {{ widgetPreviewFormVisible }},{{ toggleWidgetDatePicker }},{{ widgetPreviewDateLabel }},Einzelabnahme offen
+B129,1712,{{ isNotChooser }} / {{ v.widget }} / {{ widgetPreviewFormVisible }} / {{ showWidgetDatePicker }},{{ prevWidgetCalMonth }},‹,Einzelabnahme offen
+B130,1714,{{ isNotChooser }} / {{ v.widget }} / {{ widgetPreviewFormVisible }} / {{ showWidgetDatePicker }},{{ nextWidgetCalMonth }},›,Einzelabnahme offen
+B131,1718,{{ isNotChooser }} / {{ v.widget }} / {{ widgetPreviewFormVisible }} / {{ showWidgetDatePicker }},{{ c.select }},{{ c.num }},Einzelabnahme offen
+B132,1725,{{ isNotChooser }} / {{ v.widget }} / {{ widgetPreviewFormVisible }},{{ toggleWidgetTimePicker }},{{ widgetPreviewTimeValue }},Einzelabnahme offen
+B133,1729,{{ isNotChooser }} / {{ v.widget }} / {{ widgetPreviewFormVisible }} / {{ showWidgetTimePicker }},{{ ts.select }},{{ ts.time }},Einzelabnahme offen
+B134,1736,{{ isNotChooser }} / {{ v.widget }} / {{ widgetPreviewFormVisible }},{{ toggleWidgetPartyPicker }},{{ widgetPreviewPartyLabel }},Einzelabnahme offen
+B135,1743,{{ isNotChooser }} / {{ v.widget }} / {{ widgetPreviewFormVisible }} / {{ showWidgetPartyPicker }},{{ p.select }},{{ p.num }},Einzelabnahme offen
+B136,1748,{{ isNotChooser }} / {{ v.widget }} / {{ widgetPreviewFormVisible }},{{ submitWidgetPreview }},{{ widget.buttonText }},Einzelabnahme offen
+B137,1770,{{ isNotChooser }} / {{ v.appSettings }},{{ toggleCloseModalOnBackdrop }},,Einzelabnahme offen
+B138,1781,{{ isNotChooser }} / {{ v.appSettings }},{{ toggleFavoritesEnabled }},,Einzelabnahme offen
+B139,1791,{{ isNotChooser }} / {{ v.appSettings }} / {{ favoritesEnabled }},{{ f.toggle }},,Einzelabnahme offen
+B140,1805,{{ isNotChooser }} / {{ v.appSettings }},{{ toggleExportEnabled }},,Einzelabnahme offen
+B141,1815,{{ isNotChooser }} / {{ v.appSettings }} / {{ exportEnabled }},{{ ef.toggle }},,Einzelabnahme offen
+B142,1892,{{ isNotChooser }} / {{ v.usersCustomer }},{{ u.openEdit }},,Einzelabnahme offen
+B143,1928,{{ isNotChooser }} / {{ v.tenants }},{{ t.openDetail }},,Einzelabnahme offen
+B144,1936,{{ isNotChooser }} / {{ v.tenants }} / {{ showTenantPagination }},{{ tenantPrevPage }},‹ Zurück,Einzelabnahme offen
+B145,1937,{{ isNotChooser }} / {{ v.tenants }} / {{ showTenantPagination }},{{ tenantNextPage }},Weiter ›,Einzelabnahme offen
+B146,1953,{{ isNotChooser }} / {{ v.modules }},{{ m.toggle }},,Einzelabnahme offen
+B147,1971,{{ isNotChooser }} / {{ v.modules }},{{ m.toggle }},,Einzelabnahme offen
+B148,1993,{{ isNotChooser }} / {{ v.usersSystem }},{{ u.openEdit }},,Einzelabnahme offen
+B149,2005,{{ isNotChooser }} / {{ v.roles }},{{ savePermissionsLocal }},Lokal speichern,Einzelabnahme offen
+B150,2006,{{ isNotChooser }} / {{ v.roles }},{{ deployPermissionsTest }},{{ testDeployLabel }},Einzelabnahme offen
+B151,2007,{{ isNotChooser }} / {{ v.roles }},{{ rolloutPermissions }},{{ rolloutLabel }},Einzelabnahme offen
+B152,2014,{{ isNotChooser }} / {{ v.roles }},{{ r.select }},{{ r.name }},Einzelabnahme offen
+B153,2033,{{ isNotChooser }} / {{ v.roles }},{{ openCreateRoleModal }},+ Rolle,Einzelabnahme offen
+B154,2037,{{ isNotChooser }} / {{ v.roles }},{{ openRenameRoleModal }},Umbenennen,Einzelabnahme offen
+B155,2038,{{ isNotChooser }} / {{ v.roles }},{{ deleteSelectedRole }},Löschen,Einzelabnahme offen
+B156,2046,{{ isNotChooser }} / {{ v.roles }},{{ g.toggleAll }},,Einzelabnahme offen
+B157,2051,{{ isNotChooser }} / {{ v.roles }},{{ openCreatePermModal }},+ Berechtigung,Einzelabnahme offen
+B158,2062,{{ isNotChooser }} / {{ v.roles }},{{ p.openEdit }},,Einzelabnahme offen
+B159,2063,{{ isNotChooser }} / {{ v.roles }},{{ p.toggle }},,Einzelabnahme offen
+B160,2104,{{ isNotChooser }} / {{ v.audit }},{{ setAuditPlattform }},Plattform-Logs,Einzelabnahme offen
+B161,2105,{{ isNotChooser }} / {{ v.audit }},{{ setAuditMandant }},Mandanten-Logs,Einzelabnahme offen
+B162,2136,{{ isNotChooser }} / {{ v.health }},{{ t.select }},{{ t.label }},Einzelabnahme offen
+B163,2183,{{ isNotChooser }} / {{ v.health }} / {{ isBackupTab }},{{ runBackup }},{{ backupRunLabel }},Einzelabnahme offen
+B164,2223,{{ isNotChooser }} / {{ v.health }} / {{ isMigrationTab }},{{ runMigration }},{{ migrationRunLabel }},Einzelabnahme offen
+B165,2245,{{ isNotChooser }} / {{ v.settings }},{{ t.select }},{{ t.label }},Einzelabnahme offen
+B166,2296,{{ isNotChooser }} / {{ v.settings }} / {{ activeDbConnection }},{{ activeDbConnection.toggleSsl }},,Einzelabnahme offen
+B167,2305,{{ isNotChooser }} / {{ v.settings }} / {{ activeDbConnection }},{{ activeDbConnection.testPermissions }},{{ activeDbConnection.permTestLabel }},Einzelabnahme offen
+B168,2306,{{ isNotChooser }} / {{ v.settings }} / {{ activeDbConnection }},{{ activeDbConnection.test }},{{ activeDbConnection.testLabel }},Einzelabnahme offen
+B169,2313,{{ isNotChooser }} / {{ v.settings }} / {{ isClustersTab }},{{ openAddClusterModal }},+ Cluster,Einzelabnahme offen
+B170,2353,{{ isNotChooser }} / {{ v.settings }} / {{ isTenantMigrationTab }},{{ runTenantMigration }},{{ tenantMigrationRunLabel }},Einzelabnahme offen
+B171,2392,{{ isNotChooser }} / {{ v.settings }} / {{ isSetupTab }},{{ runSetupScript }},{{ setupRunLabel }},Einzelabnahme offen
+B172,2418,{{ isNotChooser }} / {{ v.settings }} / {{ isOdooTab }},{{ toggleOdooEnabled }},,Einzelabnahme offen
+B173,2453,{{ isNotChooser }} / {{ v.settings }} / {{ isOdooTab }} / {{ odooEnabled }},{{ testOdooConnection }},{{ odooTestLabel }},Einzelabnahme offen
+B174,2466,{{ isNotChooser }} / {{ v.settings }} / {{ isOdooTab }} / {{ odooEnabled }},{{ os.toggle }},,Einzelabnahme offen
+B175,2477,{{ isNotChooser }} / {{ v.modulesPlatform }},{{ openCreateModuleModal }},+ Modul,Einzelabnahme offen
+B176,2500,{{ isNotChooser }} / {{ v.releases }},{{ openCreateReleaseModal }},+ Release,Einzelabnahme offen
+B177,2529,{{ isNotChooser }} / {{ showExportFormatModal }},{{ closeExportFormatModal }},×,Einzelabnahme offen
+B178,2533,{{ isNotChooser }} / {{ showExportFormatModal }},{{ ef.select }},{{ ef.label }},Einzelabnahme offen
+B179,2548,{{ isNotChooser }} / {{ showChangelogModal }},{{ closeChangelogModal }},×,Einzelabnahme offen
+B180,2576,{{ isNotChooser }} / {{ showNewTicketModal }},{{ closeNewTicketModal }},Abbrechen,Einzelabnahme offen
+B181,2577,{{ isNotChooser }} / {{ showNewTicketModal }},{{ createTicket }},Ticket erstellen,Einzelabnahme offen
+B182,2578,{{ isNotChooser }} / {{ showNewTicketModal }},{{ closeNewTicketModal }},×,Einzelabnahme offen
+B183,2616,{{ isNotChooser }} / {{ v.customerSupport }},{{ t.openTicket }},,Einzelabnahme offen

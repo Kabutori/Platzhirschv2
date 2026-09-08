@@ -59,13 +59,27 @@ export default function TablePlan({
     } | null>(null);
   const list = tables.filter((t) => room === 'all' || String(t.room_id) === room);
   const selectedTable = list.find((t) => t.id === selected);
-  const current = reservations.filter((r) => !['cancelled', 'no_show', 'completed'].includes(r.status));
+  const allReservations = [...(previous.data || []), ...reservations];
+  const current = allReservations.filter((r) => !['cancelled', 'no_show', 'completed'].includes(r.status));
+  function stamp(utc: string) {
+    return new Intl.DateTimeFormat('sv-SE', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    })
+      .format(new Date(utc.replace(' ', 'T') + 'Z'))
+      .replace(' ', 'T');
+  }
   function bookings(id: number) {
     return current.filter(
       (r) =>
         (r.table_id === id || (r.additional_table_ids || []).includes(id)) &&
-        clock(r.starts_at, timezone) <= time &&
-        clock(r.ends_at, timezone) > time,
+        stamp(r.starts_at) <= date + 'T' + time &&
+        stamp(r.ends_at) > date + 'T' + time,
     );
   }
   async function save(table: Row, x: number, y: number) {
@@ -211,6 +225,10 @@ export default function TablePlan({
             />
           </>
         )
+      ) : previous.isPending ? (
+        <Loading />
+      ) : previous.error ? (
+        <ErrorBox error={previous.error} />
       ) : (
         <>
           <p className="muted padded">
@@ -321,7 +339,7 @@ export default function TablePlan({
               </button>
             )}
           </div>
-          {reservations
+          {allReservations
             .filter((r) => r.table_id === selected || (r.additional_table_ids || []).includes(selected))
             .map((r) => (
               <button className="floor-booking" key={r.id} disabled={!canWrite} onClick={() => edit(r)}>
@@ -329,7 +347,7 @@ export default function TablePlan({
                 Personen · {r.status}
               </button>
             ))}
-          {!reservations.some(
+          {!allReservations.some(
             (r) => r.table_id === selected || (r.additional_table_ids || []).includes(selected),
           ) && <p>Keine Reservierungen.</p>}
         </section>

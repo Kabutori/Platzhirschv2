@@ -7,6 +7,8 @@ export type Preferences = {
   backdropClose: boolean;
   exportEnabled: boolean;
   csvEnabled: boolean;
+  xlsxEnabled: boolean;
+  pdfEnabled: boolean;
 };
 const defaults: Preferences = {
   favoritesEnabled: false,
@@ -15,6 +17,8 @@ const defaults: Preferences = {
   backdropClose: false,
   exportEnabled: true,
   csvEnabled: true,
+  xlsxEnabled: true,
+  pdfEnabled: true,
 };
 const Context = createContext({ value: defaults, save: (_value: Preferences) => {}, error: '' });
 export const usePreferences = () => useContext(Context);
@@ -29,6 +33,8 @@ export function PreferencesProvider({ identity, children }: { identity: string; 
         backdropClose: v.backdropClose === true,
         exportEnabled: v.exportEnabled !== false,
         csvEnabled: v.csvEnabled !== false,
+        xlsxEnabled: v.xlsxEnabled !== false,
+        pdfEnabled: v.pdfEnabled !== false,
         favorites: Array.isArray(v.favorites)
           ? v.favorites.filter((x: unknown) => typeof x === 'string')
           : [],
@@ -140,7 +146,23 @@ export function PreferencesPage({
                   onChange={() => save({ ...value, csvEnabled: !value.csvEnabled })}
                 />
               </div>
-              {!value.csvEnabled && (
+              <div className="preference-row">
+                <span>XLSX · Excel-Arbeitsmappe</span>
+                <Toggle
+                  label="XLSX anbieten"
+                  checked={value.xlsxEnabled}
+                  onChange={() => save({ ...value, xlsxEnabled: !value.xlsxEnabled })}
+                />
+              </div>
+              <div className="preference-row">
+                <span>Drucken / PDF · Browser-Druckdialog</span>
+                <Toggle
+                  label="Drucken / PDF anbieten"
+                  checked={value.pdfEnabled}
+                  onChange={() => save({ ...value, pdfEnabled: !value.pdfEnabled })}
+                />
+              </div>
+              {!value.csvEnabled && !value.xlsxEnabled && !value.pdfEnabled && (
                 <p className="muted">
                   Kein Export-Format ausgewählt. Die Export-Schaltfläche wird ausgeblendet.
                 </p>
@@ -148,8 +170,8 @@ export function PreferencesPage({
             </div>
           )}
           <p className="muted">
-            Das Reservierungsmodul stellt derzeit CSV bereit. Deine Exportberechtigung wird weiterhin vom
-            Server geprüft.
+            CSV und XLSX werden heruntergeladen. PDF wird über den Browser-Druckdialog gespeichert. Deine
+            Exportberechtigung wird vom Server geprüft.
           </p>
         </section>
       )}

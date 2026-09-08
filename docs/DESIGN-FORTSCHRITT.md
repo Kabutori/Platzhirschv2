@@ -42,3 +42,11 @@ Der Monatskalender übernimmt das Raster Montag–Sonntag, Monatswechsel, Tagesa
 Der Tischplan bietet Kacheln/Zeitstrahl und einen gemeinsamen Raumfilter. Im Zeitstrahl stehen Tischname und Plätze links, die Buchungen auf einer 24-Stunden-Achse rechts. Zeiten folgen der Restaurant-Zeitzone; Tage der Zeitumstellung werden mit ihrer tatsächlichen Länge dargestellt. Buchungen vom Vortag werden mitgeladen und am Tagesrand abgeschnitten. Bestätigte, platzierte und abgeschlossene Reservierungen sind sichtbar, stornierte und nicht erschienene ausgeblendet. Überlagerungen erhalten getrennte Zeilen. Buchungen öffnen nur mit Schreibrecht den vorhandenen Bearbeitungsdialog. Auf schmalen Bildschirmen scrollt ausschließlich der Zeitstrahl horizontal.
 
 Die neuen Browsertests prüfen Schaltjahr, Jahreswechsel, Fokus und Schließen, Raumfilter, über Mitternacht laufende Buchungen sowie Nur-Lese-Zugriff und Ladefehler. Der grafische Tischplan mit gespeicherten Positionen bleibt erhalten.
+
+## Restaurantbetrieb und nachvollziehbare Einzelabnahme
+
+`DESIGN-BUTTON-INVENTAR.csv` erfasst die tatsächlichen Button-Definitionen der Referenz mit Zeile, sichtbarer Beschriftung, Aktionsbindung und umgebenden Einblendbedingungen. `tools/design/inventory.py` erzeugt sie reproduzierbar. Eine erfasste Aktion ist keine bestandene Abnahme: die Spalte bleibt bis zur tatsächlichen Einzelprüfung ausdrücklich offen. Vorhandene Screenshot-Tests ersetzen nicht die Einzelprüfung aller Vorlagefunktionen.
+
+Neu umgesetzt: Warteliste mit eigenem Lese-/Schreibrecht, Statusfilter, Kontaktdaten, Notizen und konfliktgeprüfter Übernahme; zusätzliche Tische pro Buchung im selben Raum; Öffnungszeiten über Mitternacht mit Sondertagsvorrang. Auch Kacheln berücksichtigen hineinreichende Reservierungen. XLSX und Drucken/PDF ergänzen CSV samt getrennten Anzeigeeinstellungen. Die PDF-Funktion verwendet den Browser-Druckdialog und ist kein serverseitiger PDF-Renderer.
+
+Buchungsnachrichten besitzen eine eigene Konfigurations- und Statusansicht. Sie folgen dem vorhandenen Karten-/Formularstil; die Warteliste ergänzt die Vorlage um einen ausführbaren Restaurantablauf. Eine visuelle 1:1-Vollabnahme bleibt ausstehend.

@@ -183,6 +183,7 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
             }
             $result = $db->table('reservations')->find($id);
             $result->additional_table_ids = array_values(array_diff($newIds, [(int) $table->id]));
+            app(ReservationNotifications::class)->enqueue($result);
             return $result;
         }, 3);
     }

@@ -657,4 +657,63 @@ class RestaurantTest extends TestCase
         }
         $this->assertSame(0, DB::connection('tenant')->table('reservations')->count());
     }
+
+    public function test_notifications_are_opt_in_and_changes_supersede_old_reminders(): void
+    {
+        $db = DB::connection('tenant');
+        $payload = [...$this->payload(), 'email' => 'guest@example.test'];
+        $this->postJson('/api/v1/restaurant/reservations', $payload)->assertCreated();
+        $this->assertSame(0, $db->table('reservation_notifications')->count());
+        config(['mail.default' => 'smtp', 'mail.mailers.smtp.host' => 'smtp.example.test']);
+        $this->patchJson('/api/v1/restaurant/notifications', [
+            'email_enabled' => true,
+            'sms_enabled' => false,
+            'reminder_minutes' => 120,
+        ])->assertOk();
+        $payload = [...$this->payload('20:00'), 'email' => 'guest@example.test'];
+        $id = $this->postJson('/api/v1/restaurant/reservations', $payload)->assertCreated()->json('id');
+        $this->assertSame(2, $db->table('reservation_notifications')->where('status', 'pending')->count());
+        $this->postJson('/api/v1/restaurant/reservations/' . $id . '/cancel')->assertNoContent();
+        $this->assertSame(1, $db->table('reservation_notifications')->where('status', 'pending')->count());
+        \Illuminate\Support\Facades\Mail::shouldReceive('raw')->once()->andReturnNull();
+        app(\App\Modules\Reservation\Application\ReservationNotifications::class)->dispatch(
+            'Restaurant',
+            'Europe/Berlin',
+        );
+        app(\App\Modules\Reservation\Application\ReservationNotifications::class)->dispatch(
+            'Restaurant',
+            'Europe/Berlin',
+        );
+        $this->assertSame(1, $db->table('reservation_notifications')->where('status', 'accepted')->count());
+    }
+    public function test_sms_rejection_is_not_retried_and_credentials_are_not_exposed(): void
+    {
+        config([
+            'reservation_notifications.sms.sid' => 'AC' . str_repeat('a', 32),
+            'reservation_notifications.sms.token' => 'unit-test-only',
+            'reservation_notifications.sms.from' => '+491701234567',
+        ]);
+        $this->patchJson('/api/v1/restaurant/notifications', [
+            'email_enabled' => false,
+            'sms_enabled' => true,
+            'reminder_minutes' => 0,
+        ])
+            ->assertOk()
+            ->assertJsonMissing(['token' => 'unit-test-only']);
+        \Illuminate\Support\Facades\Http::fake([
+            'api.twilio.com/*' => \Illuminate\Support\Facades\Http::response([], 400),
+        ]);
+        $this->postJson('/api/v1/restaurant/reservations', [
+            ...$this->payload(),
+            'phone' => '+491709876543',
+        ])->assertCreated();
+        $service = app(\App\Modules\Reservation\Application\ReservationNotifications::class);
+        $service->dispatch('Restaurant', 'Europe/Berlin');
+        $service->dispatch('Restaurant', 'Europe/Berlin');
+        \Illuminate\Support\Facades\Http::assertSentCount(1);
+        $this->assertSame(
+            'rejected',
+            DB::connection('tenant')->table('reservation_notifications')->first()->status,
+        );
+    }
 }

@@ -51,7 +51,7 @@ test('waitlist conversion preserves entry on conflict and supports table combina
   await page.getByRole('dialog').getByRole('button', { name: 'Speichern', exact: false }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByLabel('Wartelistenstatus', { exact: true }).selectOption('all');
-  await expect(page.getByText('Übernommen', { exact: true })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Übernommen', exact: true })).toBeVisible();
   await page.screenshot({ path: 'test-results/design-waitlist.png', fullPage: true, animations: 'disabled' });
   await page.getByRole('button', { name: 'Reservierungen', exact: true }).click();
   await page.getByRole('button', { name: 'Reservierung', exact: true }).click();

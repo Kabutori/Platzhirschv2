@@ -204,3 +204,25 @@ Artisan::command('module:repair {operation} {--acknowledge-partial-migrations}',
         $database->disconnect();
     }
 });
+
+Artisan::command('reservation:notifications', function () {
+    \App\Models\Tenant::where('status', 'active')
+        ->select('id')
+        ->chunkById(100, function ($tenants) {
+            foreach ($tenants as $tenant) {
+                try {
+                    app(\App\Contracts\Module\TenantRuntime::class)->withTenant($tenant->id, function (
+                        $context,
+                    ) {
+                        app(\App\Modules\Reservation\Application\ReservationNotifications::class)->dispatch(
+                            $context->name,
+                            $context->timezone,
+                        );
+                    });
+                } catch (\Throwable) {
+                    /* Status remains inspectable; never print credentials or message bodies. */
+                }
+            }
+        });
+})->purpose('Fällige Reservierungsnachrichten zustellen');
+Schedule::command('reservation:notifications')->everyMinute()->withoutOverlapping(10);

@@ -102,3 +102,9 @@ button.reservation-day-heading {
     flex-wrap: wrap;
   }
 }
+
+@media (max-width: 650px) {
+  .toolbar .button-row {
+    flex-wrap: wrap;
+  }
+}

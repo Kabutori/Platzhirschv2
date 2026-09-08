@@ -306,17 +306,27 @@ export function Reservations({
       setError(e);
     }
   }
-  async function download() {
+  async function download(format = 'csv') {
+    const printWindow = format === 'print' ? window.open('', '_blank') : null;
+    if (printWindow) printWindow.opener = null;
     try {
-      const response = await fetch('/api/v1/restaurant/export?date=' + date, {
+      const response = await fetch('/api/v1/restaurant/export?date=' + date + '&format=' + format, {
         credentials: 'same-origin',
         headers: { 'X-Platzhirsch-Portal': portal, ...(tenant ? { 'X-Tenant-ID': tenant } : {}) },
       });
       if (!response.ok) throw new Error('Export fehlgeschlagen.');
+      if (format === 'print') {
+        if (!printWindow) throw new Error('Bitte Popups zum Drucken erlauben.');
+        printWindow.document.write(await response.text());
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        return;
+      }
       const url = URL.createObjectURL(await response.blob());
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'reservierungen-' + date + '.csv';
+      a.download = 'reservierungen-' + date + '.' + format;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) {
@@ -355,10 +365,20 @@ export function Reservations({
             <button
               disabled={!allowed(user, 'reservation.export')}
               title={'Alle Reservierungen vom ' + date + ' als CSV; Suchfilter werden nicht angewendet.'}
-              onClick={download}
+              onClick={() => download()}
             >
               <Download size={16} />
               CSV
+            </button>
+          )}
+          {preferences.exportEnabled && preferences.xlsxEnabled && (
+            <button disabled={!allowed(user, 'reservation.export')} onClick={() => download('xlsx')}>
+              XLSX
+            </button>
+          )}
+          {preferences.exportEnabled && preferences.pdfEnabled && (
+            <button disabled={!allowed(user, 'reservation.export')} onClick={() => download('print')}>
+              Drucken / PDF
             </button>
           )}
           <button
