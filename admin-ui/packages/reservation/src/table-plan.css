@@ -81,3 +81,8 @@
     height: 86px;
   }
 }
+.floor-table.closed {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+}

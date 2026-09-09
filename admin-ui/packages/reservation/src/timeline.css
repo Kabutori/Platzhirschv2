@@ -83,3 +83,20 @@
   color: var(--muted);
   font-size: 11px;
 }
+.timeline-closure {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+  padding: 10px 4px;
+  font-size: 11px;
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+  background: repeating-linear-gradient(
+    135deg,
+    var(--danger-soft),
+    var(--danger-soft) 5px,
+    var(--bg) 5px,
+    var(--bg) 10px
+  );
+}

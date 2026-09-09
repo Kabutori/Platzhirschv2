@@ -93,14 +93,17 @@ class ReservationController
         abort_if(
             $resource === 'tables' &&
                 ($db->table('reservations')->where('table_id', $id)->exists() ||
-                    $db->table('reservation_extra_tables')->where('table_id', $id)->exists()),
+                    $db->table('reservation_extra_tables')->where('table_id', $id)->exists() ||
+                    $db->table('table_combination_members')->where('table_id', $id)->exists()),
             409,
-            'Tisch hat Reservierungen. Bitte deaktivieren statt löschen.',
+            'Tisch hat Reservierungen oder gehört zu einer Kombination. Bitte deaktivieren oder die Kombination zuerst bearbeiten.',
         );
         abort_if(
-            $resource === 'rooms' && $db->table('dining_tables')->where('room_id', $id)->exists(),
+            $resource === 'rooms' &&
+                ($db->table('dining_tables')->where('room_id', $id)->exists() ||
+                    $db->table('room_closures')->where('room_id', $id)->exists()),
             409,
-            'Raum enthält noch Tische.',
+            'Raum enthält noch Tische oder Sperrzeiten.',
         );
         abort_unless($db->table(self::RESOURCES[$resource])->where('id', $id)->delete(), 404);
         $this->audit->record('restaurant.' . $resource . '.deleted', $id, $r->attributes->get('tenant')->id);

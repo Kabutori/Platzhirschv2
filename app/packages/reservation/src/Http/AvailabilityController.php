@@ -9,7 +9,11 @@ class AvailabilityController
     public function __construct(private DatabaseManager $db, private AuditSink $audit) {}
     public function index(Request $r, string $kind)
     {
-        abort_unless($r->user()->hasPermission('restaurant.configure'), 403);
+        abort_unless(
+            $r->user()->hasPermission('restaurant.configure') ||
+                ($kind === 'room-closures' && $r->user()->hasPermission('reservation.read')),
+            403,
+        );
         $db = $this->db->connection('tenant');
         if ($kind === 'room-closures') {
             return $db->table('room_closures')->orderByDesc('starts_at')->get();

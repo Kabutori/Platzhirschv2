@@ -29,6 +29,7 @@ export default function TablePlan({
 }) {
   const rooms = useData('v1/restaurant/rooms', tenant),
     qc = useQueryClient();
+  const closures = useData('v1/restaurant/room-closures', tenant);
   const previous = useData('v1/restaurant/reservations?date=' + shiftDate(date, -1), tenant);
   const [view, setView] = useState<'tiles' | 'timeline'>('tiles');
   const [room, setRoom] = useState('all'),
@@ -80,6 +81,14 @@ export default function TablePlan({
         (r.table_id === id || (r.additional_table_ids || []).includes(id)) &&
         stamp(r.starts_at) <= date + 'T' + time &&
         stamp(r.ends_at) > date + 'T' + time,
+    );
+  }
+  function blocked(table: Row) {
+    return (closures.data || []).find(
+      (c: Row) =>
+        String(c.room_id) === String(table.room_id) &&
+        stamp(c.starts_at) <= date + 'T' + time &&
+        stamp(c.ends_at) > date + 'T' + time,
     );
   }
   async function save(table: Row, x: number, y: number) {
@@ -205,10 +214,10 @@ export default function TablePlan({
             );
           })}
       {view === 'timeline' ? (
-        previous.isPending ? (
+        previous.isPending || closures.isPending ? (
           <Loading />
-        ) : previous.error ? (
-          <ErrorBox error={previous.error} />
+        ) : previous.error || closures.error ? (
+          <ErrorBox error={previous.error || closures.error} />
         ) : (
           <>
             <p className="muted padded">
@@ -220,15 +229,16 @@ export default function TablePlan({
               tables={list}
               reservations={[...(previous.data || []), ...reservations]}
               timezone={timezone}
+              closures={closures.data || []}
               canWrite={canWrite}
               edit={edit}
             />
           </>
         )
-      ) : previous.isPending ? (
+      ) : previous.isPending || closures.isPending ? (
         <Loading />
-      ) : previous.error ? (
-        <ErrorBox error={previous.error} />
+      ) : previous.error || closures.error ? (
+        <ErrorBox error={previous.error || closures.error} />
       ) : (
         <>
           <p className="muted padded">
@@ -257,13 +267,14 @@ export default function TablePlan({
                       ? t.layout_y
                       : (Math.floor(i / columns) * 100) / Math.max(1, Math.ceil(list.length / columns) - 1);
               const booked = bookings(t.id).length > 0;
+              const closure = blocked(t);
               return (
                 <button
                   key={t.id}
                   className={
                     'floor-table ' +
                     (t.shape || 'rectangle') +
-                    (!t.active ? ' inactive' : booked ? ' occupied' : ' free')
+                    (!t.active ? ' inactive' : closure ? ' closed' : booked ? ' occupied' : ' free')
                   }
                   style={{
                     left: x + '%',
@@ -271,7 +282,7 @@ export default function TablePlan({
                     transform: `translate(-${x}%,-${y}%)`,
                     touchAction: layout ? 'none' : 'auto',
                   }}
-                  aria-label={`${t.name}, ${t.capacity} Plätze, ${!t.active ? 'deaktiviert' : booked ? 'belegt' : 'frei'}`}
+                  aria-label={`${t.name}, ${t.capacity} Plätze, ${!t.active ? 'deaktiviert' : closure ? 'Raum gesperrt' : booked ? 'belegt' : 'frei'}`}
                   aria-pressed={selected === t.id}
                   disabled={busy}
                   onPointerDown={(e) => start(e, t, x, y)}
@@ -320,7 +331,8 @@ export default function TablePlan({
                   <Armchair size={20} />
                   <strong>{t.name}</strong>
                   <small>
-                    {t.capacity} Plätze · {!t.active ? 'Inaktiv' : booked ? 'Belegt' : 'Frei'}
+                    {t.capacity} Plätze ·{' '}
+                    {!t.active ? 'Inaktiv' : closure ? 'Raum gesperrt' : booked ? 'Belegt' : 'Frei'}
                   </small>
                 </button>
               );
@@ -331,6 +343,7 @@ export default function TablePlan({
       )}
       {selectedTable && (
         <section className="padded">
+          {blocked(selectedTable) && <p className="notice">Raum gesperrt: {blocked(selectedTable).reason}</p>}
           <div className="toolbar">
             <h3>{selectedTable.name} · Reservierungen am gewählten Tag</h3>
             {canWrite && selectedTable.active && (

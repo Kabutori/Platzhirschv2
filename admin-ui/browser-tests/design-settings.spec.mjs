@@ -182,6 +182,19 @@ test('interactive designer completes a sample booking, supports back and sends n
   await preview.getByRole('button', { name: 'Neue Beispielbuchung' }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: 'test-results/design-widget-interactive-mobile.png', fullPage: true });
+  const overflow = await page.evaluate(() =>
+    Array.from(document.querySelectorAll('*'))
+      .filter((el) => el.getBoundingClientRect().right > 395 && getComputedStyle(el).display !== 'none')
+      .slice(0, 25)
+      .map((el) => ({
+        tag: el.tagName,
+        cls: el.className,
+        width: el.getBoundingClientRect().width,
+        right: el.getBoundingClientRect().right,
+        overflow: getComputedStyle(el).overflowX,
+      })),
+  );
+  console.log('Widget layout bounds', JSON.stringify(overflow));
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
 test('profile menu opens actual profile editor and session can be extended', async ({ page }) => {

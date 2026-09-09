@@ -28,6 +28,7 @@ export function dayBounds(date: string, timezone: string) {
 export default function Timeline({
   tables,
   reservations,
+  closures = [],
   date,
   timezone,
   canWrite,
@@ -35,6 +36,7 @@ export default function Timeline({
 }: {
   tables: Row[];
   reservations: Row[];
+  closures?: Row[];
   date: string;
   timezone: string;
   canWrite: boolean;
@@ -75,6 +77,12 @@ export default function Timeline({
                 instant(r.ends_at) > start,
             )
             .sort((a, b) => instant(a.starts_at) - instant(b.starts_at));
+          const closed = closures.filter(
+            (c) =>
+              String(c.room_id) === String(table.room_id) &&
+              instant(c.starts_at) < end &&
+              instant(c.ends_at) > start,
+          );
           const lanes: number[] = [];
           const bars = bookings.map((r) => {
             let lane = lanes.findIndex((until) => until <= instant(r.starts_at));
@@ -98,6 +106,29 @@ export default function Timeline({
                     style={{ left: ((now - start) / span) * 100 + '%' }}
                   />
                 )}
+                {closed.map((c) => (
+                  <span
+                    key={'closure-' + c.id}
+                    className="timeline-closure"
+                    title={
+                      'Raum gesperrt: ' +
+                      c.reason +
+                      ' · ' +
+                      clock(c.starts_at, timezone) +
+                      '–' +
+                      clock(c.ends_at, timezone)
+                    }
+                    style={{
+                      left: ((Math.max(start, instant(c.starts_at)) - start) / span) * 100 + '%',
+                      width:
+                        ((Math.min(end, instant(c.ends_at)) - Math.max(start, instant(c.starts_at))) / span) *
+                          100 +
+                        '%',
+                    }}
+                  >
+                    Gesperrt
+                  </span>
+                ))}
                 {bars.map(({ r, lane }) => {
                   const label = `${r.guest_name} · ${clock(r.starts_at, timezone)}–${clock(r.ends_at, timezone)} · ${r.party_size} Personen · ${labels[r.status] || r.status}`;
                   const props = {
@@ -127,7 +158,9 @@ export default function Timeline({
                     </span>
                   );
                 })}
-                {!bookings.length && <span className="timeline-empty">Keine Reservierungen</span>}
+                {!bookings.length && !closed.length && (
+                  <span className="timeline-empty">Keine Reservierungen</span>
+                )}
               </div>
             </div>
           );

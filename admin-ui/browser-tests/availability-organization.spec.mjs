@@ -97,3 +97,60 @@ test('all tenant pages are reachable and organization hierarchy is visible', asy
   await expect(page.getByText(/Restaurant auf Seite 2/)).toBeVisible();
   await page.screenshot({ path: 'test-results/design-organizations.png', fullPage: true });
 });
+
+test('role synchronization displays permission changes and submits a confirmed preview', async ({ page }) => {
+  let applied;
+  await page.route('**/api/**', async (route) => {
+    const req = route.request(),
+      u = new URL(req.url()),
+      path = u.pathname;
+    let data = [];
+    if (path.endsWith('/auth/me'))
+      data = {
+        id: 1,
+        name: 'Admin',
+        role: 'system_admin',
+        permissions: ['*'],
+        installed_modules: ['identity'],
+      };
+    else if (path.endsWith('/csrf')) data = { token: 'csrf' };
+    else if (path.endsWith('/modules')) data = [{ code: 'identity', installed: true }];
+    else if (path.endsWith('/platform-roles')) data = { roles: [], families: [] };
+    else if (path.endsWith('/dashboard')) data = { recent_audit: [] };
+    else if (path.endsWith('/tenants')) data = { data: [{ id: 1, name: 'Nord' }], last_page: 1 };
+    else if (path.endsWith('/role-rollout'))
+      data = {
+        permissions: { 'reservation.read': 'Reservierungen ansehen', 'waitlist.read': 'Warteliste ansehen' },
+      };
+    else if (path.endsWith('/role-rollout/preview'))
+      data = {
+        token: 'preview-test',
+        preview: {
+          ...req.postDataJSON(),
+          existing: [{ id: 2, tenant_id: 1, assigned_users: 3, added: ['waitlist.read'], removed: [] }],
+        },
+      };
+    else if (path.endsWith('/role-rollout/apply')) {
+      applied = req.postDataJSON();
+      data = { synchronized: [{ tenant_id: 1, role_id: 2 }] };
+    }
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(data) });
+  });
+  await page.goto('/administration/login');
+  await page.getByRole('button', { name: 'Rollen & Rechte', exact: true }).click();
+  await page.getByLabel('Vorgang', { exact: true }).selectOption('sync');
+  await page.getByLabel('Rollenname', { exact: true }).fill('Empfang');
+  await page
+    .getByLabel('Berechtigungen', { exact: true })
+    .selectOption(['reservation.read', 'waitlist.read']);
+  await page.getByLabel('Zielrestaurants', { exact: true }).selectOption('1');
+  await page.getByRole('button', { name: 'Verteilung prüfen' }).click();
+  await expect(page.getByText(/3 Benutzer/)).toBeVisible();
+  await expect(page.getByText(/Hinzu: waitlist.read/)).toBeVisible();
+  await page.screenshot({ path: 'test-results/design-role-synchronization.png', fullPage: true });
+  await page.getByLabel('Administratorkennwort', { exact: true }).fill('test-password-long');
+  await page.getByLabel('Aktueller Zwei-Faktor-Code', { exact: true }).fill('123456');
+  await page.getByRole('button', { name: 'Rollenänderung bestätigen' }).click();
+  await expect.poll(() => applied?.token).toBe('preview-test');
+  await expect(page.getByText(/1 Restaurantrollen verarbeitet/)).toBeVisible();
+});

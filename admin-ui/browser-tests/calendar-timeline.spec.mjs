@@ -136,3 +136,27 @@ test('read-only timeline and failed overnight data never imply availability', as
   await expect(timeline.getByText('Spätgast', { exact: true })).toBeVisible();
   await expect(timeline.getByRole('button')).toHaveCount(0);
 });
+
+test('room closures are visible in both floor tiles and the timeline', async ({ page }) => {
+  await open(page);
+  await page.route('**/api/v1/restaurant/room-closures', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify([
+        {
+          id: 1,
+          room_id: 1,
+          starts_at: '2026-01-02 16:00:00',
+          ends_at: '2026-01-02 20:00:00',
+          reason: 'Private Feier',
+        },
+      ]),
+    }),
+  );
+  await page.getByRole('button', { name: 'Tischplan', exact: true }).click();
+  await page.getByLabel('Reservierungsdatum', { exact: true }).fill('2026-01-02');
+  await expect(page.getByRole('button', { name: 'Fenster, 4 Plätze, Raum gesperrt' })).toBeVisible();
+  await page.getByRole('button', { name: 'Zeitstrahl', exact: true }).click();
+  await expect(page.getByTitle(/Raum gesperrt: Private Feier/)).toBeVisible();
+  await page.screenshot({ path: 'test-results/design-timeline-closures.png', fullPage: true });
+});
