@@ -181,6 +181,7 @@ test('interactive designer completes a sample booking, supports back and sends n
   await page.screenshot({ path: 'test-results/design-widget-confirmation.png', fullPage: true });
   await preview.getByRole('button', { name: 'Neue Beispielbuchung' }).click();
   await page.setViewportSize({ width: 390, height: 844 });
+  await preview.getByRole('button', { name: 'Verfügbare Tische anzeigen' }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: 'test-results/design-widget-interactive-mobile.png', fullPage: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });

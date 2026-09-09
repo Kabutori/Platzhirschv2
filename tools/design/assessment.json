@@ -64,9 +64,9 @@
       "Restabweichung": "Einstellungen sofort pro Konto/Portal/Browser gespeichert; kein separater Speichern-Button."
     },
     "B011": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/packages/identity/src/Screens.tsx",
-      "Restabweichung": "Mein Konto zeigt Identität, MFA und SSO; eigener Profilbearbeitungsdialog für Name/Avatar/E-Mail fehlt."
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/customer/src/Screens.tsx",
+      "Restabweichung": "Restaurantprofil wird über eine echte API gespeichert; Speichern liegt im Formular statt im globalen Seitenkopf. Der persönliche Profilbearbeitungsdialog ist zusätzlich vorhanden."
     },
     "B016": {
       "Codeabgleich": "Funktion vorhanden",
