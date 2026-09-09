@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from '@platzhirsch/ui-runtime/api';
+import { allPages, api } from '@platzhirsch/ui-runtime/api';
 export default function Placement() {
   const qc = useQueryClient();
   const tenants = useQuery({
     queryKey: ['placement-tenants'],
-    queryFn: () => api('v1/admin/tenants'),
+    queryFn: () => allPages('v1/admin/tenants'),
     refetchInterval: 10000,
   });
   const servers = useQuery({
@@ -43,7 +43,7 @@ export default function Placement() {
             e.preventDefault();
             const form = e.currentTarget;
             const f = new FormData(form);
-            const tenant = tenants.data?.data.find((t: any) => String(t.id) === f.get('tenant'));
+            const tenant = tenants.data?.find((t: any) => String(t.id) === f.get('tenant'));
             if (!tenant) return;
             setBusy(true);
             setError('');
@@ -70,8 +70,8 @@ export default function Placement() {
             Restaurant
             <select name="tenant" required>
               <option value="">Auswählen</option>
-              {tenants.data?.data
-                .filter((t: any) => t.status === 'active')
+              {tenants.data
+                ?.filter((t: any) => t.status === 'active')
                 .map((t: any) => (
                   <option key={t.id} value={t.id}>
                     {t.name} · {t.server_id ? 'Server #' + t.server_id : 'Lokaler Server'}

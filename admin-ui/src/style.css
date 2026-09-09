@@ -1361,16 +1361,117 @@ input.design-toggle:focus-visible {
 .rights-savebar + .rights-workspace {
   margin-top: 18px;
 }
-.profile-controls { padding:14px; border-top:1px solid var(--border); margin-top:auto; }
-.profile-trigger { width:100%; border:0; background:transparent; text-align:left; display:flex; gap:10px; align-items:center; }
-.profile-trigger strong,.profile-trigger small { display:block; overflow:hidden; text-overflow:ellipsis; }
-.profile-trigger small { color:var(--muted); font-size:11px; }
-.session-control { width:100%; display:block; border:0; padding:12px 0 0; background:transparent; text-align:left; }
-.session-control small { color:var(--muted); font-size:10px; text-transform:uppercase; }
-.session-track { display:block; height:3px; background:var(--border); margin-bottom:5px; }
-.session-track>span { display:block; height:100%; background:var(--accent); transition:width 1s linear; }
-.profile-actions { display:grid; gap:10px; padding:20px; }
-.compact-navigation .profile-trigger>span:last-child,.compact-navigation .session-control small { display:none; }
-.organization-tree { list-style:none; padding-left:20px; border-left:1px solid var(--border); }
-.organization-tree li { margin:16px 0; }
-.organization-tree li>div { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.profile-controls {
+  padding: 14px;
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+.profile-trigger {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.profile-trigger strong,
+.profile-trigger small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profile-trigger small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.session-control {
+  width: 100%;
+  display: block;
+  border: 0;
+  padding: 12px 0 0;
+  background: transparent;
+  text-align: left;
+}
+.session-control small {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.session-track {
+  display: block;
+  height: 3px;
+  background: var(--border);
+  margin-bottom: 5px;
+}
+.session-track > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 1s linear;
+}
+.profile-actions {
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+}
+.compact-navigation .profile-trigger > span:last-child,
+.compact-navigation .session-control small {
+  display: none;
+}
+.organization-tree {
+  list-style: none;
+  padding-left: 20px;
+  border-left: 1px solid var(--border);
+}
+.organization-tree li {
+  margin: 16px 0;
+}
+.organization-tree li > div {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.accent-presets {
+  display: flex;
+  gap: 12px;
+}
+.accent-presets button {
+  width: 44px;
+  height: 44px;
+  border: 2px solid transparent;
+}
+.accent-presets button[aria-pressed='true'] {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--surface) inset;
+}
+.workspace {
+  min-width: 0;
+}
+.panel,
+.table-scroll {
+  min-width: 0;
+  max-width: 100%;
+}
+dialog:has(.profile-actions) {
+  width: min(320px, calc(100vw - 32px));
+}
+.profile-actions > button {
+  justify-content: flex-start;
+  border: 0;
+  padding: 14px 6px;
+}
+.profile-actions > button:last-child {
+  color: var(--danger);
+}
+.profile-actions .accent-presets {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.profile-trigger > span:last-child {
+  min-width: 0;
+}
+.profile-trigger .avatar {
+  flex-shrink: 0;
+}

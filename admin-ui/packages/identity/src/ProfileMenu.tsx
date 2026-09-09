@@ -1,8 +1,10 @@
+import { usePreferences, accentPresets } from '@platzhirsch/ui-runtime/preferences';
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '@platzhirsch/ui-runtime/api';
 import { Modal, Form, ErrorBox, labels, type Row } from '@platzhirsch/ui-runtime/components';
 export default function ProfileMenu({ user, go }: { user: Row; go: (page: string) => void }) {
+  const preferences = usePreferences();
   const qc = useQueryClient(),
     lifetime = Number(user.session_lifetime_seconds) || 3600;
   const [dialog, setDialog] = useState(''),
@@ -19,7 +21,7 @@ export default function ProfileMenu({ user, go }: { user: Row; go: (page: string
       window.removeEventListener('platzhirsch-session-activity', touch);
     };
   }, [lifetime]);
-  const seconds = Math.max(0, Math.ceil((deadline - now) / 1000));
+  const seconds = Math.min(lifetime, Math.max(0, Math.ceil((deadline - now) / 1000)));
   return (
     <div className="profile-controls">
       <button className="profile-trigger" aria-label="Profilmenü öffnen" onClick={() => setDialog('menu')}>
@@ -67,6 +69,20 @@ export default function ProfileMenu({ user, go }: { user: Row; go: (page: string
       {dialog === 'menu' && (
         <Modal title={user.name} close={() => setDialog('')}>
           <div className="profile-actions">
+            <span className="muted">Akzentfarbe</span>
+            <div className="accent-presets">
+              {Object.entries(accentPresets).map(([key, hue]) => (
+                <button
+                  key={key}
+                  aria-label={'Akzentfarbe ' + key}
+                  aria-pressed={preferences.value.accent === key}
+                  style={{ background: `oklch(0.68 0.14 ${hue})` }}
+                  onClick={() =>
+                    preferences.save({ ...preferences.value, accent: key as keyof typeof accentPresets })
+                  }
+                />
+              ))}
+            </div>
             <button onClick={() => setDialog('edit')}>Profil bearbeiten</button>
             <button
               onClick={() => {

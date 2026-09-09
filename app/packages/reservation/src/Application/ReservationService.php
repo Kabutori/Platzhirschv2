@@ -182,7 +182,8 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
                         ->where('room_id', $table->room_id)
                         ->where('starts_at', '<', $end->utc()->format('Y-m-d H:i:s'))
                         ->where('ends_at', '>', $start->utc()->format('Y-m-d H:i:s'))
-                        ->exists(),
+                        ->lockForUpdate()
+                        ->first(),
                     409,
                     'Der Raum ist in diesem Zeitraum gesperrt.',
                 );

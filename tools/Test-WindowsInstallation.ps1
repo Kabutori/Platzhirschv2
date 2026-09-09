@@ -157,6 +157,21 @@ $converted=Call-Api POST "v1/restaurant/waitlist/$($waiting.id)/book" @{table_id
 if(-not $converted.reservation_id){throw 'Wartelistenuebernahme ohne Buchungsnummer.'}
 Write-Host 'Restaurantbetrieb mit MySQL geprueft: Nachtbuchung, Tischkombination, Konflikt und Wartelistenuebernahme; Versand bleibt aus.'
 $widget=Call-Api POST 'v1/restaurant/widget' @{origins=@('https://restaurant.example');duration_minutes=90;months=1} 201
+# Saved combinations and room closures must also work through IIS on real MySQL.
+$availabilityDate=(Get-Date).AddDays(4).ToString('yyyy-MM-dd')
+$combo=Call-Api POST 'v1/restaurant/table-combinations' @{name='Familientisch';active=$true;table_ids=@($table.id,$extraTable.id)}
+$closure=Call-Api POST 'v1/restaurant/room-closures' @{room_id=$room.id;starts_at="${availabilityDate}T18:00";ends_at="${availabilityDate}T20:00";reason='CI room closure'}
+$availabilityPath="widget/$($widget.token)/availability?starts_at=${availabilityDate}T18:00&party_size=6"
+$free=Call-Api GET $availabilityPath
+if(@($free.tables).Count -ne 0){throw 'Gesperrter Raum bietet Tische an.'}
+$null=Call-Api DELETE "v1/restaurant/room-closures/$($closure.id)" $null 204
+$free=Call-Api GET $availabilityPath
+if(@($free.tables).Count -ne 1 -or $free.tables[0].id -ne -$combo.id){throw 'Gespeicherte Tischkombination fehlt im Widget.'}
+$combinedWidget=Call-Api POST "widget/$($widget.token)" @{table_id=(-$combo.id);guest_name='Widget group';party_size=6;starts_at="${availabilityDate}T18:00";email='group@example.test';consent=$true;request_key=[Guid]::NewGuid().ToString()}
+$free=Call-Api GET $availabilityPath
+if(@($free.tables).Count -ne 0){throw 'Gebuchte Tischkombination wird weiter angeboten.'}
+$null=Call-Api POST 'v1/restaurant/room-closures' @{room_id=$room.id;starts_at="${availabilityDate}T18:00";ends_at="${availabilityDate}T20:00";reason='Must conflict'} 409
+Write-Host 'Raumsperren und gespeicherte Widget-Kombination mit echtem MySQL geprueft.'
 # Stateless requests avoid session locking: both IIS requests may execute concurrently.
 Add-Type -AssemblyName System.Net.Http
 $client=New-Object System.Net.Http.HttpClient

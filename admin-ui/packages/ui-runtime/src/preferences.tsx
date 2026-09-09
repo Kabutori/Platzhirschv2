@@ -1,6 +1,8 @@
 import { Toggle } from './controls';
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+export const accentPresets = { terracotta: 45, ozean: 220, wald: 150, gold: 85 };
 export type Preferences = {
+  accent: keyof typeof accentPresets;
   favoritesEnabled: boolean;
   favorites: string[];
   collapsed: boolean;
@@ -11,6 +13,7 @@ export type Preferences = {
   pdfEnabled: boolean;
 };
 const defaults: Preferences = {
+  accent: 'terracotta',
   favoritesEnabled: false,
   favorites: [],
   collapsed: false,
@@ -28,6 +31,7 @@ export function PreferencesProvider({ identity, children }: { identity: string; 
     try {
       const v = JSON.parse(localStorage.getItem(key) || '{}');
       return {
+        accent: Object.hasOwn(accentPresets, v.accent) ? v.accent : 'terracotta',
         favoritesEnabled: v.favoritesEnabled === true,
         collapsed: v.collapsed === true,
         backdropClose: v.backdropClose === true,
@@ -43,6 +47,20 @@ export function PreferencesProvider({ identity, children }: { identity: string; 
       return defaults;
     }
   });
+  useEffect(() => {
+    const hue = accentPresets[value.accent];
+    const vars: Record<string, string> = {
+      '--accent': `oklch(0.68 0.14 ${hue})`,
+      '--accent-hover': `oklch(0.73 0.14 ${hue})`,
+      '--accent-soft': `oklch(0.68 0.14 ${hue} / 0.1)`,
+      '--accent-border': `oklch(0.68 0.14 ${hue} / 0.3)`,
+      '--on-accent': `oklch(0.14 0.01 ${hue})`,
+    };
+    for (const [key, val] of Object.entries(vars)) document.documentElement.style.setProperty(key, val);
+    return () => {
+      for (const key of Object.keys(vars)) document.documentElement.style.removeProperty(key);
+    };
+  }, [value.accent]);
   const [error, setError] = useState('');
   function save(next: Preferences) {
     setValue(next);

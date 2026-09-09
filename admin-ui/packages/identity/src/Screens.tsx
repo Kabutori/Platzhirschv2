@@ -16,7 +16,7 @@ import {
   AlertCircle,
   ChevronRight,
 } from 'lucide-react';
-import { api, ApiError, portal } from '@platzhirsch/ui-runtime/api';
+import { allPages, api, ApiError, portal } from '@platzhirsch/ui-runtime/api';
 import {
   Row,
   Field,
@@ -280,7 +280,7 @@ export function UsersPage({ tenant, team = false, user }: { tenant?: string; tea
   const [editing, setEditing] = useState<Row | null>(null);
   const tenants = useQuery({
     queryKey: ['user-tenants'],
-    queryFn: () => api('v1/admin/tenants'),
+    queryFn: () => allPages('v1/admin/tenants'),
     enabled: !team && user.role === 'system_admin',
   });
   const qc = useQueryClient();
@@ -325,7 +325,7 @@ export function UsersPage({ tenant, team = false, user }: { tenant?: string; tea
           {
             key: 'tenant_id',
             label: 'Restaurant (leer für Plattformkonten)',
-            options: tenants.data?.data?.map((t: Row) => ({ value: t.id, label: t.name })) || [],
+            options: tenants.data?.map((t: Row) => ({ value: t.id, label: t.name })) || [],
           },
         ]
       : []),

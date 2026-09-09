@@ -1,4 +1,12 @@
-import { useState, useRef, useEffect, type ReactNode, type FormEvent } from 'react';
+import {
+  useState,
+  useRef,
+  useEffect,
+  createContext,
+  useContext,
+  type ReactNode,
+  type FormEvent,
+} from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, RefreshCw, CalendarDays, X, ChevronRight } from 'lucide-react';
 import { api } from './api';
@@ -80,6 +88,7 @@ export function useData(path: string, tenant?: string) {
     queryFn: ({ signal }) => api(path, 'GET', undefined, tenant, signal),
   });
 }
+const ModalClose = createContext<(() => void) | null>(null);
 export function Modal({ title, children, close }: { title: string; children: ReactNode; close: () => void }) {
   const { value: preferences } = usePreferences();
   const ref = useRef<HTMLDialogElement>(null);
@@ -104,7 +113,7 @@ export function Modal({ title, children, close }: { title: string; children: Rea
           <X size={20} />
         </button>
       </header>
-      {children}
+      <ModalClose.Provider value={close}>{children}</ModalClose.Provider>
     </dialog>
   );
 }
@@ -121,6 +130,7 @@ export function Form({
   label?: string;
   renderBefore?: (values: Row, change: (patch: Row) => void) => ReactNode;
 }) {
+  const closeModal = useContext(ModalClose);
   const [values, setValues] = useState<Row>(() =>
     Object.fromEntries(
       fields.map((f) => [
@@ -133,6 +143,7 @@ export function Form({
   const [busy, setBusy] = useState(false);
   async function submit(e: FormEvent) {
     e.preventDefault();
+    if (busy) return;
     setError(undefined);
     setBusy(true);
     try {
@@ -156,6 +167,7 @@ export function Form({
             </span>
             {f.options ? (
               <select
+                aria-label={f.label}
                 multiple={f.multiple}
                 required={f.required}
                 value={values[f.key]}
@@ -177,6 +189,7 @@ export function Form({
               </select>
             ) : f.type === 'textarea' ? (
               <textarea
+                aria-label={f.label}
                 rows={4}
                 value={values[f.key]}
                 required={f.required}
@@ -184,6 +197,7 @@ export function Form({
               />
             ) : (
               <input
+                aria-label={f.label}
                 type={f.type || 'text'}
                 value={f.type === 'checkbox' ? undefined : values[f.key]}
                 checked={f.type === 'checkbox' ? Boolean(values[f.key]) : undefined}
@@ -210,6 +224,11 @@ export function Form({
         ))}
       </div>
       <footer className="form-footer">
+        {closeModal && (
+          <button type="button" disabled={busy} onClick={closeModal}>
+            Abbrechen
+          </button>
+        )}
         <button className="primary" disabled={busy}>
           {busy ? 'Wird gespeichert …' : label}
           <ChevronRight size={16} />
