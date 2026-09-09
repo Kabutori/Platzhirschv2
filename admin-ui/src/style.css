@@ -1496,3 +1496,16 @@ dialog:has(.profile-actions) {
 
 /* Keep explanatory content aligned with the template dialog form inset. */
 dialog > p, dialog > ul, dialog > .notice { margin:16px 24px; }
+/* Dialog and setting controls aligned with the reference's 44px actions. */
+.export-options {display:flex;flex-direction:column;gap:8px;padding:24px;max-width:420px;margin:auto;}
+.export-options button {min-height:44px;text-align:left;}
+.changelog-dialog {max-width:560px;margin:auto;padding:20px;}
+.release-list {display:grid;gap:14px;max-width:780px;}
+.release-list article > button {margin-top:14px;}
+.dialog-actions {display:flex;justify-content:flex-end;gap:8px;padding:24px;flex-wrap:wrap;}
+.widget-presets {border:0;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:6px;}
+.widget-presets legend {margin-bottom:8px;color:var(--muted);font-size:12px;}
+.widget-presets button {min-height:44px;border:2px solid transparent;padding:7px;}
+.widget-presets button[aria-pressed=true] {border-color:white;}
+.settings-tabs {display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.settings-tabs button[aria-pressed=true] {color:var(--accent);border-bottom:2px solid var(--accent);}

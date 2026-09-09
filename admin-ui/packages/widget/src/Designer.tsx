@@ -107,6 +107,25 @@ export default function Designer({
             Akzentfarbe
             <input type="color" value={accent} onChange={(e) => setAccent(e.target.value)} />
           </label>
+          <fieldset className="widget-presets">
+            <legend>Farbvorlagen</legend>
+            {[
+              ['Terrakotta', '#db8053'],
+              ['Schiefer', '#687384'],
+              ['Wald', '#428058'],
+            ].map(([label, color]) => (
+              <button
+                type="button"
+                key={label}
+                aria-label={'Farbvorlage ' + label}
+                aria-pressed={accent === color}
+                style={{ background: color, color: '#fff' }}
+                onClick={() => setAccent(color)}
+              >
+                {label}
+              </button>
+            ))}
+          </fieldset>
           <label>
             Max. Personenzahl
             <input

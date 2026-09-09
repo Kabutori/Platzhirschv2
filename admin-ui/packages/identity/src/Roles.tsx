@@ -1,3 +1,4 @@
+import { Modal, Form } from '@platzhirsch/ui-runtime/components';
 import { Toggle } from '@platzhirsch/ui-runtime/controls';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -32,6 +33,7 @@ function Editor({
 }) {
   const [name, setName] = useState(role.name);
   const [renaming, setRenaming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [checked, setChecked] = useState(role.draft_permissions);
   const [familyKey, setFamilyKey] = useState(families[0]?.module + ':' + families[0]?.code);
   const [search, setSearch] = useState('');
@@ -129,22 +131,7 @@ function Editor({
           <Pencil size={14} />
           Umbenennen
         </button>
-        <button
-          className="danger"
-          disabled={role.locked || busy}
-          onClick={async () => {
-            if (!confirm('Diese unbenutzte Plattformrolle löschen?')) return;
-            setBusy(true);
-            try {
-              await api('v1/admin/platform-roles/' + role.id, 'DELETE', { version: role.version });
-              await refresh();
-            } catch (e) {
-              setError((e as Error).message);
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
+        <button className="danger" disabled={role.locked || busy} onClick={() => setDeleting(true)}>
           <Trash2 size={14} />
           Rolle löschen
         </button>
@@ -152,11 +139,53 @@ function Editor({
           {role.locked ? 'Alle registrierten Rechte' : checked.length + ' Rechte im Entwurf'}
         </span>
       </div>
+      {deleting && (
+        <Modal
+          title="Rolle löschen"
+          close={() => {
+            if (!busy) setDeleting(false);
+          }}
+        >
+          <p>Die Rolle „{role.name}“ löschen? Bereits zugewiesene Rollen können nicht gelöscht werden.</p>
+          {error && <p role="alert">{error}</p>}
+          <div className="dialog-actions">
+            <button disabled={busy} onClick={() => setDeleting(false)}>
+              Abbrechen
+            </button>
+            <button
+              className="danger"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                setError('');
+                try {
+                  await api('v1/admin/platform-roles/' + role.id, 'DELETE', { version: role.version });
+                  setDeleting(false);
+                  await refresh();
+                } catch (e) {
+                  setError((e as Error).message);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              Löschen bestätigen
+            </button>
+          </div>
+        </Modal>
+      )}
       {renaming && (
-        <label className="rights-rename">
-          Rollenname
-          <input autoFocus value={name} disabled={busy} onChange={(e) => setName(e.target.value)} />
-        </label>
+        <Modal title="Rolle umbenennen" close={() => setRenaming(false)}>
+          <Form
+            initial={{ name }}
+            fields={[{ key: 'name', label: 'Rollenname', required: true }]}
+            onSave={async (data) => {
+              setName(data.name);
+              setRenaming(false);
+            }}
+          />
+          <p>Der neue Name wird mit „Lokal speichern“ übernommen. Ungespeicherte Rechte bleiben erhalten.</p>
+        </Modal>
       )}
       <div className="rights-groups" aria-label="Berechtigungsgruppen">
         {families.map((f) => {
@@ -261,68 +290,75 @@ export default function Roles() {
         />
       )}
       {creating && (
-        <div className="rights-create panel padded">
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              setBusy(true);
-              setError('');
-              try {
-                const source = q.data?.roles.find((r) => String(r.id) === template);
-                const r = await api('v1/admin/platform-roles', 'POST', {
-                  name,
-                  permissions: source?.permissions || [],
-                });
-                setSelected(r.id);
-                setCreating(false);
-                setName('');
-                setTemplate('');
-                await q.refetch();
-              } catch (e) {
-                setError((e as Error).message);
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            <h2>Neue Plattformrolle</h2>
-            <label>
-              Neue Rolle
-              <input
-                autoFocus
-                required
-                maxLength={120}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </label>
-            <label>
-              Berechtigungs-Vorlage
-              <select value={template} onChange={(e) => setTemplate(e.target.value)}>
-                <option value="">Leer beginnen</option>
-                {q.data?.roles
-                  .filter((r) => !r.locked && r.activated_at)
-                  .map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name} · aktive Rechte
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <p className="muted">
-              Die Kopie wird als neuer Entwurf angelegt und muss separat geprüft und aktiviert werden.
-            </p>
-            {error && <p role="alert">{error}</p>}
-            <div className="rights-actions">
-              <button type="button" disabled={busy} onClick={() => setCreating(false)}>
-                Abbrechen
-              </button>
-              <button className="primary" disabled={busy || !name.trim()}>
-                Anlegen
-              </button>
-            </div>
-          </form>
-        </div>
+        <Modal
+          title="Rolle anlegen"
+          close={() => {
+            if (!busy) setCreating(false);
+          }}
+        >
+          <div className="rights-create panel padded">
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setBusy(true);
+                setError('');
+                try {
+                  const source = q.data?.roles.find((r) => String(r.id) === template);
+                  const r = await api('v1/admin/platform-roles', 'POST', {
+                    name,
+                    permissions: source?.permissions || [],
+                  });
+                  setSelected(r.id);
+                  setCreating(false);
+                  setName('');
+                  setTemplate('');
+                  await q.refetch();
+                } catch (e) {
+                  setError((e as Error).message);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              <h2>Neue Plattformrolle</h2>
+              <label>
+                Neue Rolle
+                <input
+                  autoFocus
+                  required
+                  maxLength={120}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </label>
+              <label>
+                Berechtigungs-Vorlage
+                <select value={template} onChange={(e) => setTemplate(e.target.value)}>
+                  <option value="">Leer beginnen</option>
+                  {q.data?.roles
+                    .filter((r) => !r.locked && r.activated_at)
+                    .map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name} · aktive Rechte
+                      </option>
+                    ))}
+                </select>
+              </label>
+              <p className="muted">
+                Die Kopie wird als neuer Entwurf angelegt und muss separat geprüft und aktiviert werden.
+              </p>
+              {error && <p role="alert">{error}</p>}
+              <div className="rights-actions">
+                <button type="button" disabled={busy} onClick={() => setCreating(false)}>
+                  Abbrechen
+                </button>
+                <button className="primary" disabled={busy || !name.trim()}>
+                  Anlegen
+                </button>
+              </div>
+            </form>
+          </div>
+        </Modal>
       )}
     </>
   );

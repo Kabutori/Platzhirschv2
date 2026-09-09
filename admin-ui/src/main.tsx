@@ -1,3 +1,4 @@
+const Releases = lazy(() => import('@platzhirsch/support-ui/Releases.tsx'));
 const Organizations = lazy(() => import('@platzhirsch/customer-ui/Organizations.tsx'));
 const Availability = lazy(() => import('@platzhirsch/reservation-ui/Availability.tsx'));
 import ProfileMenu from '@platzhirsch/identity-ui/ProfileMenu.tsx';
@@ -111,6 +112,7 @@ const systemNav = [
   ['roles', 'Rollen & Rechte', ShieldCheck],
   ['modules', 'Module', Code2],
   ['system-settings', 'System-Einstellungen', Settings],
+  ['releases', 'Releases', ScrollText],
   ['audit-log', 'Audit Log', ScrollText],
   ['health', 'System', Activity],
   ['system-guide', 'System verstehen', Building2],
@@ -219,6 +221,7 @@ const platformPagePermission: Record<string, string> = {
   users: 'platform.users.read',
   roles: 'platform.roles.manage',
   modules: 'platform.modules.read',
+  releases: 'system.root',
   'audit-log': 'platform.audit.read',
   health: 'platform.health.read',
   support: 'support.access',
@@ -266,14 +269,15 @@ function ShellBody({ user }: { user: Row }) {
     scope === 'system'
       ? systemNav.filter(
           ([key]) =>
-            (!['organizations', 'database-access', 'placement', 'billing-admin'].includes(key) ||
+            (!['organizations', 'database-access', 'placement', 'billing-admin', 'releases'].includes(key) ||
               user.role === 'system_admin') &&
             (!platformPagePermission[key] || allowed(user, platformPagePermission[key])) &&
             (key !== 'system-settings' ||
               user.role === 'system_admin' ||
               provisioningVisible ||
               allowed(user, 'platform.health.read')) &&
-            (key !== 'roles' || identityVisible),
+            (key !== 'roles' || identityVisible) &&
+            (key !== 'releases' || installedCodes.includes('support')),
         )
       : restaurantNav.filter(
           ([key]) =>
@@ -469,6 +473,7 @@ function Content({
           <DatabaseAccess />
         </Suspense>
       );
+    if (page === 'releases' && user.role === 'system_admin') return <Releases manage />;
     if (page === 'audit-log') return <AuditPage />;
     if (page === 'health') return <Health />;
     if (page === provisioningNavigation.key)
@@ -652,52 +657,196 @@ function AuditRows({ rows }: { rows: Row[] }) {
   );
 }
 function AuditPage() {
-  const q = useData('v1/admin/audit-log');
+  const [scope, setScope] = useState('platform');
+  const [tenantId, setTenantId] = useState('');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const params = new URLSearchParams({ scope, page: String(page), search });
+  if (scope === 'tenant' && tenantId) params.set('tenant_id', tenantId);
+  const q = useData('v1/admin/audit-log?' + params);
   return (
-    <section className="panel">
-      <div className="panel-head">
-        <h2>Protokollierte Änderungen</h2>
-        <small>Die letzten 100 Einträge</small>
-      </div>
-      {q.isPending ? <Loading /> : q.error ? <ErrorBox error={q.error} /> : <AuditRows rows={q.data.data} />}
-    </section>
-  );
-}
-function Health() {
-  const q = useData('v1/admin/health');
-  return (
-    <section className="panel">
-      <div className="panel-head">
-        <h2>Betriebsstatus</h2>
-        <button onClick={() => q.refetch()}>
+    <>
+      <nav className="settings-tabs" aria-label="Audit-Bereich">
+        {[
+          ['platform', 'Plattform'],
+          ['tenant', 'Mandanten'],
+        ].map(([key, label]) => (
+          <button
+            key={key}
+            aria-pressed={scope === key}
+            onClick={() => {
+              setScope(key);
+              setPage(1);
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+      <div className="toolbar">
+        <label>
+          Aktion oder Objekt suchen
+          <input
+            value={search}
+            maxLength={120}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+          />
+        </label>
+        {scope === 'tenant' && (
+          <label>
+            Mandanten-ID
+            <input
+              type="number"
+              min="1"
+              value={tenantId}
+              onChange={(e) => {
+                setTenantId(e.target.value);
+                setPage(1);
+              }}
+            />
+          </label>
+        )}
+        <button onClick={() => q.refetch()} disabled={q.isFetching}>
           <RefreshCw size={15} />
           Aktualisieren
         </button>
       </div>
-      {q.isPending ? (
-        <Loading />
-      ) : q.error ? (
-        <ErrorBox error={q.error} />
+      <section className="panel">
+        <div className="panel-head">
+          <h2>Protokollierte Änderungen</h2>
+          <small>{q.data?.total ?? '–'} Einträge</small>
+        </div>
+        {q.isPending ? (
+          <Loading />
+        ) : q.error ? (
+          <ErrorBox error={q.error} />
+        ) : (
+          <AuditRows rows={q.data.data} />
+        )}
+      </section>
+      <div className="toolbar">
+        <button disabled={page === 1 || q.isFetching} onClick={() => setPage(page - 1)}>
+          Zurück
+        </button>
+        <span>
+          Seite {page} / {q.data?.last_page || 1}
+        </span>
+        <button
+          disabled={!q.data || page >= q.data.last_page || q.isFetching}
+          onClick={() => setPage(page + 1)}
+        >
+          Weiter
+        </button>
+      </div>
+    </>
+  );
+}
+function Health() {
+  const q = useData('v1/admin/health');
+  const [tab, setTab] = useState('status');
+  return (
+    <>
+      <nav className="settings-tabs" aria-label="Systemstatus">
+        {[
+          ['status', 'Übersicht'],
+          ['backups', 'Backups'],
+          ['migrations', 'Migrationen'],
+        ].map(([key, label]) => (
+          <button key={key} aria-pressed={tab === key} onClick={() => setTab(key)}>
+            {label}
+          </button>
+        ))}
+      </nav>
+      {tab === 'backups' ? (
+        <section className="panel padded">
+          <h2>Backups & Wiederherstellung</h2>
+          <p>
+            Backups werden auf dem Windows-Server mit erhöhten Rechten ausgeführt. Der Webprozess besitzt
+            keine Sicherungs- oder Wiederherstellungsrechte.
+          </p>
+          <p>
+            Im Installationsordner die mitgelieferten Sicherungs- und Wiederherstellungsskripte verwenden. Die
+            Betriebsanleitung beschreibt Sicherungsumfang, Aufbewahrung und Wiederherstellung auf einer
+            Test-VM.
+          </p>
+          <a
+            href="https://github.com/Kabutori/Platzhirschv2/blob/codex/windows-application/docs/BETRIEB.md"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Betriebsanleitung öffnen
+          </a>
+          <p className="muted">
+            Eine erfolgreiche Dateisicherung allein bestätigt noch keine erfolgreiche Wiederherstellung. Der
+            Backup-Status wird hier nicht automatisch überwacht.
+          </p>
+        </section>
+      ) : tab === 'migrations' ? (
+        <section className="panel">
+          <div className="panel-head">
+            <h2>Plattformmigrationen</h2>
+            <button disabled={q.isFetching} onClick={() => q.refetch()}>
+              Aktualisieren
+            </button>
+          </div>
+          <p className="padded">
+            Erfolgreich angewendete Migrationen der Plattformdatenbank. Mandantenmigrationen laufen bei
+            Provisionierung und Modulaktivierung.
+          </p>
+          {q.isPending ? (
+            <Loading />
+          ) : q.error ? (
+            <ErrorBox error={q.error} />
+          ) : (
+            <DataTable
+              rows={q.data.migrations || []}
+              columns={[
+                { key: 'migration', label: 'Migration' },
+                { key: 'batch', label: 'Durchlauf' },
+              ]}
+            />
+          )}
+        </section>
       ) : (
-        <dl className="details">
-          {Object.entries({
-            Version: q.data.version,
-            'PHP-Version': q.data.php,
-            Datenbank: q.data.database,
-            'DB-Antwortzeit': q.data.latency_ms + ' ms',
-            'Wartende Aufgaben': q.data.queued_jobs,
-            'Fehlgeschlagene Aufgaben': q.data.failed_jobs,
-            Mailversand: q.data.mail_configured ? 'Konfiguriert (kein Versandtest)' : 'Nicht konfiguriert',
-            'Scheduler zuletzt gesehen': q.data.scheduler_last_seen || 'Noch kein Lebenszeichen',
-          }).map(([k, v]) => (
-            <React.Fragment key={k}>
-              <dt>{k}</dt>
-              <dd>{String(v)}</dd>
-            </React.Fragment>
-          ))}
-        </dl>
+        <section className="panel">
+          <div className="panel-head">
+            <h2>Betriebsstatus</h2>
+            <button onClick={() => q.refetch()}>
+              <RefreshCw size={15} />
+              Aktualisieren
+            </button>
+          </div>
+          {q.isPending ? (
+            <Loading />
+          ) : q.error ? (
+            <ErrorBox error={q.error} />
+          ) : (
+            <dl className="details">
+              {Object.entries({
+                Version: q.data.version,
+                'PHP-Version': q.data.php,
+                Datenbank: q.data.database,
+                'DB-Antwortzeit': q.data.latency_ms + ' ms',
+                'Wartende Aufgaben': q.data.queued_jobs,
+                'Fehlgeschlagene Aufgaben': q.data.failed_jobs,
+                Mailversand: q.data.mail_configured
+                  ? 'Konfiguriert (kein Versandtest)'
+                  : 'Nicht konfiguriert',
+                'Scheduler zuletzt gesehen': q.data.scheduler_last_seen || 'Noch kein Lebenszeichen',
+              }).map(([k, v]) => (
+                <React.Fragment key={k}>
+                  <dt>{k}</dt>
+                  <dd>{String(v)}</dd>
+                </React.Fragment>
+              ))}
+            </dl>
+          )}
+        </section>
       )}
-    </section>
+    </>
   );
 }
 

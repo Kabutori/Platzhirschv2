@@ -1,3 +1,4 @@
+import Releases from './Releases';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Plus, ChevronRight } from 'lucide-react';
@@ -27,9 +28,17 @@ export default function Support({ tenant, user }: { tenant?: string; user?: Row 
     enabled: selected !== null,
   });
   const [open, setOpen] = useState(false);
+  const [changelog, setChangelog] = useState(false);
   const qc = useQueryClient();
   return (
     <>
+      {changelog && (
+        <Modal title="Changelog" close={() => setChangelog(false)}>
+          <div className="changelog-dialog">
+            <Releases />
+          </div>
+        </Modal>
+      )}
       <div className="toolbar">
         <div>
           {selected ? (
@@ -41,6 +50,7 @@ export default function Support({ tenant, user }: { tenant?: string; user?: Row 
             <p className="muted">Fragen, Fehler und Rückmeldungen</p>
           )}
         </div>
+        <button onClick={() => setChangelog(true)}>Changelog</button>
         <button className="primary" onClick={() => setOpen(true)}>
           <Plus size={16} />
           Ticket erstellen

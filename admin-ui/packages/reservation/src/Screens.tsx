@@ -307,6 +307,8 @@ export function Reservations({
       setError(e);
     }
   }
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportBusy, setExportBusy] = useState(false);
   async function download(format = 'csv') {
     const printWindow = format === 'print' ? window.open('', '_blank') : null;
     if (printWindow) printWindow.opener = null;
@@ -363,25 +365,44 @@ export function Reservations({
           <button onClick={() => setDate(today())}>Heute</button>
         </div>
         <div className="button-row">
-          {preferences.exportEnabled && preferences.csvEnabled && (
-            <button
-              disabled={!allowed(user, 'reservation.export')}
-              title={'Alle Reservierungen vom ' + date + ' als CSV; Suchfilter werden nicht angewendet.'}
-              onClick={() => download()}
-            >
+          {preferences.exportEnabled && (
+            <button disabled={!allowed(user, 'reservation.export')} onClick={() => setExportOpen(true)}>
               <Download size={16} />
-              CSV
+              Exportieren
             </button>
           )}
-          {preferences.exportEnabled && preferences.xlsxEnabled && (
-            <button disabled={!allowed(user, 'reservation.export')} onClick={() => download('xlsx')}>
-              XLSX
-            </button>
-          )}
-          {preferences.exportEnabled && preferences.pdfEnabled && (
-            <button disabled={!allowed(user, 'reservation.export')} onClick={() => download('print')}>
-              Drucken / PDF
-            </button>
+          {exportOpen && (
+            <Modal title="Exportieren als" close={() => setExportOpen(false)}>
+              <div className="export-options">
+                <p>Alle Reservierungen vom {date}. Suchfilter werden nicht angewendet.</p>
+                {[
+                  [preferences.csvEnabled, 'csv', 'CSV'],
+                  [preferences.xlsxEnabled, 'xlsx', 'XLSX'],
+                  [preferences.pdfEnabled, 'print', 'Drucken / PDF'],
+                ]
+                  .filter(([enabled]) => enabled)
+                  .map(([, format, label]) => (
+                    <button
+                      key={String(format)}
+                      disabled={exportBusy}
+                      onClick={async () => {
+                        setExportBusy(true);
+                        try {
+                          await download(String(format));
+                        } finally {
+                          setExportBusy(false);
+                        }
+                      }}
+                    >
+                      {String(label)}
+                    </button>
+                  ))}
+                {!preferences.csvEnabled && !preferences.xlsxEnabled && !preferences.pdfEnabled && (
+                  <p>Keine Export-Formate aktiviert. Unter Einstellungen konfigurierbar.</p>
+                )}
+                <button onClick={() => setExportOpen(false)}>Abbrechen</button>
+              </div>
+            </Modal>
           )}
           <button
             disabled={!allowed(user, 'reservation.write')}
