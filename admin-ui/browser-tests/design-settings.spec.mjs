@@ -180,6 +180,7 @@ test('interactive designer completes a sample booking, supports back and sends n
   expect(writes).toHaveLength(0);
   await page.screenshot({ path: 'test-results/design-widget-confirmation.png', fullPage: true });
   await preview.getByRole('button', { name: 'Neue Beispielbuchung' }).click();
+  await expect(preview.getByLabel('Beispieldatum',{exact:true})).toHaveValue('2027-05-20');
   await page.setViewportSize({ width: 390, height: 844 });
   await preview.getByRole('button', { name: 'Verfügbare Tische anzeigen' }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: 'test-results/design-widget-interactive-mobile.png', fullPage: true });

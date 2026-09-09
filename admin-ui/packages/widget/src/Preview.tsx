@@ -13,7 +13,7 @@ export default function Preview({
   const [step, setStep] = useState(0),
     [date, setDate] = useState(''),
     [time, setTime] = useState('19:00'),
-    [party, setParty] = useState(2),
+    [party, setParty] = useState(Math.min(2,max)),
     [table, setTable] = useState('Fenster'),
     [name, setName] = useState(''),
     [email, setEmail] = useState('');
@@ -126,7 +126,7 @@ export default function Preview({
             </button>
           )}
           {step < 3 ? (
-            <button className="preview-action" type="submit">
+            <button key="advance" className="preview-action" type="submit">
               {step === 0
                 ? text('Verfügbare Tische anzeigen', 'Show available tables')
                 : step === 1
@@ -135,8 +135,10 @@ export default function Preview({
             </button>
           ) : (
             <button
+              key="restart"
               type="button"
-              onClick={() => {
+              onClick={(event) => {
+                event.preventDefault();
                 setStep(0);
                 setName('');
                 setEmail('');
