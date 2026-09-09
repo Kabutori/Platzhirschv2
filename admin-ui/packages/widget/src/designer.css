@@ -148,3 +148,10 @@ dialog:has(.widget-designer) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+.preview-close {
+  position: absolute;
+  right: 22px;
+  top: 22px;
+  background: var(--surface);
+  z-index: 1;
+}

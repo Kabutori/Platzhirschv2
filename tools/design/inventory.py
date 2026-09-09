@@ -23,5 +23,5 @@ if __name__=='__main__':
     if set(assessment['controls'])!={f'B{i:03}' for i in range(1,len(parser.rows)+1)}: raise ValueError('Button-Abgleich ist unvollständig.')
     with Path(args.output).open('w',encoding='utf-8',newline='') as f:
         writer=csv.writer(f,lineterminator='\n');writer.writerow(['ID','Vorlagenzeile','Bedingungen','Aktion','Beschriftung','Abnahme','Codeabgleich','Umsetzung','Restabweichung'])
-        for i,row in enumerate(parser.rows,1):writer.writerow([f'B{i:03}',row['line'],row['conditions'],row['action'],row['text'],'Visuelle Einzelabnahme offen',*[assessment['controls'][f'B{i:03}'][k] for k in ['Codeabgleich','Umsetzung','Restabweichung']]])
+        for i,row in enumerate(parser.rows,1):writer.writerow([f'B{i:03}',row['line'],row['conditions'],row['action'],row['text'],assessment['controls'][f'B{i:03}'].get('Abnahme','Visuelle Einzelabnahme offen'),*[assessment['controls'][f'B{i:03}'][k] for k in ['Codeabgleich','Umsetzung','Restabweichung']]])
     print(f'{len(parser.rows)} Buttons; SHA-256 {hashlib.sha256(raw).hexdigest()}')

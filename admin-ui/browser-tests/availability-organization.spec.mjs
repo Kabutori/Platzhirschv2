@@ -46,6 +46,7 @@ test('room closures and saved table combinations have editable dialogs and prese
   });
   await page.goto('/restaurant/login');
   await page.getByRole('button', { name: 'Raumsperren', exact: true }).click();
+  await expect(page.getByText('Geschlossene Gesellschaft', { exact: true })).toBeVisible();
   await page.screenshot({ path: 'test-results/design-room-closures.png', fullPage: true });
   await page.getByRole('button', { name: 'Raumsperre anlegen' }).click();
   const dialog = page.getByRole('dialog');

@@ -1,6 +1,6 @@
 {
   "reference_sha256": "eb67fafaae41861c29388a08eb7e635de89586954cdee1038faa8f5fdbae6768",
-  "date": "2026-09-08",
+  "date": "2026-09-09",
   "controls": {
     "B001": {
       "Codeabgleich": "Bewusst anders",
@@ -38,9 +38,10 @@
       "Restabweichung": "Einklappen, berechtigungsabhängige Navigation, Favoriten und Weitere-Aufklapper vorhanden; vollständiger visueller Zustandsvergleich offen."
     },
     "B008": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/src/main.tsx",
-      "Restabweichung": "Kein sichtbarer Sitzungs-Countdown und kein expliziter Verlängern-Button."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
     },
     "B009": {
       "Codeabgleich": "Teilweise",
@@ -68,24 +69,28 @@
       "Restabweichung": "Mein Konto zeigt Identität, MFA und SSO; eigener Profilbearbeitungsdialog für Name/Avatar/E-Mail fehlt."
     },
     "B016": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/packages/identity/src/Screens.tsx",
-      "Restabweichung": "Mein Konto zeigt Identität, MFA und SSO; eigener Profilbearbeitungsdialog für Name/Avatar/E-Mail fehlt."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
     },
     "B019": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/packages/identity/src/Screens.tsx",
-      "Restabweichung": "Mein Konto zeigt Identität, MFA und SSO; eigener Profilbearbeitungsdialog für Name/Avatar/E-Mail fehlt."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
     },
     "B020": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/packages/identity/src/Screens.tsx",
-      "Restabweichung": "Mein Konto zeigt Identität, MFA und SSO; eigener Profilbearbeitungsdialog für Name/Avatar/E-Mail fehlt."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
     },
     "B021": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/packages/identity/src/Screens.tsx",
-      "Restabweichung": "Mein Konto zeigt Identität, MFA und SSO; eigener Profilbearbeitungsdialog für Name/Avatar/E-Mail fehlt."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
     },
     "B012": {
       "Codeabgleich": "Nicht vorhanden",
@@ -103,24 +108,28 @@
       "Restabweichung": "Fachliche Anlagebuttons in den jeweiligen Ansichten statt zentralem kontextabhängigem Kopfbutton."
     },
     "B014": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/src/main.tsx",
-      "Restabweichung": "Kein aufklappbares Benutzer-/Avatar-Auswahlmenü wie in der Vorlage."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
     },
     "B015": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/src/main.tsx",
-      "Restabweichung": "Kein aufklappbares Benutzer-/Avatar-Auswahlmenü wie in der Vorlage."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
     },
     "B017": {
       "Codeabgleich": "Funktion vorhanden",
-      "Umsetzung": "admin-ui/src/main.tsx",
-      "Restabweichung": "Einstellungen in Navigation und echte Abmeldung unten in der Sidebar; andere Position als Vorlagen-Popover."
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
     },
     "B018": {
       "Codeabgleich": "Funktion vorhanden",
-      "Umsetzung": "admin-ui/src/main.tsx",
-      "Restabweichung": "Einstellungen in Navigation und echte Abmeldung unten in der Sidebar; andere Position als Vorlagen-Popover."
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
     },
     "B022": {
       "Codeabgleich": "Teilweise",
@@ -725,52 +734,52 @@
     "B127": {
       "Codeabgleich": "Teilweise",
       "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
-      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget."
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
     },
     "B128": {
       "Codeabgleich": "Teilweise",
       "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
-      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget."
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
     },
     "B129": {
       "Codeabgleich": "Teilweise",
       "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
-      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget."
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
     },
     "B130": {
       "Codeabgleich": "Teilweise",
       "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
-      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget."
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
     },
     "B131": {
       "Codeabgleich": "Teilweise",
       "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
-      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget."
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
     },
     "B132": {
       "Codeabgleich": "Teilweise",
       "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
-      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget."
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
     },
     "B133": {
       "Codeabgleich": "Teilweise",
       "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
-      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget."
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
     },
     "B134": {
       "Codeabgleich": "Teilweise",
       "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
-      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget."
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
     },
     "B135": {
       "Codeabgleich": "Teilweise",
       "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
-      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget."
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
     },
     "B136": {
       "Codeabgleich": "Teilweise",
       "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
-      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget."
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
     },
     "B137": {
       "Codeabgleich": "Funktion vorhanden",

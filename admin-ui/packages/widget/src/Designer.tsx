@@ -27,6 +27,7 @@ export default function Designer({
     [brand, setBrand] = useState(initial?.show_brand == null ? true : !!initial.show_brand),
     [busy, setBusy] = useState(false),
     [error, setError] = useState<unknown>();
+  const [previewOpen, setPreviewOpen] = useState(true);
   const en = language === 'en';
   const rgb = accent
     .slice(1)
@@ -161,15 +162,37 @@ export default function Designer({
           className={'designer-preview ' + position}
           style={{ '--designer-accent': accent, '--designer-on-accent': onAccent } as CSSProperties}
         >
-          <Preview
-            key={language + ':' + max + ':' + duration}
-            en={en}
-            max={max}
-            duration={duration}
-            brand={brand}
-          />
+          {(position === 'inline' || previewOpen) && (
+            <>
+              {' '}
+              <Preview
+                key={language + ':' + max + ':' + duration}
+                en={en}
+                max={max}
+                duration={duration}
+                brand={brand}
+              />
+              {position !== 'inline' && (
+                <button
+                  type="button"
+                  className="preview-close"
+                  aria-label={en ? 'Close example widget' : 'Beispielwidget schließen'}
+                  onClick={() => setPreviewOpen(false)}
+                >
+                  ×
+                </button>
+              )}
+            </>
+          )}
           {position !== 'inline' && (
-            <span className="preview-launch">{en ? 'Reserve a table' : 'Tisch reservieren'}</span>
+            <button
+              type="button"
+              className="preview-launch"
+              aria-expanded={previewOpen}
+              onClick={() => setPreviewOpen(!previewOpen)}
+            >
+              {en ? 'Reserve a table' : 'Tisch reservieren'}
+            </button>
           )}
         </div>
       </section>

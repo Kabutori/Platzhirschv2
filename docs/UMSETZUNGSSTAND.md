@@ -32,7 +32,7 @@ Diese Änderungen durchlaufen eine neue Anwendungs- und Windows-Prüfung. Die we
 
 - Öffnungsfenster und Buchungen über Mitternacht mit Sondertagsvorrang, UTC-Dauer und Ablehnung mehrdeutiger/nicht existierender Startzeiten bei Zeitumstellung.
 - Warteliste mit eigenen Rechten, Kontaktdaten, Status und transaktionaler Übernahme. Konflikte erhalten den offenen Eintrag.
-- Haupttisch plus weitere aktive Tische im selben Raum; summierte Plätze und Konfliktprüfung aller beteiligten Tische. Das Widget berücksichtigt kombinierte Belegungen, bietet selbst aber einzelne Tische an.
+- Haupttisch plus weitere aktive Tische im selben Raum; summierte Plätze und Konfliktprüfung aller beteiligten Tische. Das Widget bietet zusätzlich vordefinierte, aktive und vollständig freie Tischkombinationen an.
 - Optionaler SMTP-/Twilio-Versand für Bestätigungen, Änderungen, Storno und Erinnerungen; Konfiguration und Status je Restaurant. Standardmäßig deaktiviert. Kein Live-Anbietertest oder Zustellnachweis.
 - OIDC mit expliziter Kontoverknüpfung, PKCE/Nonce/Signaturprüfung und weiterhin lokaler MFA. Ein fest konfigurierter Anbieter pro Installation; Details in [SSO.md](SSO.md).
 - Neue Restaurantrollen nach Einmalvorschau und Kennwort/TOTP in bis zu 50 ausgewählten Mandanten erstellen. Kein Überschreiben bestehender Rollen oder automatisches Ändern von Benutzerzuordnungen.
@@ -80,9 +80,9 @@ Offline-Snapshot und Wiederherstellung sind für dieselbe lokale Maschine, Versi
 - Automatischer Zahlungsanbieter, automatische Abbuchungen/Verlängerungen, Rechnungen, Rückerstattungen und Testphasenpolitik. Die vorhandene Freigabe ist eine manuelle externe Zahlungsbestätigung.
 - Separate Paket-Repositories, private Paketregistries und unabhängige Modul-Releases. Erweiterte Clusterplanung, Massenumzüge und automatische Bereinigung alter/abgebrochener Kopien.
 - Versionsübergreifende Updates und Rollback, Wiederherstellung auf neuer Maschine, koordinierte Wiederherstellung verteilter Datenbanken, echte Neustartabnahme, externe CA-/Netzwerkabnahme, große Datenmengen und Lasttests.
-- Live-Abnahme des OIDC-Anbieters, weitere SSO-Verfahren, Organisationshierarchie, fortlaufende Synchronisierung bestehender Rollen und vollständige Listenpaginierung. Die Rollout-Auswahl liest bisher nur die erste Mandantenseite.
+- Live-Abnahme des OIDC-Anbieters, weitere SSO-Verfahren, automatisch wiederkehrende Rollenvererbung und Paginierung weiterer großer Fachlisten. Organisationen, explizite Synchronisierung bestehender Restaurantrollen und sämtliche Mandantenseiten sind umgesetzt.
 - Marketing-Website, Selbstregistrierung, E-Mail-Verifikation, Odoo-/Wetterintegrationen, Umsatz-/Kassenberichte und direkter serverseitiger PDF-Download. Nachrichten-Zustellwebhooks und ein kontrollierter Wiederholungsassistent fehlen.
-- Raumbezogene Sperrzeiträume, vordefinierte kombinierbare Tischgruppen, automatische Kombinationssuche im Widget und interaktive Buchungsvorschau im Designer.
+- Die neue Ausbaustufe ergänzt Raumsperren, gespeicherte Kombinationen, automatische Widget-Auswahl, interaktive Beispielbuchung und Profil-/Sitzungsbedienung; siehe [Bedienung und Abnahmegrenzen](DESIGN-UND-RESTAURANT-AUSBAU.md).
 - Vollständige visuelle 1:1-Abnahme aller Designansichten sowie durchgängige Tastatur-, Bildschirmleser- und Browser-Ende-zu-Ende-Abnahme.
 
 Ein bestehendes System anderer Version darf nicht durch Löschen seiner Installation oder Daten an der Versionsprüfung vorbeigeführt werden. Für neue Vorschauen bis zur Update-Implementierung eine getrennte Installation verwenden.

@@ -342,6 +342,7 @@ main {
   border-bottom: 1px solid var(--border);
 }
 .table-scroll {
+  position: relative;
   overflow-x: auto;
 }
 table {
@@ -733,6 +734,9 @@ dd {
 }
 .sr-only {
   position: absolute;
+  top: 0;
+  left: 0;
+  clip-path: inset(50%);
   width: 1px;
   height: 1px;
   padding: 0;
@@ -1474,4 +1478,18 @@ dialog:has(.profile-actions) {
 }
 .profile-trigger .avatar {
   flex-shrink: 0;
+}
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.profile-controls dialog:has(form) {
+  width: min(440px, calc(100vw - 32px));
+}
+.profile-controls dialog .fields {
+  grid-template-columns: minmax(0, 1fr);
 }
