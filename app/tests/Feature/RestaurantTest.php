@@ -71,6 +71,95 @@ class RestaurantTest extends TestCase
         // the persisted user just as the real login flow does (active = true).
         $this->actingAs($this->user->refresh());
     }
+    public function test_room_closures_block_widget_and_booking_and_protect_existing_reservations(): void
+    {
+        $date = now()->addDay()->format('Y-m-d');
+        $closure = [
+            'room_id' => 1,
+            'starts_at' => $date . 'T18:00',
+            'ends_at' => $date . 'T20:00',
+            'reason' => 'Geschlossene Gesellschaft',
+        ];
+        $id = $this->postJson('/api/v1/restaurant/room-closures', $closure)->assertOk()->json('id');
+        $this->postJson('/api/v1/restaurant/reservations', $this->payload())->assertConflict();
+        $token = $this->widgetToken();
+        $this->getJson(
+            '/api/widget/' .
+                $token .
+                '/availability?' .
+                http_build_query(['starts_at' => $date . 'T18:00', 'party_size' => 2]),
+        )
+            ->assertOk()
+            ->assertJsonCount(0, 'tables');
+        $this->deleteJson('/api/v1/restaurant/room-closures/' . $id)->assertNoContent();
+        $this->postJson('/api/v1/restaurant/reservations', $this->payload())->assertCreated();
+        $this->postJson('/api/v1/restaurant/room-closures', $closure)->assertConflict();
+        $this->postJson('/api/v1/restaurant/room-closures', [
+            ...$closure,
+            'starts_at' => $date . 'T19:30',
+        ])->assertOk();
+        $this->user->update(['role' => 'staff']);
+        $this->postJson('/api/v1/restaurant/room-closures', $closure)->assertForbidden();
+    }
+    public function test_saved_widget_combination_resolves_server_side_and_locks_all_members(): void
+    {
+        DB::connection('tenant')
+            ->table('dining_tables')
+            ->insert(['id' => 2, 'name' => 'Tisch 2', 'room_id' => 1, 'capacity' => 4, 'active' => true]);
+        $combo = $this->postJson('/api/v1/restaurant/table-combinations', [
+            'name' => 'Familientisch',
+            'active' => true,
+            'table_ids' => [1, 2],
+        ])
+            ->assertOk()
+            ->json('id');
+        $token = $this->widgetToken();
+        $payload = [
+            ...$this->payload(),
+            'table_id' => -$combo,
+            'party_size' => 6,
+            'email' => 'guest@example.test',
+            'consent' => true,
+        ];
+        $url =
+            '/api/widget/' .
+            $token .
+            '/availability?' .
+            http_build_query(['starts_at' => $payload['starts_at'], 'party_size' => 6]);
+        $this->getJson($url)
+            ->assertOk()
+            ->assertJsonCount(1, 'tables')
+            ->assertJsonPath('tables.0.id', -$combo);
+        $id = $this->postJson('/api/widget/' . $token, $payload)
+            ->assertOk()
+            ->json('id');
+        $this->postJson('/api/widget/' . $token, $payload)
+            ->assertOk()
+            ->assertJsonPath('id', $id);
+        $this->assertSame(
+            1,
+            DB::connection('tenant')
+                ->table('reservation_extra_tables')
+                ->where('reservation_id', $id)
+                ->count(),
+        );
+        $this->getJson($url)->assertOk()->assertJsonCount(0, 'tables');
+        $this->postJson('/api/v1/restaurant/reservations', [
+            ...$this->payload(),
+            'table_id' => 2,
+        ])->assertConflict();
+        $this->postJson('/api/widget/' . $token, [
+            ...$payload,
+            'additional_table_ids' => [2],
+        ])->assertUnprocessable();
+        $this->postJson('/api/v1/restaurant/reservations/' . $id . '/cancel')->assertNoContent();
+        $this->patchJson('/api/v1/restaurant/table-combinations/' . $combo, [
+            'name' => 'Familientisch',
+            'active' => false,
+            'table_ids' => [1, 2],
+        ])->assertOk();
+        $this->getJson($url)->assertOk()->assertJsonCount(0, 'tables');
+    }
     private function payload(string $time = '18:00'): array
     {
         return [

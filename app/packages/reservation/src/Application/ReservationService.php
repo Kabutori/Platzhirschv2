@@ -34,11 +34,17 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
         }
         $this->assertOpeningHours($start, $end);
         // Availability is advisory. The final booking still takes transaction locks.
-        return $this->db
+        $free = $this->db
             ->connection('tenant')
             ->table('dining_tables')
             ->where('active', true)
-            ->where('capacity', '>=', $partySize)
+            ->whereNotExists(function ($q) use ($start, $end) {
+                $q->selectRaw('1')
+                    ->from('room_closures')
+                    ->whereColumn('room_closures.room_id', 'dining_tables.room_id')
+                    ->where('room_closures.starts_at', '<', $end->utc()->format('Y-m-d H:i:s'))
+                    ->where('room_closures.ends_at', '>', $start->utc()->format('Y-m-d H:i:s'));
+            })
             ->whereNotExists(function ($query) use ($start, $end) {
                 $query
                     ->selectRaw('1')
@@ -60,12 +66,57 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
             })
             ->orderBy('capacity')
             ->orderBy('id')
-            ->get(['id', 'name', 'capacity']);
+            ->get(['id', 'name', 'capacity', 'room_id']);
+        $options = $free
+            ->where('capacity', '>=', $partySize)
+            ->map(fn($t) => (object) ['id' => $t->id, 'name' => $t->name, 'capacity' => $t->capacity])
+            ->values();
+        $db = $this->db->connection('tenant');
+        foreach ($db->table('table_combinations')->where('active', true)->get() as $combo) {
+            $ids = $db
+                ->table('table_combination_members')
+                ->where('combination_id', $combo->id)
+                ->pluck('table_id');
+            $members = $free->whereIn('id', $ids);
+            if (
+                $ids->count() >= 2 &&
+                $members->count() === $ids->count() &&
+                $members->pluck('room_id')->unique()->count() === 1 &&
+                $members->sum('capacity') >= $partySize
+            ) {
+                // Negative option IDs name a saved combination, never arbitrary client-selected tables.
+                $options->push(
+                    (object) [
+                        'id' => -$combo->id,
+                        'name' => $combo->name . ' · Tischkombination',
+                        'capacity' => $members->sum('capacity'),
+                    ],
+                );
+            }
+        }
+        return $options->sortBy('capacity')->values();
     }
     public function save(array $data, string $timezone, ?int $id = null, string $source = 'admin'): object
     {
         $db = $this->db->connection('tenant');
         return $db->transaction(function () use ($db, $data, $timezone, $id, $source) {
+            if ($source === 'widget' && (int) $data['table_id'] < 0) {
+                $combo = $db
+                    ->table('table_combinations')
+                    ->where('id', -(int) $data['table_id'])
+                    ->lockForUpdate()
+                    ->first();
+                abort_unless($combo && $combo->active, 422, 'Tischkombination ist nicht verfügbar.');
+                $members = $db
+                    ->table('table_combination_members')
+                    ->where('combination_id', $combo->id)
+                    ->orderBy('table_id')
+                    ->pluck('table_id')
+                    ->all();
+                abort_unless(count($members) >= 2, 422, 'Tischkombination ist nicht verfügbar.');
+                $data['table_id'] = array_shift($members);
+                $data['additional_table_ids'] = $members;
+            }
             $old = $id ? $db->table('reservations')->where('id', $id)->first() : null;
             abort_if($id && !$old, 404);
             // All writes lock tables in ascending order, including moves. This serializes overlap checks.
@@ -125,6 +176,16 @@ class ReservationService implements \App\Modules\Reservation\PublicApi\Reservati
             }
             if ($status !== 'cancelled') {
                 $this->assertOpeningHours($start, $end);
+                abort_if(
+                    $db
+                        ->table('room_closures')
+                        ->where('room_id', $table->room_id)
+                        ->where('starts_at', '<', $end->utc()->format('Y-m-d H:i:s'))
+                        ->where('ends_at', '>', $start->utc()->format('Y-m-d H:i:s'))
+                        ->exists(),
+                    409,
+                    'Der Raum ist in diesem Zeitraum gesperrt.',
+                );
                 $conflict = $db
                     ->table('reservations')
                     ->where(function ($match) use ($newIds) {

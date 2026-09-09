@@ -104,3 +104,8 @@ dialog:has(.widget-designer) {
     gap: 10px;
   }
 }
+.preview-steps { display:flex; gap:8px; padding:0; list-style:none; flex-wrap:wrap; font-size:11px; }
+.preview-steps li { padding-bottom:5px; border-bottom:2px solid var(--border); }
+.preview-steps [aria-current] { border-color:var(--designer-accent); color:var(--designer-accent); }
+.preview-surface .actions { flex-wrap:wrap; }
+.preview-surface .preview-action { white-space:normal; }

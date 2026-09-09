@@ -19,7 +19,9 @@ import {
   DataTable,
 } from '@platzhirsch/ui-runtime/components';
 export function Tenants({ user }: { user: Row }) {
-  const q = useData('v1/admin/tenants');
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const q = useData('v1/admin/tenants?page=' + page + '&search=' + encodeURIComponent(search));
   const servers = useQuery({
     queryKey: ['tenant-create-servers'],
     queryFn: () => api('v1/admin/database-servers'),
@@ -29,12 +31,11 @@ export function Tenants({ user }: { user: Row }) {
   const [form, setForm] = useState<Row | null>(null);
   const [demo, setDemo] = useState(false);
   const [demoNotice, setDemoNotice] = useState('');
-  const [search, setSearch] = useState('');
   const [error, setError] = useState<unknown>();
   useEffect(() => {
     const timer = setInterval(() => q.refetch(), 10000);
     return () => clearInterval(timer);
-  }, []);
+  }, [q.refetch]);
   const fields: Field[] = [
     ...(!form?.id
       ? [
@@ -74,7 +75,10 @@ export function Tenants({ user }: { user: Row }) {
             aria-label="Mandanten suchen"
             placeholder="Restaurant suchen …"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
         <button className="primary" disabled={user.role !== 'system_admin'} onClick={() => setForm({})}>
@@ -127,6 +131,17 @@ export function Tenants({ user }: { user: Row }) {
           />
         </Modal>
       )}
+      <nav className="toolbar" aria-label="Mandantenseiten">
+        <button disabled={page <= 1 || q.isPending} onClick={() => setPage(page - 1)}>
+          Vorherige Seite
+        </button>
+        <span>
+          Seite {page} von {q.data?.last_page || 1} · {q.data?.total ?? q.data?.data?.length ?? 0} Restaurants
+        </span>
+        <button disabled={page >= (q.data?.last_page || 1) || q.isPending} onClick={() => setPage(page + 1)}>
+          Nächste Seite
+        </button>
+      </nav>
       <section className="panel">
         {q.isPending ? (
           <Loading />
@@ -134,7 +149,7 @@ export function Tenants({ user }: { user: Row }) {
           <ErrorBox error={q.error} />
         ) : (
           <DataTable
-            rows={q.data.data.filter((r: Row) => r.name.toLowerCase().includes(search.toLowerCase()))}
+            rows={q.data.data}
             columns={[
               {
                 key: 'name',

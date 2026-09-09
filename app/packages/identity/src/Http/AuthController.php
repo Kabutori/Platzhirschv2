@@ -100,11 +100,57 @@ class AuthController
         abort_unless($r->user()->active, 403);
         return $this->identity($r->user());
     }
+    public function profile(Request $r)
+    {
+        abort_unless($r->user()->active, 403);
+        $r->merge(['email' => strtolower((string) $r->input('email'))]);
+        $d = $r->validate([
+            'name' => 'required|string|max:120',
+            'email' => [
+                'required',
+                'email',
+                'max:254',
+                \Illuminate\Validation\Rule::unique('users')->ignore($r->user()->id),
+            ],
+            'current_password' => 'required|string',
+            'password' => ['nullable', 'confirmed', PasswordRule::min(12)],
+            'mfa_code' => 'nullable|string',
+        ]);
+        return $this->db->transaction(function () use ($r, $d) {
+            $user = User::whereKey($r->user()->id)->lockForUpdate()->firstOrFail();
+            abort_unless(
+                $user->active && $this->hash->check($d['current_password'], $user->password),
+                403,
+                'Aktuelles Kennwort ungültig.',
+            );
+            if ($user->mfa_secret) {
+                $step = Totp::verify($user->mfa_secret, $d['mfa_code'] ?? '', $user->mfa_last_step);
+                abort_if($step === false, 403, 'Aktueller Zwei-Faktor-Code erforderlich.');
+                $user->mfa_last_step = $step;
+            }
+            $user->name = $d['name'];
+            $user->email = strtolower($d['email']);
+            if (!empty($d['password'])) {
+                $user->password = $d['password'];
+                $user->setRememberToken(bin2hex(random_bytes(30)));
+                $this->db
+                    ->table('sessions')
+                    ->where('user_id', $user->id)
+                    ->where('id', '!=', $r->session()->getId())
+                    ->delete();
+            }
+            $user->save();
+            $r->session()->regenerate();
+            $this->audit->record('auth.profile_updated', $user->id, $user->tenant_id);
+            return $this->identity($user);
+        });
+    }
     private function identity(User $u): array
     {
         return [
             ...$u->toArray(),
             'mfa_enabled' => (bool) $u->mfa_secret,
+            'session_lifetime_seconds' => (int) config('session.lifetime') * 60,
             'scopes' => $u->isSystem() ? ['system'] : ['customer'],
             'permissions' => $u->permissions(),
             'enabled_modules' => $u->tenant_id ? $this->modules->enabled($u->tenant_id) : [],

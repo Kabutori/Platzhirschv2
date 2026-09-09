@@ -1361,3 +1361,16 @@ input.design-toggle:focus-visible {
 .rights-savebar + .rights-workspace {
   margin-top: 18px;
 }
+.profile-controls { padding:14px; border-top:1px solid var(--border); margin-top:auto; }
+.profile-trigger { width:100%; border:0; background:transparent; text-align:left; display:flex; gap:10px; align-items:center; }
+.profile-trigger strong,.profile-trigger small { display:block; overflow:hidden; text-overflow:ellipsis; }
+.profile-trigger small { color:var(--muted); font-size:11px; }
+.session-control { width:100%; display:block; border:0; padding:12px 0 0; background:transparent; text-align:left; }
+.session-control small { color:var(--muted); font-size:10px; text-transform:uppercase; }
+.session-track { display:block; height:3px; background:var(--border); margin-bottom:5px; }
+.session-track>span { display:block; height:100%; background:var(--accent); transition:width 1s linear; }
+.profile-actions { display:grid; gap:10px; padding:20px; }
+.compact-navigation .profile-trigger>span:last-child,.compact-navigation .session-control small { display:none; }
+.organization-tree { list-style:none; padding-left:20px; border-left:1px solid var(--border); }
+.organization-tree li { margin:16px 0; }
+.organization-tree li>div { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }

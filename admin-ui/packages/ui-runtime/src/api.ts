@@ -38,6 +38,7 @@ export async function api<T = any>(
     body: body === undefined ? undefined : JSON.stringify(body),
     signal,
   });
+  if (response.ok) window.dispatchEvent(new Event('platzhirsch-session-activity'));
   if (response.status === 204) return undefined as T;
   const json = await response.json().catch(() => ({ message: 'Serverantwort konnte nicht gelesen werden.' }));
   if (!response.ok)
@@ -46,4 +47,19 @@ export async function api<T = any>(
       json.errors ? Object.values(json.errors).flat().join(' ') : json.message || 'Anfrage fehlgeschlagen.',
     );
   return json;
+}
+
+// Follow numbered API pages only; never fetch arbitrary next_page_url destinations.
+export async function allPages(path: string) {
+  const rows: any[] = [];
+  let page = 1,
+    last = 1;
+  do {
+    const result = await api(path + (path.includes('?') ? '&' : '?') + 'page=' + page);
+    if (Array.isArray(result)) return result;
+    rows.push(...(result.data || []));
+    last = Number(result.last_page) || 1;
+    page++;
+  } while (page <= last);
+  return rows;
 }

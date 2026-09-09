@@ -4,6 +4,16 @@ $r = app('router');
 $r->middleware(['web', 'auth', 'tenant'])
     ->prefix('api/v1/restaurant')
     ->group(function ($r) {
+        $a = \App\Modules\Reservation\Http\AvailabilityController::class;
+        $r->get('/{kind}', [$a, 'index'])->where('kind', 'room-closures|table-combinations');
+        $r->post('/{kind}', [$a, 'save'])->where('kind', 'room-closures|table-combinations');
+        $r->patch('/{kind}/{id}', [$a, 'save'])
+            ->where('kind', 'room-closures|table-combinations')
+            ->whereNumber('id');
+        $r->delete('/{kind}/{id}', [$a, 'delete'])
+            ->where('kind', 'room-closures|table-combinations')
+            ->whereNumber('id');
+
         $r->get('/notifications', [\App\Modules\Reservation\Http\NotificationController::class, 'index']);
         $r->patch('/notifications', [\App\Modules\Reservation\Http\NotificationController::class, 'save']);
         $r->get('/waitlist', [\App\Modules\Reservation\Http\WaitlistController::class, 'index']);

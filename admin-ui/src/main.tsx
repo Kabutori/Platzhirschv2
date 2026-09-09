@@ -1,3 +1,6 @@
+const Organizations = lazy(() => import('@platzhirsch/customer-ui/Organizations.tsx'));
+const Availability = lazy(() => import('@platzhirsch/reservation-ui/Availability.tsx'));
+import ProfileMenu from '@platzhirsch/identity-ui/ProfileMenu.tsx';
 import { PreferencesProvider, PreferencesPage, usePreferences } from '@platzhirsch/ui-runtime/preferences';
 const Tenants = lazy(() => import('@platzhirsch/customer-ui').then((m) => ({ default: m.Tenants })));
 const Profile = lazy(() => import('@platzhirsch/customer-ui').then((m) => ({ default: m.Profile })));
@@ -103,6 +106,7 @@ const client = new QueryClient({
 const systemNav = [
   ['dashboard', 'Übersicht', LayoutDashboard],
   ['tenants', 'Mandanten', Building2],
+  ['organizations', 'Organisationen', Building2],
   ['users', 'Benutzer', Users],
   ['roles', 'Rollen & Rechte', ShieldCheck],
   ['modules', 'Module', Code2],
@@ -125,6 +129,8 @@ const restaurantNav = [
   ['table-plan', 'Tischplan', Armchair],
   ['tables', 'Tische', Armchair],
   ['rooms', 'Räume', DoorOpen],
+  ['room-closures', 'Raumsperren', Clock],
+  ['table-combinations', 'Tischkombinationen', Armchair],
   ['hours', 'Öffnungszeiten', Clock],
   ['special-days', 'Sondertage', CalendarDays],
   ['widget', 'Widget', Code2],
@@ -193,9 +199,12 @@ const pagePermission: Record<string, string> = {
   'module-shop': 'modules.manage',
   reservations: 'reservation.read',
   waitlist: 'waitlist.read',
+  notifications: 'restaurant.configure',
   'table-plan': 'reservation.read',
   tables: 'restaurant.configure',
   rooms: 'restaurant.configure',
+  'room-closures': 'restaurant.configure',
+  'table-combinations': 'restaurant.configure',
   hours: 'restaurant.configure',
   'special-days': 'restaurant.configure',
   widget: 'widget.manage',
@@ -257,7 +266,7 @@ function ShellBody({ user }: { user: Row }) {
     scope === 'system'
       ? systemNav.filter(
           ([key]) =>
-            (!['database-access', 'placement', 'billing-admin'].includes(key) ||
+            (!['organizations', 'database-access', 'placement', 'billing-admin'].includes(key) ||
               user.role === 'system_admin') &&
             (!platformPagePermission[key] || allowed(user, platformPagePermission[key])) &&
             (key !== 'system-settings' ||
@@ -343,27 +352,7 @@ function ShellBody({ user }: { user: Row }) {
             </>
           )}
         </nav>
-        <div className="user">
-          <div className="avatar">{user.name?.slice(0, 2).toUpperCase()}</div>
-          <div>
-            <strong>{user.name}</strong>
-            <small>{labels[user.role]}</small>
-          </div>
-          <button
-            className="icon"
-            title="Abmelden"
-            onClick={async () => {
-              try {
-                await api('v1/admin/auth/logout', 'POST');
-                await q.resetQueries();
-              } catch (e) {
-                setError(e);
-              }
-            }}
-          >
-            <LogOut size={17} />
-          </button>
-        </div>
+        <ProfileMenu user={user} go={setPage} />
       </aside>
       <div className="workspace">
         <header className="topbar">
@@ -440,6 +429,12 @@ function Content({
         </Suspense>
       );
     if (page === 'dashboard') return <Dashboard go={go} />;
+    if (page === 'organizations' && user.role === 'system_admin')
+      return (
+        <Suspense fallback={<Loading />}>
+          <Organizations />
+        </Suspense>
+      );
     if (page === 'tenants')
       return (
         <Suspense fallback={<Loading />}>
@@ -483,6 +478,12 @@ function Content({
         </Suspense>
       );
   }
+  if (page === 'room-closures' || page === 'table-combinations')
+    return (
+      <Suspense fallback={<Loading />}>
+        <Availability tenant={tenant} kind={page} />
+      </Suspense>
+    );
   if (page === 'notifications')
     return (
       <Suspense fallback={<Loading />}>

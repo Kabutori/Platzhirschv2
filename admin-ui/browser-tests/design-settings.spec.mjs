@@ -159,3 +159,39 @@ test('export settings do not appear without the export permission', async ({ pag
   await page.getByRole('button', { name: 'Einstellungen', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Export-Formate', exact: true })).toHaveCount(0);
 });
+
+test('interactive designer completes a sample booking, supports back and sends nothing', async ({ page }) => {
+  const writes = await mock(page);
+  await page.goto('/restaurant/login');
+  await page.getByRole('button', { name: 'Widget', exact: true }).click();
+  await page.getByRole('button', { name: 'Gestaltung bearbeiten', exact: true }).click();
+  const preview = page.getByLabel('Beispielbuchung', { exact: true });
+  await preview.getByLabel('Beispieldatum', { exact: true }).fill('2027-05-20');
+  await preview.getByRole('button', { name: 'Verfügbare Tische anzeigen' }).click();
+  await preview.getByLabel('Beispieltisch wählen').selectOption('Terrasse');
+  await preview.getByRole('button', { name: 'Weiter zu Kontaktdaten' }).click();
+  await preview.getByLabel('Beispielname', { exact: true }).fill('Anna Beispiel');
+  await preview.getByLabel('Beispiel-E-Mail', { exact: true }).fill('example@example.test');
+  await preview.getByRole('button', { name: 'Zurück', exact: true }).click();
+  await expect(preview.getByLabel('Beispieltisch wählen')).toHaveValue('Terrasse');
+  await preview.getByRole('button', { name: 'Weiter zu Kontaktdaten' }).click();
+  await preview.getByRole('button', { name: 'Beispielbuchung bestätigen' }).click();
+  await expect(preview.getByRole('heading', { name: 'Beispielbuchung bestätigt' })).toBeVisible();
+  expect(writes).toHaveLength(0);
+  await page.screenshot({ path: 'test-results/design-widget-confirmation.png', fullPage: true });
+  await preview.getByRole('button', { name: 'Neue Beispielbuchung' }).click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.screenshot({ path: 'test-results/design-widget-interactive-mobile.png', fullPage: true });
+});
+test('profile menu opens actual profile editor and session can be extended', async ({ page }) => {
+  await mock(page);
+  await page.goto('/restaurant/login');
+  await page.getByRole('button', { name: 'Sitzung verlängern' }).click();
+  await page.getByRole('button', { name: 'Profilmenü öffnen' }).click();
+  await page.screenshot({ path: 'test-results/design-profile-menu.png', fullPage: true });
+  await page.getByRole('button', { name: 'Profil bearbeiten', exact: true }).click();
+  await expect(page.getByLabel('Name', { exact: true })).toHaveValue('Anna');
+  await expect(page.getByLabel('Aktuelles Passwort', { exact: true })).toBeVisible();
+  await page.screenshot({ path: 'test-results/design-profile-editor.png', fullPage: true });
+});

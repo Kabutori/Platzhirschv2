@@ -7,6 +7,32 @@ use Tests\TestCase;
 class AuthTest extends TestCase
 {
     use RefreshDatabase;
+    public function test_profile_edit_requires_password_and_preserves_role(): void
+    {
+        $u = $this->admin()->fresh();
+        $this->actingAs($u);
+        $data = [
+            'name' => 'Neuer Name',
+            'email' => 'new@example.test',
+            'current_password' => 'wrong',
+            'role' => 'staff',
+        ];
+        $this->patchJson('/api/v1/admin/auth/profile', $data)->assertForbidden();
+        $this->patchJson('/api/v1/admin/auth/profile', [
+            ...$data,
+            'current_password' => 'Strong-test-password-2026',
+        ])
+            ->assertOk()
+            ->assertJsonPath('name', 'Neuer Name')
+            ->assertJsonPath('role', 'system_admin')
+            ->assertJsonMissingPath('password');
+        $this->postJson('/api/v1/admin/auth/session/extend')
+            ->assertOk()
+            ->assertJsonPath('session_lifetime_seconds', 3600);
+        $u->update(['active' => false]);
+        $this->actingAs($u->fresh());
+        $this->postJson('/api/v1/admin/auth/session/extend')->assertForbidden();
+    }
     private function admin(): User
     {
         return User::create([

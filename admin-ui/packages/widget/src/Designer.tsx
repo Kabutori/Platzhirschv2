@@ -1,3 +1,4 @@
+import Preview from './Preview';
 import { useState, type CSSProperties, type FormEvent } from 'react';
 import { CalendarDays, Users, Code2 } from 'lucide-react';
 import { api } from '@platzhirsch/ui-runtime/api';
@@ -160,22 +161,13 @@ export default function Designer({
           className={'designer-preview ' + position}
           style={{ '--designer-accent': accent, '--designer-on-accent': onAccent } as CSSProperties}
         >
-          <div className="preview-surface">
-            {brand && <span className="preview-brand">P · Platzhirsch</span>}
-            <h3>{en ? 'Reserve a table' : 'Tisch reservieren'}</h3>
-            <p>
-              <CalendarDays size={16} /> {en ? 'Date and time' : 'Datum und Uhrzeit'}
-            </p>
-            <p>
-              <Users size={16} /> {en ? 'Up to' : 'Bis zu'} {max} {en ? 'guests' : 'Personen'}
-            </p>
-            <p>
-              {duration} {en ? 'minutes' : 'Minuten'}
-            </p>
-            <span className="preview-action">
-              {en ? 'Show available tables' : 'Verfügbare Tische anzeigen'}
-            </span>
-          </div>
+          <Preview
+            key={language + ':' + max + ':' + duration}
+            en={en}
+            max={max}
+            duration={duration}
+            brand={brand}
+          />
           {position !== 'inline' && (
             <span className="preview-launch">{en ? 'Reserve a table' : 'Tisch reservieren'}</span>
           )}

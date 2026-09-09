@@ -55,6 +55,64 @@ class RoleRolloutTest extends TestCase
             'permissions' => ['*'],
         ])->assertUnprocessable();
     }
+    public function test_sync_updates_existing_roles_and_rejects_stale_preview(): void
+    {
+        $secret = Totp::secret();
+        $admin = User::create([
+            'name' => 'Admin',
+            'email' => 'sync@example.test',
+            'password' => 'long-test-password',
+            'role' => 'system_admin',
+            'mfa_secret' => $secret,
+        ])->fresh();
+        $t = Tenant::create([
+            'name' => 'Sync',
+            'email' => 't@example.test',
+            'status' => 'active',
+            'database_name' => 'ph_t_' . str_repeat('c', 24),
+            'database_user' => 'phu_' . str_repeat('c', 24),
+            'database_password' => 'test',
+        ]);
+        $role = DB::table('restaurant_roles')->insertGetId([
+            'tenant_id' => $t->id,
+            'name' => 'Empfang',
+            'permissions' => json_encode(['reservation.read']),
+            'version' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $this->actingAs($admin);
+        $data = [
+            'name' => 'Empfang',
+            'mode' => 'sync',
+            'permissions' => ['reservation.read', 'waitlist.read'],
+            'tenant_ids' => [$t->id],
+        ];
+        $preview = $this->postJson('/api/v1/admin/role-rollout/preview', $data)
+            ->assertOk()
+            ->assertJsonPath('preview.existing.0.added', ['waitlist.read'])
+            ->json('token');
+        DB::table('restaurant_roles')
+            ->where('id', $role)
+            ->update(['version' => 2]);
+        $approval = [
+            'token' => $preview,
+            'password' => 'long-test-password',
+            'mfa_code' => Totp::code($secret, intdiv(time(), 30)),
+        ];
+        $this->postJson('/api/v1/admin/role-rollout/apply', $approval)->assertConflict();
+        $approval['token'] = $this->postJson('/api/v1/admin/role-rollout/preview', $data)
+            ->assertOk()
+            ->json('token');
+        $this->postJson('/api/v1/admin/role-rollout/apply', $approval)
+            ->assertOk()
+            ->assertJsonCount(1, 'synchronized');
+        $this->assertSame(3, DB::table('restaurant_roles')->where('id', $role)->value('version'));
+        $this->assertSame(
+            $data['permissions'],
+            json_decode(DB::table('restaurant_roles')->where('id', $role)->value('permissions'), true),
+        );
+    }
     public function test_non_system_admin_cannot_preview_rollout(): void
     {
         $user = User::create([
