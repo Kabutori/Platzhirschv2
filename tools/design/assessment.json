@@ -1,0 +1,930 @@
+{
+  "reference_sha256": "eb67fafaae41861c29388a08eb7e635de89586954cdee1038faa8f5fdbae6768",
+  "date": "2026-09-09",
+  "controls": {
+    "B001": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Zwei getrennte Portale mit eigenen Loginseiten; Wechsel per Link statt Umschalten einer simulierten Rolle."
+    },
+    "B002": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Zwei getrennte Portale mit eigenen Loginseiten; Wechsel per Link statt Umschalten einer simulierten Rolle."
+    },
+    "B004": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Zwei getrennte Portale mit eigenen Loginseiten; Wechsel per Link statt Umschalten einer simulierten Rolle."
+    },
+    "B003": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Einklappen, berechtigungsabhängige Navigation, Favoriten und Weitere-Aufklapper vorhanden; vollständiger visueller Zustandsvergleich offen."
+    },
+    "B005": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Einklappen, berechtigungsabhängige Navigation, Favoriten und Weitere-Aufklapper vorhanden; vollständiger visueller Zustandsvergleich offen."
+    },
+    "B006": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Einklappen, berechtigungsabhängige Navigation, Favoriten und Weitere-Aufklapper vorhanden; vollständiger visueller Zustandsvergleich offen."
+    },
+    "B007": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Einklappen, berechtigungsabhängige Navigation, Favoriten und Weitere-Aufklapper vorhanden; vollständiger visueller Zustandsvergleich offen."
+    },
+    "B008": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
+    },
+    "B009": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "CSV/XLSX und Browser-Druck/PDF für Tagesreservierungen; direkte Formatbuttons statt Exportdialog, kein globaler Export jeder Übersicht."
+    },
+    "B177": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "CSV/XLSX und Browser-Druck/PDF für Tagesreservierungen; direkte Formatbuttons statt Exportdialog, kein globaler Export jeder Übersicht."
+    },
+    "B178": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "CSV/XLSX und Browser-Druck/PDF für Tagesreservierungen; direkte Formatbuttons statt Exportdialog, kein globaler Export jeder Übersicht."
+    },
+    "B010": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/preferences.tsx",
+      "Restabweichung": "Einstellungen sofort pro Konto/Portal/Browser gespeichert; kein separater Speichern-Button."
+    },
+    "B011": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/customer/src/Screens.tsx",
+      "Restabweichung": "Restaurantprofil wird über eine echte API gespeichert; Speichern liegt im Formular statt im globalen Seitenkopf. Der persönliche Profilbearbeitungsdialog ist zusätzlich vorhanden."
+    },
+    "B016": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
+    },
+    "B019": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
+    },
+    "B020": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
+    },
+    "B021": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
+    },
+    "B012": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Kein Changelog-Dialog in der Anwendung; Versionshinweise liegen bei GitHub Releases."
+    },
+    "B179": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Kein Changelog-Dialog in der Anwendung; Versionshinweise liegen bei GitHub Releases."
+    },
+    "B013": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Fachliche Anlagebuttons in den jeweiligen Ansichten statt zentralem kontextabhängigem Kopfbutton."
+    },
+    "B014": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
+    },
+    "B015": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
+    },
+    "B017": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
+    },
+    "B018": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/ProfileMenu.tsx",
+      "Restabweichung": "Profilmenü, vier Akzentfarben, Bearbeitungsdialog und Abbrechen/Speichern vorhanden. Sitzung nutzt echte konfigurierte Laufzeit statt simulierter 15 Minuten. Eigener Sicherheitsbereich bleibt zusätzlicher Menüpunkt.",
+      "Abnahme": "Desktop visuell geprüft; mobile Einzelabnahme offen"
+    },
+    "B022": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B024": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B026": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B027": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B029": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B031": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B035": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B036": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B038": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B039": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B041": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B043": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B051": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B053": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B055": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B058": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B060": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B066": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B067": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B069": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B071": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B074": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B076": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B078": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B080": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B082": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B087": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B089": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B180": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B182": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/components.tsx",
+      "Restabweichung": "Gemeinsamer Dialog mit Schließen/Escape und optionalem Hintergrundklick. Nicht alle Vorlagen-Dialoge existieren; separate Abbrechen-Fußzeile und fachliche Dialogform müssen je Ansicht angeglichen werden."
+    },
+    "B023": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Tisch speichern und löschen vorhanden; Löschen als Tabellenaktion mit Bestätigung statt Button im Bearbeitungsdialog, mit Schutz der Buchungshistorie."
+    },
+    "B025": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Tisch speichern und löschen vorhanden; Löschen als Tabellenaktion mit Bestätigung statt Button im Bearbeitungsdialog, mit Schutz der Buchungshistorie."
+    },
+    "B028": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/identity/src/Screens.tsx",
+      "Restabweichung": "Benutzer- und Teamdialoge speichern Rollen/Aktivstatus. Feldumfang und Anordnung weichen ab; Login-E-Mail wird beim Bearbeiten nicht frei verändert."
+    },
+    "B032": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/identity/src/Screens.tsx",
+      "Restabweichung": "Benutzer- und Teamdialoge speichern Rollen/Aktivstatus. Feldumfang und Anordnung weichen ab; Login-E-Mail wird beim Bearbeiten nicht frei verändert."
+    },
+    "B142": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/identity/src/Screens.tsx",
+      "Restabweichung": "Benutzer- und Teamdialoge speichern Rollen/Aktivstatus. Feldumfang und Anordnung weichen ab; Login-E-Mail wird beim Bearbeiten nicht frei verändert."
+    },
+    "B148": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/identity/src/Screens.tsx",
+      "Restabweichung": "Benutzer- und Teamdialoge speichern Rollen/Aktivstatus. Feldumfang und Anordnung weichen ab; Login-E-Mail wird beim Bearbeiten nicht frei verändert."
+    },
+    "B030": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/packages/identity/src/Screens.tsx",
+      "Restabweichung": "Teamzugang deaktivieren statt historischen Benutzer samt Zuordnungen löschen; Bestätigung erfolgt über Browserdialog."
+    },
+    "B033": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/packages/identity/src/Screens.tsx",
+      "Restabweichung": "Teamzugang deaktivieren statt historischen Benutzer samt Zuordnungen löschen; Bestätigung erfolgt über Browserdialog."
+    },
+    "B034": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/packages/identity/src/Screens.tsx",
+      "Restabweichung": "Teamzugang deaktivieren statt historischen Benutzer samt Zuordnungen löschen; Bestätigung erfolgt über Browserdialog."
+    },
+    "B037": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/packages/identity/src/Roles.tsx",
+      "Restabweichung": "Berechtigungen stammen aus registrierten Modulen; keine freien, wirkungslosen technischen Berechtigungscodes über UI."
+    },
+    "B157": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/packages/identity/src/Roles.tsx",
+      "Restabweichung": "Berechtigungen stammen aus registrierten Modulen; keine freien, wirkungslosen technischen Berechtigungscodes über UI."
+    },
+    "B158": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/packages/identity/src/Roles.tsx",
+      "Restabweichung": "Berechtigungen stammen aus registrierten Modulen; keine freien, wirkungslosen technischen Berechtigungscodes über UI."
+    },
+    "B040": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/packages/module-host/src/Catalog.tsx",
+      "Restabweichung": "Ausführbare Module werden als Composer/npm-Paket im Projekt registriert und getestet; Angebote im Billing-Reiter. Kein beliebiges Laufzeit-Modulformular."
+    },
+    "B175": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/packages/module-host/src/Catalog.tsx",
+      "Restabweichung": "Ausführbare Module werden als Composer/npm-Paket im Projekt registriert und getestet; Angebote im Billing-Reiter. Kein beliebiges Laufzeit-Modulformular."
+    },
+    "B042": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Öffnungsfenster einzeln anlegen/bearbeiten/löschen, auch über Mitternacht. Gemeinsamer Wochenplan-Dialog mit Tages-Schaltern fehlt."
+    },
+    "B044": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Öffnungsfenster einzeln anlegen/bearbeiten/löschen, auch über Mitternacht. Gemeinsamer Wochenplan-Dialog mit Tages-Schaltern fehlt."
+    },
+    "B110": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Öffnungsfenster einzeln anlegen/bearbeiten/löschen, auch über Mitternacht. Gemeinsamer Wochenplan-Dialog mit Tages-Schaltern fehlt."
+    },
+    "B045": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/support/src/Support.tsx",
+      "Restabweichung": "Ticketdetails als Seite statt Modal, Antworten und interne Notizen nur für Administration; Checkbox und Statusauswahl statt Vorlagen-Schaltflächen."
+    },
+    "B046": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/support/src/Support.tsx",
+      "Restabweichung": "Ticketdetails als Seite statt Modal, Antworten und interne Notizen nur für Administration; Checkbox und Statusauswahl statt Vorlagen-Schaltflächen."
+    },
+    "B047": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/support/src/Support.tsx",
+      "Restabweichung": "Ticketdetails als Seite statt Modal, Antworten und interne Notizen nur für Administration; Checkbox und Statusauswahl statt Vorlagen-Schaltflächen."
+    },
+    "B048": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/support/src/Support.tsx",
+      "Restabweichung": "Ticketdetails als Seite statt Modal, Antworten und interne Notizen nur für Administration; Checkbox und Statusauswahl statt Vorlagen-Schaltflächen."
+    },
+    "B049": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/support/src/Support.tsx",
+      "Restabweichung": "Ticketdetails als Seite statt Modal, Antworten und interne Notizen nur für Administration; Checkbox und Statusauswahl statt Vorlagen-Schaltflächen."
+    },
+    "B050": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/support/src/Support.tsx",
+      "Restabweichung": "Ticketdetails als Seite statt Modal, Antworten und interne Notizen nur für Administration; Checkbox und Statusauswahl statt Vorlagen-Schaltflächen."
+    },
+    "B183": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/support/src/Support.tsx",
+      "Restabweichung": "Ticketdetails als Seite statt Modal, Antworten und interne Notizen nur für Administration; Checkbox und Statusauswahl statt Vorlagen-Schaltflächen."
+    },
+    "B052": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Kein Release-Editor mit Kategorien und Veröffentlichen in der Webadministration; Paketveröffentlichung über GitHub-Workflow."
+    },
+    "B054": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Kein Release-Editor mit Kategorien und Veröffentlichen in der Webadministration; Paketveröffentlichung über GitHub-Workflow."
+    },
+    "B176": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Kein Release-Editor mit Kategorien und Veröffentlichen in der Webadministration; Paketveröffentlichung über GitHub-Workflow."
+    },
+    "B056": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/provisioning/src/Servers.tsx",
+      "Restabweichung": "Server anlegen/bearbeiten und Verbindung/Rechte getrennt prüfen. Tests nach Speichern, kein kompletter Cluster-Detaildialog wie Vorlage."
+    },
+    "B057": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/provisioning/src/Servers.tsx",
+      "Restabweichung": "Server anlegen/bearbeiten und Verbindung/Rechte getrennt prüfen. Tests nach Speichern, kein kompletter Cluster-Detaildialog wie Vorlage."
+    },
+    "B059": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/provisioning/src/Servers.tsx",
+      "Restabweichung": "Server anlegen/bearbeiten und Verbindung/Rechte getrennt prüfen. Tests nach Speichern, kein kompletter Cluster-Detaildialog wie Vorlage."
+    },
+    "B061": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/provisioning/src/Servers.tsx",
+      "Restabweichung": "Server anlegen/bearbeiten und Verbindung/Rechte getrennt prüfen. Tests nach Speichern, kein kompletter Cluster-Detaildialog wie Vorlage."
+    },
+    "B062": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/provisioning/src/Servers.tsx",
+      "Restabweichung": "Server anlegen/bearbeiten und Verbindung/Rechte getrennt prüfen. Tests nach Speichern, kein kompletter Cluster-Detaildialog wie Vorlage."
+    },
+    "B169": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/provisioning/src/Servers.tsx",
+      "Restabweichung": "Server anlegen/bearbeiten und Verbindung/Rechte getrennt prüfen. Tests nach Speichern, kein kompletter Cluster-Detaildialog wie Vorlage."
+    },
+    "B063": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/provisioning/src/Placement.tsx",
+      "Restabweichung": "Bestätigter Einzelmandantenumzug vorhanden; keine Cluster-Massenmigration mehrerer Mandanten."
+    },
+    "B064": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/provisioning/src/Placement.tsx",
+      "Restabweichung": "Bestätigter Einzelmandantenumzug vorhanden; keine Cluster-Massenmigration mehrerer Mandanten."
+    },
+    "B065": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/provisioning/src/Placement.tsx",
+      "Restabweichung": "Bestätigter Einzelmandantenumzug vorhanden; keine Cluster-Massenmigration mehrerer Mandanten."
+    },
+    "B068": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/identity/src/Roles.tsx",
+      "Restabweichung": "Rollenwahl, Anlegen, Umbenennen und Löschen vorhanden; Inline-Form und Browserbestätigung statt aller Vorlagen-Modals; Systemrollen geschützt."
+    },
+    "B070": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/identity/src/Roles.tsx",
+      "Restabweichung": "Rollenwahl, Anlegen, Umbenennen und Löschen vorhanden; Inline-Form und Browserbestätigung statt aller Vorlagen-Modals; Systemrollen geschützt."
+    },
+    "B152": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/identity/src/Roles.tsx",
+      "Restabweichung": "Rollenwahl, Anlegen, Umbenennen und Löschen vorhanden; Inline-Form und Browserbestätigung statt aller Vorlagen-Modals; Systemrollen geschützt."
+    },
+    "B153": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/identity/src/Roles.tsx",
+      "Restabweichung": "Rollenwahl, Anlegen, Umbenennen und Löschen vorhanden; Inline-Form und Browserbestätigung statt aller Vorlagen-Modals; Systemrollen geschützt."
+    },
+    "B154": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/identity/src/Roles.tsx",
+      "Restabweichung": "Rollenwahl, Anlegen, Umbenennen und Löschen vorhanden; Inline-Form und Browserbestätigung statt aller Vorlagen-Modals; Systemrollen geschützt."
+    },
+    "B155": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/identity/src/Roles.tsx",
+      "Restabweichung": "Rollenwahl, Anlegen, Umbenennen und Löschen vorhanden; Inline-Form und Browserbestätigung statt aller Vorlagen-Modals; Systemrollen geschützt."
+    },
+    "B072": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/customer/src/Screens.tsx",
+      "Restabweichung": "Mandant bearbeiten vorhanden; keine getrennte schreibgeschützte Detailkarte mit identischer Informationsfülle."
+    },
+    "B075": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/customer/src/Screens.tsx",
+      "Restabweichung": "Mandant bearbeiten vorhanden; keine getrennte schreibgeschützte Detailkarte mit identischer Informationsfülle."
+    },
+    "B143": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/customer/src/Screens.tsx",
+      "Restabweichung": "Mandant bearbeiten vorhanden; keine getrennte schreibgeschützte Detailkarte mit identischer Informationsfülle."
+    },
+    "B073": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/packages/billing/src/Administration.tsx",
+      "Restabweichung": "Zusatzmodule folgen Bestellung/Zahlungsfreigabe/Aktivierung mit Migration statt ungesichertem Toggle im Mandantenprofil."
+    },
+    "B077": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Sondertage speichern/bearbeiten/löschen vorhanden; separate Liste und nativer Datumseingang statt Vorlagen-Karte/Popup."
+    },
+    "B079": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Sondertage speichern/bearbeiten/löschen vorhanden; separate Liste und nativer Datumseingang statt Vorlagen-Karte/Popup."
+    },
+    "B111": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Sondertage speichern/bearbeiten/löschen vorhanden; separate Liste und nativer Datumseingang statt Vorlagen-Karte/Popup."
+    },
+    "B112": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Sondertage speichern/bearbeiten/löschen vorhanden; separate Liste und nativer Datumseingang statt Vorlagen-Karte/Popup."
+    },
+    "B081": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Raumname, Farbe, Symbol, Standort, Notiz und Außenbereich vorhanden; Select/Checkbox statt Symbol- und Farbraster, keine Wetterautomatik."
+    },
+    "B083": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Raumname, Farbe, Symbol, Standort, Notiz und Außenbereich vorhanden; Select/Checkbox statt Symbol- und Farbraster, keine Wetterautomatik."
+    },
+    "B084": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Raumname, Farbe, Symbol, Standort, Notiz und Außenbereich vorhanden; Select/Checkbox statt Symbol- und Farbraster, keine Wetterautomatik."
+    },
+    "B085": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Raumname, Farbe, Symbol, Standort, Notiz und Außenbereich vorhanden; Select/Checkbox statt Symbol- und Farbraster, keine Wetterautomatik."
+    },
+    "B086": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Raumzuordnung am Tisch vorhanden; Mehrfachzuordnung mehrerer Tische im Raumdialog fehlt."
+    },
+    "B088": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Echte konfliktgeprüfte Buchung, Status/Notiz und kombinierte Tische. Auswahl über Formular/Mehrfachselect statt Vorlagen-Tischchips und Optionsbuttons."
+    },
+    "B097": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Echte konfliktgeprüfte Buchung, Status/Notiz und kombinierte Tische. Auswahl über Formular/Mehrfachselect statt Vorlagen-Tischchips und Optionsbuttons."
+    },
+    "B098": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Echte konfliktgeprüfte Buchung, Status/Notiz und kombinierte Tische. Auswahl über Formular/Mehrfachselect statt Vorlagen-Tischchips und Optionsbuttons."
+    },
+    "B090": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/BookingTools.tsx",
+      "Restabweichung": "Walk-in setzt lokale Restaurantzeit und Eingetroffen; Kalender und Viertelstunden-Auswahl ergänzen freie Eingabe. Slots sind keine Verfügbarkeitszusage; Speichern prüft Konflikte."
+    },
+    "B091": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/BookingTools.tsx",
+      "Restabweichung": "Walk-in setzt lokale Restaurantzeit und Eingetroffen; Kalender und Viertelstunden-Auswahl ergänzen freie Eingabe. Slots sind keine Verfügbarkeitszusage; Speichern prüft Konflikte."
+    },
+    "B092": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/BookingTools.tsx",
+      "Restabweichung": "Walk-in setzt lokale Restaurantzeit und Eingetroffen; Kalender und Viertelstunden-Auswahl ergänzen freie Eingabe. Slots sind keine Verfügbarkeitszusage; Speichern prüft Konflikte."
+    },
+    "B093": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/BookingTools.tsx",
+      "Restabweichung": "Walk-in setzt lokale Restaurantzeit und Eingetroffen; Kalender und Viertelstunden-Auswahl ergänzen freie Eingabe. Slots sind keine Verfügbarkeitszusage; Speichern prüft Konflikte."
+    },
+    "B094": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/BookingTools.tsx",
+      "Restabweichung": "Walk-in setzt lokale Restaurantzeit und Eingetroffen; Kalender und Viertelstunden-Auswahl ergänzen freie Eingabe. Slots sind keine Verfügbarkeitszusage; Speichern prüft Konflikte."
+    },
+    "B095": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/BookingTools.tsx",
+      "Restabweichung": "Walk-in setzt lokale Restaurantzeit und Eingetroffen; Kalender und Viertelstunden-Auswahl ergänzen freie Eingabe. Slots sind keine Verfügbarkeitszusage; Speichern prüft Konflikte."
+    },
+    "B096": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/BookingTools.tsx",
+      "Restabweichung": "Walk-in setzt lokale Restaurantzeit und Eingetroffen; Kalender und Viertelstunden-Auswahl ergänzen freie Eingabe. Slots sind keine Verfügbarkeitszusage; Speichern prüft Konflikte."
+    },
+    "B099": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Tages-/Wochennavigation, Kalender mit Heute, Liste/Woche, Suche/Status und rechteabhängiges Bearbeiten. Kalender/Week haben gezielte Browsertests; kein vollständiger Pixelvergleich."
+    },
+    "B100": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Tages-/Wochennavigation, Kalender mit Heute, Liste/Woche, Suche/Status und rechteabhängiges Bearbeiten. Kalender/Week haben gezielte Browsertests; kein vollständiger Pixelvergleich."
+    },
+    "B101": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Tages-/Wochennavigation, Kalender mit Heute, Liste/Woche, Suche/Status und rechteabhängiges Bearbeiten. Kalender/Week haben gezielte Browsertests; kein vollständiger Pixelvergleich."
+    },
+    "B102": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Tages-/Wochennavigation, Kalender mit Heute, Liste/Woche, Suche/Status und rechteabhängiges Bearbeiten. Kalender/Week haben gezielte Browsertests; kein vollständiger Pixelvergleich."
+    },
+    "B103": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Tages-/Wochennavigation, Kalender mit Heute, Liste/Woche, Suche/Status und rechteabhängiges Bearbeiten. Kalender/Week haben gezielte Browsertests; kein vollständiger Pixelvergleich."
+    },
+    "B104": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Tages-/Wochennavigation, Kalender mit Heute, Liste/Woche, Suche/Status und rechteabhängiges Bearbeiten. Kalender/Week haben gezielte Browsertests; kein vollständiger Pixelvergleich."
+    },
+    "B105": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Tages-/Wochennavigation, Kalender mit Heute, Liste/Woche, Suche/Status und rechteabhängiges Bearbeiten. Kalender/Week haben gezielte Browsertests; kein vollständiger Pixelvergleich."
+    },
+    "B106": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Tages-/Wochennavigation, Kalender mit Heute, Liste/Woche, Suche/Status und rechteabhängiges Bearbeiten. Kalender/Week haben gezielte Browsertests; kein vollständiger Pixelvergleich."
+    },
+    "B107": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Tages-/Wochennavigation, Kalender mit Heute, Liste/Woche, Suche/Status und rechteabhängiges Bearbeiten. Kalender/Week haben gezielte Browsertests; kein vollständiger Pixelvergleich."
+    },
+    "B108": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/TablePlan.tsx",
+      "Restabweichung": "Kacheln/Zeitstrahl mit Raumfilter, Übernachtbuchungen und lesenden Rollen; grafischer Tischplan ergänzt die Vorlage."
+    },
+    "B109": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/TablePlan.tsx",
+      "Restabweichung": "Kacheln/Zeitstrahl mit Raumfilter, Übernachtbuchungen und lesenden Rollen; grafischer Tischplan ergänzt die Vorlage."
+    },
+    "B113": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Keine eigenständigen raumbezogenen Sperrzeiträume mit Von/Bis-Kalendern. Sondertage gelten restaurantweit."
+    },
+    "B114": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Keine eigenständigen raumbezogenen Sperrzeiträume mit Von/Bis-Kalendern. Sondertage gelten restaurantweit."
+    },
+    "B115": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Keine eigenständigen raumbezogenen Sperrzeiträume mit Von/Bis-Kalendern. Sondertage gelten restaurantweit."
+    },
+    "B116": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Keine eigenständigen raumbezogenen Sperrzeiträume mit Von/Bis-Kalendern. Sondertage gelten restaurantweit."
+    },
+    "B117": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Keine eigenständigen raumbezogenen Sperrzeiträume mit Von/Bis-Kalendern. Sondertage gelten restaurantweit."
+    },
+    "B118": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Keine eigenständigen raumbezogenen Sperrzeiträume mit Von/Bis-Kalendern. Sondertage gelten restaurantweit."
+    },
+    "B119": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Keine eigenständigen raumbezogenen Sperrzeiträume mit Von/Bis-Kalendern. Sondertage gelten restaurantweit."
+    },
+    "B120": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Keine eigenständigen raumbezogenen Sperrzeiträume mit Von/Bis-Kalendern. Sondertage gelten restaurantweit."
+    },
+    "B121": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Keine eigenständigen raumbezogenen Sperrzeiträume mit Von/Bis-Kalendern. Sondertage gelten restaurantweit."
+    },
+    "B122": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
+      "Restabweichung": "Keine eigenständigen raumbezogenen Sperrzeiträume mit Von/Bis-Kalendern. Sondertage gelten restaurantweit."
+    },
+    "B123": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Freie Akzentfarbe vorhanden; die drei expliziten Vorlagen-Farbpresetbuttons fehlen."
+    },
+    "B124": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Freie Akzentfarbe vorhanden; die drei expliziten Vorlagen-Farbpresetbuttons fehlen."
+    },
+    "B125": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Freie Akzentfarbe vorhanden; die drei expliziten Vorlagen-Farbpresetbuttons fehlen."
+    },
+    "B126": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Logo ein-/ausblendbar und gespeichert, als Checkbox statt Schalter dargestellt."
+    },
+    "B127": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
+    },
+    "B128": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
+    },
+    "B129": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
+    },
+    "B130": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
+    },
+    "B131": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
+    },
+    "B132": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
+    },
+    "B133": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
+    },
+    "B134": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
+    },
+    "B135": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
+    },
+    "B136": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/widget/src/Designer.tsx",
+      "Restabweichung": "Live-Darstellung für Farbe/Logo/Sprache/Position. Interaktiver Beispiel-Buchungsablauf mit Kalender, Zeit, Gästen, Bestätigen/Zurück im Designer fehlt; echte Buchung separat im Widget. Ergänzung 09.09.: Vollständiger interaktiver Beispieldurchlauf mit Zurück und Bestätigung in Preview.tsx vorhanden."
+    },
+    "B137": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/preferences.tsx",
+      "Restabweichung": "Verhalten/Favoriten/Export-Karten und bedingte Anzeige der Unteroptionen vorhanden; Rechte begrenzen weiterhin tatsächliche Funktionen."
+    },
+    "B138": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/preferences.tsx",
+      "Restabweichung": "Verhalten/Favoriten/Export-Karten und bedingte Anzeige der Unteroptionen vorhanden; Rechte begrenzen weiterhin tatsächliche Funktionen."
+    },
+    "B139": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/preferences.tsx",
+      "Restabweichung": "Verhalten/Favoriten/Export-Karten und bedingte Anzeige der Unteroptionen vorhanden; Rechte begrenzen weiterhin tatsächliche Funktionen."
+    },
+    "B140": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/preferences.tsx",
+      "Restabweichung": "Verhalten/Favoriten/Export-Karten und bedingte Anzeige der Unteroptionen vorhanden; Rechte begrenzen weiterhin tatsächliche Funktionen."
+    },
+    "B141": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/ui-runtime/src/preferences.tsx",
+      "Restabweichung": "Verhalten/Favoriten/Export-Karten und bedingte Anzeige der Unteroptionen vorhanden; Rechte begrenzen weiterhin tatsächliche Funktionen."
+    },
+    "B144": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/customer/src/Screens.tsx",
+      "Restabweichung": "API liefert paginierte Mandanten; UI liest bisher nur erste Seite. Vorlagen-Zurück/Weiter fehlen auch bei abhängigen Restaurantauswahlen."
+    },
+    "B145": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/packages/customer/src/Screens.tsx",
+      "Restabweichung": "API liefert paginierte Mandanten; UI liest bisher nur erste Seite. Vorlagen-Zurück/Weiter fehlen auch bei abhängigen Restaurantauswahlen."
+    },
+    "B146": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/billing/src/Shop.tsx",
+      "Restabweichung": "Buchen/Aktivieren/Deaktivieren vorhanden mit Berechtigungen, Entitlement und Migration; andere Karten und Bestätigungsschritte als einfacher Vorlagen-Toggle."
+    },
+    "B147": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/billing/src/Shop.tsx",
+      "Restabweichung": "Buchen/Aktivieren/Deaktivieren vorhanden mit Berechtigungen, Entitlement und Migration; andere Karten und Bestätigungsschritte als einfacher Vorlagen-Toggle."
+    },
+    "B149": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/Roles.tsx",
+      "Restabweichung": "Lokaler Entwurf und serverseitige Prüfung vorhanden; Prüfung ist keine separate Testserver-Bereitstellung."
+    },
+    "B150": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/Roles.tsx",
+      "Restabweichung": "Lokaler Entwurf und serverseitige Prüfung vorhanden; Prüfung ist keine separate Testserver-Bereitstellung."
+    },
+    "B151": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/identity/src/RoleRollout.tsx",
+      "Restabweichung": "Plattformrechte aktivieren plus bestätigte neue Restaurantrolle für explizite Mandantenauswahl. Keine Synchronisierung bestehender Rollen oder separater Organisationen."
+    },
+    "B156": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/Roles.tsx",
+      "Restabweichung": "Gruppen mit Zwischenzustand und einzelne Berechtigungen schaltbar; registrierte Module und geschützte Rollen beachtet."
+    },
+    "B159": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/identity/src/Roles.tsx",
+      "Restabweichung": "Gruppen mit Zwischenzustand und einzelne Berechtigungen schaltbar; registrierte Module und geschützte Rollen beachtet."
+    },
+    "B160": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Auditliste vorhanden, aber keine getrennten Plattform-/Mandanten-Tabs und noch keine Mandantenfilterung in der Ansicht."
+    },
+    "B161": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Auditliste vorhanden, aber keine getrennten Plattform-/Mandanten-Tabs und noch keine Mandantenfilterung in der Ansicht."
+    },
+    "B162": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Betriebsstatus vorhanden; Backup-/Migrationsreiter der Health-Ansicht fehlen."
+    },
+    "B163": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Backup/Restore über Windows-Skripte und Migrationen über kontrollierte Jobs; keine entsprechenden Health-Webbuttons."
+    },
+    "B164": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Backup/Restore über Windows-Skripte und Migrationen über kontrollierte Jobs; keine entsprechenden Health-Webbuttons."
+    },
+    "B165": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Systemreiter Datenbankserver, SQL-Zugangsdaten, Zuordnung/Umzüge und Betriebsstatus; Redis/Odoo/SQL-Setup-Reiter der Vorlage nicht übernommen."
+    },
+    "B166": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/provisioning/src/Servers.tsx",
+      "Restabweichung": "TLS-Einstellung und getrennte Verbindungs-/Rechteprüfung für registrierte Server; andere Anordnung und geschütztes Anzeigen von SQL-Zugangsdaten."
+    },
+    "B167": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/provisioning/src/Servers.tsx",
+      "Restabweichung": "TLS-Einstellung und getrennte Verbindungs-/Rechteprüfung für registrierte Server; andere Anordnung und geschütztes Anzeigen von SQL-Zugangsdaten."
+    },
+    "B168": {
+      "Codeabgleich": "Teilweise",
+      "Umsetzung": "admin-ui/packages/provisioning/src/Servers.tsx",
+      "Restabweichung": "TLS-Einstellung und getrennte Verbindungs-/Rechteprüfung für registrierte Server; andere Anordnung und geschütztes Anzeigen von SQL-Zugangsdaten."
+    },
+    "B170": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/provisioning/src/Placement.tsx",
+      "Restabweichung": "Echter einzelner Mandantenumzug mit Version, Kennwort, MFA und Sicherungs-/Ausfallbestätigung; Status unter Aufträge."
+    },
+    "B171": {
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Erstinstallation über BAT/PowerShell mit erhöhten Rechten; keine beliebige SQL-/Betriebssystemausführung durch den Webprozess."
+    },
+    "B172": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Odoo-Einstellungen, Verbindungsprüfung und Synchronisations-Schalter nicht implementiert."
+    },
+    "B173": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Odoo-Einstellungen, Verbindungsprüfung und Synchronisations-Schalter nicht implementiert."
+    },
+    "B174": {
+      "Codeabgleich": "Nicht vorhanden",
+      "Umsetzung": "admin-ui/src/main.tsx",
+      "Restabweichung": "Odoo-Einstellungen, Verbindungsprüfung und Synchronisations-Schalter nicht implementiert."
+    },
+    "B181": {
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/support/src/Support.tsx",
+      "Restabweichung": "Ticketanlage mit Priorität/Betreff/Nachricht und echter Speicherung; Administration muss Zielrestaurant wählen."
+    }
+  }
+}
