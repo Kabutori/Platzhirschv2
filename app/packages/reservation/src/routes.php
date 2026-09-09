@@ -4,6 +4,8 @@ $r = app('router');
 $r->middleware(['web', 'auth', 'tenant'])
     ->prefix('api/v1/restaurant')
     ->group(function ($r) {
+        $r->get('/hours-week', [C::class, 'week']);
+        $r->put('/hours-week', [C::class, 'saveWeek']);
         $a = \App\Modules\Reservation\Http\AvailabilityController::class;
         $r->get('/{kind}', [$a, 'index'])->where('kind', 'room-closures|table-combinations');
         $r->post('/{kind}', [$a, 'save'])->where('kind', 'room-closures|table-combinations');

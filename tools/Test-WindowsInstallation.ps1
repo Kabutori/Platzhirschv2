@@ -132,6 +132,11 @@ $headers['X-Tenant-ID']=[string]$tenant.id
 $room=Call-Api POST 'v1/restaurant/rooms' @{name='Saal';color='sage';outdoor=$false}
 $table=Call-Api POST 'v1/restaurant/tables' @{name='Tisch 1';room_id=$room.id;capacity=4;active=$true}
 foreach($day in 1..7){$null=Call-Api POST 'v1/restaurant/hours' @{weekday=$day;opens='12:00';closes='23:00'}}
+$week=Call-Api GET 'v1/restaurant/hours-week'
+$weekRows=@($week.rows | ForEach-Object { @{weekday=$_.weekday;opens=$_.opens.Substring(0,5);closes=$_.closes.Substring(0,5)} })
+$null=Call-Api PUT 'v1/restaurant/hours-week' @{revision=$week.revision;rows=$weekRows}
+$null=Call-Api PUT 'v1/restaurant/hours-week' @{revision=$week.revision;rows=$weekRows} 409
+Write-Host 'Wochenplan atomar gespeichert und veraltete Aenderung abgewiesen.'
 $date=(Get-Date).AddDays(2).ToString('yyyy-MM-dd')
 $booking=@{table_id=$table.id;guest_name='CI Guest';party_size=2;starts_at="${date}T18:00";duration_minutes=90;request_key=[Guid]::NewGuid().ToString()}
 $reservation=Call-Api POST 'v1/restaurant/reservations' $booking 201

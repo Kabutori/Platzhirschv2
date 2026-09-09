@@ -123,3 +123,53 @@ test('room colors and icons use selectable grids without submitting the editor',
   await expect.poll(() => saved?.icon).toBe('terrace');
   expect(saved.color).toBe('sage');
 });
+test('weekly opening dialog preserves inputs on conflicts and closes a day explicitly', async ({ page }) => {
+  let saved;
+  let conflict = true;
+  await page.route('**/api/**', async (route) => {
+    const r = route.request(),
+      p = new URL(r.url()).pathname;
+    let body = [];
+    if (p.endsWith('/auth/me'))
+      body = {
+        id: 2,
+        name: 'Restaurant',
+        role: 'restaurant_admin',
+        tenant_id: 1,
+        permissions: ['restaurant.configure'],
+      };
+    else if (p.endsWith('/csrf')) body = { token: 'csrf' };
+    else if (p.endsWith('/hours-week')) {
+      if (r.method() === 'PUT') {
+        saved = r.postDataJSON();
+        if (conflict) {
+          conflict = false;
+          await route.fulfill({
+            status: 409,
+            contentType: 'application/json',
+            body: JSON.stringify({ message: 'Öffnungszeiten wurden inzwischen geändert.' }),
+          });
+          return;
+        }
+        body = { saved: true };
+      } else body = { revision: 'a'.repeat(64), rows: [{ weekday: 1, opens: '12:00', closes: '22:00' }] };
+    }
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
+  });
+  await page.goto('/restaurant/login');
+  await page.getByRole('button', { name: 'Öffnungszeiten', exact: true }).click();
+  await page.getByRole('button', { name: 'Wochenplan bearbeiten', exact: true }).click();
+  const d = page.getByRole('dialog');
+  await d.getByRole('switch', { name: 'Dienstag geöffnet' }).check();
+  await d.getByRole('switch', { name: 'Montag geöffnet' }).uncheck();
+  await d.getByRole('button', { name: 'Wochenplan speichern', exact: true }).click();
+  await expect(d.getByRole('alert')).toContainText('inzwischen geändert');
+  await expect(d.getByRole('switch', { name: 'Dienstag geöffnet' })).toBeChecked();
+  await mkdir('test-results', { recursive: true });
+  await page.screenshot({ path: 'test-results/design-hours-week.png' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: 'test-results/design-hours-week-mobile.png' });
+  expect(saved.rows).toEqual([{ weekday: 2, opens: '12:00', closes: '22:00' }]);
+  await d.getByRole('button', { name: 'Abbrechen', exact: true }).click();
+  await expect(d).toHaveCount(0);
+});

@@ -71,6 +71,37 @@ class RestaurantTest extends TestCase
         // the persisted user just as the real login flow does (active = true).
         $this->actingAs($this->user->refresh());
     }
+    public function test_weekly_hours_are_atomic_version_checked_and_include_overnight_overlap(): void
+    {
+        $snapshot = $this->getJson('/api/v1/restaurant/hours-week')->assertOk()->json();
+        $rows = [
+            ['weekday' => 7, 'opens' => '22:00', 'closes' => '02:00'],
+            ['weekday' => 1, 'opens' => '01:00', 'closes' => '03:00'],
+        ];
+        $this->putJson('/api/v1/restaurant/hours-week', [
+            'revision' => $snapshot['revision'],
+            'rows' => $rows,
+        ])->assertUnprocessable();
+        $this->assertSame(7, DB::connection('tenant')->table('opening_hours')->count());
+        $rows[1]['opens'] = '02:00';
+        $this->putJson('/api/v1/restaurant/hours-week', [
+            'revision' => $snapshot['revision'],
+            'rows' => $rows,
+        ])->assertOk();
+        $this->assertSame(2, DB::connection('tenant')->table('opening_hours')->count());
+        $this->putJson('/api/v1/restaurant/hours-week', [
+            'revision' => $snapshot['revision'],
+            'rows' => [],
+        ])->assertConflict();
+        $new = $this->getJson('/api/v1/restaurant/hours-week')->json();
+        $this->putJson('/api/v1/restaurant/hours-week', [
+            'revision' => $new['revision'],
+            'rows' => [],
+        ])->assertOk();
+        $this->assertSame(0, DB::connection('tenant')->table('opening_hours')->count());
+        $this->user->update(['role' => 'staff']);
+        $this->actingAs($this->user->fresh())->getJson('/api/v1/restaurant/hours-week')->assertForbidden();
+    }
     public function test_room_closures_block_widget_and_booking_and_protect_existing_reservations(): void
     {
         $date = now()->addDay()->format('Y-m-d');

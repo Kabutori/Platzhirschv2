@@ -1,3 +1,4 @@
+import HoursWeek from './HoursWeek';
 import Calendar from './Calendar';
 import BookingTools from './BookingTools';
 import Week, { shiftDate, matchesReservation } from './Week';
@@ -34,6 +35,7 @@ export function RestaurantResource({ resource, tenant }: { resource: string; ten
     queryFn: () => api('v1/restaurant/rooms', 'GET', undefined, tenant),
     enabled: resource === 'tables',
   });
+  const [weekOpen, setWeekOpen] = useState(false);
   const [form, setForm] = useState<Row | null>(null);
   const [error, setError] = useState<unknown>();
   const qc = useQueryClient();
@@ -145,6 +147,7 @@ export function RestaurantResource({ resource, tenant }: { resource: string; ten
               ? 'Sondertage ersetzen den gesamten Kalendertag, einschließlich hineinreichender Öffnungszeiten vom Vortag.'
               : 'Deine Restaurant-Konfiguration'}
         </p>
+        {resource === 'hours' && <button onClick={() => setWeekOpen(true)}>Wochenplan bearbeiten</button>}
         <button className="primary" onClick={() => setForm({})}>
           <Plus size={16} />
           Hinzufügen
@@ -188,6 +191,16 @@ export function RestaurantResource({ resource, tenant }: { resource: string; ten
           />
         )}
       </section>
+      {weekOpen && (
+        <HoursWeek
+          tenant={tenant}
+          close={() => setWeekOpen(false)}
+          done={async () => {
+            setWeekOpen(false);
+            await qc.invalidateQueries();
+          }}
+        />
+      )}
       {form && (
         <Modal title={form.id ? 'Eintrag bearbeiten' : 'Neuer Eintrag'} close={() => setForm(null)}>
           <Form

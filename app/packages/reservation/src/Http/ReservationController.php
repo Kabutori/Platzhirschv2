@@ -25,7 +25,71 @@ class ReservationController
         abort_unless(isset(self::RESOURCES[$resource]), 404);
         return $this->db->connection('tenant')->table(self::RESOURCES[$resource])->orderBy('id')->get();
     }
+    public function week(Request $r)
+    {
+        abort_unless($r->user()->hasPermission('restaurant.configure'), 403);
+        $rows = $this->db->connection('tenant')->table('opening_hours')->orderBy('id')->get();
+        return ['rows' => $rows, 'revision' => hash('sha256', $rows->toJson())];
+    }
+    public function saveWeek(Request $r)
+    {
+        abort_unless($r->user()->hasPermission('restaurant.configure'), 403);
+        $v = $r->validate([
+            'revision' => ['required', 'string', 'size:64'],
+            'rows' => ['present', 'array', 'max:42'],
+            'rows.*' => ['array:weekday,opens,closes'],
+            'rows.*.weekday' => ['required', 'integer', 'min:1', 'max:7'],
+            'rows.*.opens' => ['required', 'date_format:H:i'],
+            'rows.*.closes' => ['required', 'date_format:H:i'],
+        ]);
+        $intervals = [];
+        foreach ($v['rows'] as $row) {
+            abort_if($row['opens'] === $row['closes'], 422, 'Öffnen und Schließen dürfen nicht gleich sein.');
+            $minutes = fn($t) => (int) substr($t, 0, 2) * 60 + (int) substr($t, 3, 2);
+            $start = ($row['weekday'] - 1) * 1440 + $minutes($row['opens']);
+            $end = ($row['weekday'] - 1) * 1440 + $minutes($row['closes']);
+            if ($end < $start) {
+                $end += 1440;
+            }
+            foreach ($intervals as [$a, $b]) {
+                foreach ([-10080, 0, 10080] as $shift) {
+                    abort_if(
+                        $start < $b + $shift && $end > $a + $shift,
+                        422,
+                        'Öffnungszeiten überschneiden sich.',
+                    );
+                }
+            }
+            $intervals[] = [$start, $end];
+        }
+        $db = $this->db->connection('tenant');
+        return $db->transaction(function () use ($r, $v, $db) {
+            $rows = $db->table('opening_hours')->orderBy('id')->lockForUpdate()->get();
+            abort_unless(
+                hash_equals(hash('sha256', $rows->toJson()), $v['revision']),
+                409,
+                'Öffnungszeiten wurden inzwischen geändert. Bitte neu laden.',
+            );
+            $db->table('opening_hours')->delete();
+            foreach ($v['rows'] as $row) {
+                $db->table('opening_hours')->insert([...$row, 'created_at' => now(), 'updated_at' => now()]);
+            }
+            $this->audit->record('restaurant.hours.week_saved', null, $r->attributes->get('tenant')->id);
+            return ['saved' => true];
+        });
+    }
     public function save(Request $r, string $resource, ?int $id = null)
+    {
+        if ($resource !== 'hours') {
+            return $this->saveResource($r, $resource, $id);
+        }
+        $db = $this->db->connection('tenant');
+        return $db->transaction(function () use ($r, $resource, $id, $db) {
+            $db->table('opening_hours')->orderBy('id')->lockForUpdate()->get();
+            return $this->saveResource($r, $resource, $id);
+        });
+    }
+    private function saveResource(Request $r, string $resource, ?int $id = null)
     {
         abort_unless($r->user()->hasPermission('restaurant.configure'), 403);
         abort_unless(isset(self::RESOURCES[$resource]), 404);
@@ -86,6 +150,17 @@ class ReservationController
         return $db->table($table)->find($id);
     }
     public function delete(Request $r, string $resource, int $id)
+    {
+        if ($resource !== 'hours') {
+            return $this->deleteResource($r, $resource, $id);
+        }
+        $db = $this->db->connection('tenant');
+        return $db->transaction(function () use ($r, $resource, $id, $db) {
+            $db->table('opening_hours')->orderBy('id')->lockForUpdate()->get();
+            return $this->deleteResource($r, $resource, $id);
+        });
+    }
+    private function deleteResource(Request $r, string $resource, int $id)
     {
         abort_unless($r->user()->hasPermission('restaurant.configure'), 403);
         abort_unless(isset(self::RESOURCES[$resource]), 404);

@@ -352,19 +352,19 @@
       "Restabweichung": "Ausführbare Module werden als Composer/npm-Paket im Projekt registriert und getestet; Angebote im Billing-Reiter. Kein beliebiges Laufzeit-Modulformular."
     },
     "B042": {
-      "Codeabgleich": "Teilweise",
-      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
-      "Restabweichung": "Öffnungsfenster einzeln anlegen/bearbeiten/löschen, auch über Mitternacht. Gemeinsamer Wochenplan-Dialog mit Tages-Schaltern fehlt."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/HoursWeek.tsx",
+      "Restabweichung": "Gemeinsamer Wochenplan mit Tages-Schaltern und mehreren Zeitfenstern; atomare Speicherung mit Revisionsprüfung und Überschneidungsprüfung einschließlich Wochenwechsel. Native Zeiteingaben statt simuliertem Vorlagenzustand."
     },
     "B044": {
-      "Codeabgleich": "Teilweise",
-      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
-      "Restabweichung": "Öffnungsfenster einzeln anlegen/bearbeiten/löschen, auch über Mitternacht. Gemeinsamer Wochenplan-Dialog mit Tages-Schaltern fehlt."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/HoursWeek.tsx",
+      "Restabweichung": "Gemeinsamer Wochenplan mit Tages-Schaltern und mehreren Zeitfenstern; atomare Speicherung mit Revisionsprüfung und Überschneidungsprüfung einschließlich Wochenwechsel. Native Zeiteingaben statt simuliertem Vorlagenzustand."
     },
     "B110": {
-      "Codeabgleich": "Teilweise",
-      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
-      "Restabweichung": "Öffnungsfenster einzeln anlegen/bearbeiten/löschen, auch über Mitternacht. Gemeinsamer Wochenplan-Dialog mit Tages-Schaltern fehlt."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/HoursWeek.tsx",
+      "Restabweichung": "Gemeinsamer Wochenplan mit Tages-Schaltern und mehreren Zeitfenstern; atomare Speicherung mit Revisionsprüfung und Überschneidungsprüfung einschließlich Wochenwechsel. Native Zeiteingaben statt simuliertem Vorlagenzustand."
     },
     "B045": {
       "Codeabgleich": "Teilweise",
