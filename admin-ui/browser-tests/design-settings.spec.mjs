@@ -122,13 +122,19 @@ test('template preference cards control CSV visibility, survive reload and remai
 }) => {
   await mock(page);
   await page.goto('/restaurant/login');
+  await page.getByRole('button', { name: 'Exportieren', exact: true }).click();
   await expect(page.getByRole('button', { name: 'CSV', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Abbrechen', exact: true }).click();
   await page.getByRole('button', { name: 'Einstellungen', exact: true }).click();
   await page.getByRole('switch', { name: 'CSV anbieten', exact: true }).uncheck();
   await page.getByRole('button', { name: 'Reservierungen', exact: true }).click();
+  await page.getByRole('button', { name: 'Exportieren', exact: true }).click();
   await expect(page.getByRole('button', { name: 'CSV', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Abbrechen', exact: true }).click();
   await page.reload();
+  await page.getByRole('button', { name: 'Exportieren', exact: true }).click();
   await expect(page.getByRole('button', { name: 'CSV', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Abbrechen', exact: true }).click();
   await page.getByRole('button', { name: 'Einstellungen', exact: true }).click();
   await page.getByRole('switch', { name: 'CSV anbieten', exact: true }).check();
   await page.getByRole('switch', { name: 'Exporte anzeigen', exact: true }).uncheck();
@@ -180,7 +186,7 @@ test('interactive designer completes a sample booking, supports back and sends n
   expect(writes).toHaveLength(0);
   await page.screenshot({ path: 'test-results/design-widget-confirmation.png', fullPage: true });
   await preview.getByRole('button', { name: 'Neue Beispielbuchung' }).click();
-  await expect(preview.getByLabel('Beispieldatum',{exact:true})).toHaveValue('2027-05-20');
+  await expect(preview.getByLabel('Beispieldatum', { exact: true })).toHaveValue('2027-05-20');
   await page.setViewportSize({ width: 390, height: 844 });
   await preview.getByRole('button', { name: 'Verfügbare Tische anzeigen' }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: 'test-results/design-widget-interactive-mobile.png', fullPage: true });

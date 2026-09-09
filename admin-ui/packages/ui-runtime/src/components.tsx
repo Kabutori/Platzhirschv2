@@ -1,5 +1,7 @@
+import { createPortal } from 'react-dom';
 import {
   useState,
+  useId,
   useRef,
   useEffect,
   createContext,
@@ -8,7 +10,17 @@ import {
   type FormEvent,
 } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, RefreshCw, CalendarDays, X, ChevronRight } from 'lucide-react';
+import {
+  AlertCircle,
+  RefreshCw,
+  CalendarDays,
+  X,
+  ChevronRight,
+  House,
+  Trees,
+  Wine,
+  PartyPopper,
+} from 'lucide-react';
 import { api } from './api';
 import { usePreferences } from './preferences';
 export type Row = Record<string, any>;
@@ -92,15 +104,20 @@ const ModalClose = createContext<(() => void) | null>(null);
 export function Modal({ title, children, close }: { title: string; children: ReactNode; close: () => void }) {
   const { value: preferences } = usePreferences();
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   useEffect(() => {
     ref.current?.showModal();
     return () => ref.current?.close();
   }, []);
-  return (
+  return createPortal(
     <dialog
       ref={ref}
-      onCancel={close}
-      aria-labelledby="dialog-title"
+      onCancel={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        close();
+      }}
+      aria-labelledby={titleId}
       onClick={(e) => {
         if (!preferences.backdropClose || e.target !== e.currentTarget) return;
         const r = e.currentTarget.getBoundingClientRect();
@@ -108,13 +125,14 @@ export function Modal({ title, children, close }: { title: string; children: Rea
       }}
     >
       <header>
-        <h2 id="dialog-title">{title}</h2>
-        <button className="icon" onClick={close} aria-label="Schließen">
+        <h2 id={titleId}>{title}</h2>
+        <button type="button" className="icon" onClick={close} aria-label="Schließen">
           <X size={20} />
         </button>
       </header>
       <ModalClose.Provider value={close}>{children}</ModalClose.Provider>
-    </dialog>
+    </dialog>,
+    document.body,
   );
 }
 export function Form({
@@ -143,6 +161,7 @@ export function Form({
   const [busy, setBusy] = useState(false);
   async function submit(e: FormEvent) {
     e.preventDefault();
+    e.stopPropagation();
     if (busy) return;
     setError(undefined);
     setBusy(true);
@@ -165,7 +184,45 @@ export function Form({
               {f.label}
               {f.required ? ' *' : ''}
             </span>
-            {f.options ? (
+            {f.options && (f.type === 'color-choices' || f.type === 'icon-choices') ? (
+              <div className="field-choices" role="group" aria-label={f.label}>
+                {f.options.map((o) => {
+                  const Symbol = (
+                    { room: House, terrace: Trees, bar: Wine, event: PartyPopper } as Record<
+                      string,
+                      typeof House
+                    >
+                  )[String(o.value)];
+                  const color = (
+                    {
+                      terracotta: '#cc794e',
+                      sage: '#819681',
+                      sky: '#779ba7',
+                      mustard: '#b39b4f',
+                      plum: '#987890',
+                      slate: '#78818b',
+                    } as Record<string, string>
+                  )[String(o.value)];
+                  return (
+                    <button
+                      type="button"
+                      key={o.value}
+                      aria-label={o.label}
+                      aria-pressed={String(values[f.key]) === String(o.value)}
+                      disabled={busy}
+                      onClick={() => setValues({ ...values, [f.key]: o.value })}
+                    >
+                      {f.type === 'color-choices' ? (
+                        <span className="choice-swatch" style={{ background: color }} />
+                      ) : Symbol ? (
+                        <Symbol size={22} />
+                      ) : null}
+                      {o.label}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : f.options ? (
               <select
                 aria-label={f.label}
                 multiple={f.multiple}

@@ -63,7 +63,7 @@ test('restaurant administrator creates a scoped employee role', async ({ page })
 test('read-only role hides administration and disables booking and export', async ({ page }) => {
   await mockApi(page, { ...admin, role: 'staff', permissions: ['reservation.read'] });
   await page.goto('/restaurant/login');
-  await expect(page.getByRole('button', { name: 'CSV', exact: true })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Exportieren', exact: true })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Reservierung', exact: true })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Rollen & Rechte', exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Team', exact: true })).toHaveCount(0);

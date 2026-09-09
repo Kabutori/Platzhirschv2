@@ -51,7 +51,7 @@ async function setup(page) {
     await route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
   });
   await page.goto('/administration/login');
-  await mkdir('artifacts', { recursive: true });
+  await mkdir('test-results', { recursive: true });
   return calls;
 }
 test('audit tabs filter at the server and system tabs show actual migration history', async ({ page }) => {
@@ -62,13 +62,13 @@ test('audit tabs filter at the server and system tabs show actual migration hist
   await page.getByLabel('Mandanten-ID').fill('42');
   await expect.poll(() => calls.some((x) => x.includes('tenant_id=42'))).toBe(true);
   await expect(page.getByText('reservation.created', { exact: true })).toBeVisible();
-  await page.screenshot({ path: 'artifacts/design-audit-tabs.png' });
+  await page.screenshot({ path: 'test-results/design-audit-tabs.png' });
   await page.getByRole('button', { name: 'System', exact: true }).click();
   await page.getByRole('button', { name: 'Migrationen', exact: true }).click();
   await expect(page.getByText('support_release_notes')).toBeVisible();
   await page.getByRole('button', { name: 'Backups', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Betriebsanleitung öffnen' })).toBeVisible();
-  await page.screenshot({ path: 'artifacts/design-health-tabs.png' });
+  await page.screenshot({ path: 'test-results/design-health-tabs.png' });
 });
 test('release editor publishes a categorized note and preserves mobile dialog layout', async ({ page }) => {
   await setup(page);
@@ -80,11 +80,46 @@ test('release editor publishes a categorized note and preserves mobile dialog la
   await d.getByLabel('Kategorie', { exact: true }).selectOption('feature');
   await d.getByLabel('Änderungen', { exact: true }).fill('Neue Ansicht');
   await d.getByLabel('Für Restaurantportale veröffentlichen', { exact: true }).check();
-  await page.screenshot({ path: 'artifacts/design-release-editor.png' });
+  await page.screenshot({ path: 'test-results/design-release-editor.png' });
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(d).toBeVisible();
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
-  await page.screenshot({ path: 'artifacts/design-release-mobile.png' });
+  await page.screenshot({ path: 'test-results/design-release-mobile.png' });
   await d.getByRole('button', { name: 'Speichern', exact: true }).click();
   await expect(page.getByText('Neue Ansicht', { exact: true })).toBeVisible();
+});
+test('room colors and icons use selectable grids without submitting the editor', async ({ page }) => {
+  let saved;
+  await page.route('**/api/**', async (route) => {
+    const r = route.request(),
+      p = new URL(r.url()).pathname;
+    let body = [];
+    if (p.endsWith('/auth/me'))
+      body = {
+        id: 2,
+        name: 'Restaurant',
+        role: 'restaurant_admin',
+        tenant_id: 1,
+        permissions: ['restaurant.configure'],
+      };
+    else if (p.endsWith('/csrf')) body = { token: 'csrf' };
+    else if (p.endsWith('/rooms') && r.method() === 'POST') {
+      saved = r.postDataJSON();
+      body = { id: 1, ...saved };
+    }
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
+  });
+  await page.goto('/restaurant/login');
+  await page.getByRole('button', { name: 'Räume', exact: true }).click();
+  await page.getByRole('button', { name: 'Hinzufügen', exact: true }).click();
+  const d = page.getByRole('dialog');
+  await d.getByLabel('Raumname', { exact: true }).fill('Garten');
+  await d.getByRole('button', { name: 'Salbei', exact: true }).click();
+  await d.getByRole('button', { name: 'Terrasse', exact: true }).click();
+  expect(saved).toBeUndefined();
+  await mkdir('test-results', { recursive: true });
+  await page.screenshot({ path: 'test-results/design-room-choices.png' });
+  await d.getByRole('button', { name: 'Speichern', exact: true }).click();
+  await expect.poll(() => saved?.icon).toBe('terrace');
+  expect(saved.color).toBe('sage');
 });

@@ -45,9 +45,17 @@ export function RestaurantResource({ resource, tenant }: { resource: string; ten
           {
             key: 'color',
             label: 'Kennfarbe',
+            type: 'color-choices',
             required: true,
             default: 'terracotta',
-            options: pick(['terracotta', 'sage', 'sky', 'mustard', 'plum', 'slate']),
+            options: [
+              ['terracotta', 'Terrakotta'],
+              ['sage', 'Salbei'],
+              ['sky', 'Himmel'],
+              ['mustard', 'Senf'],
+              ['plum', 'Pflaume'],
+              ['slate', 'Schiefer'],
+            ].map(([value, label]) => ({ value, label })),
           },
           { key: 'outdoor', label: 'Außenbereich', type: 'checkbox' },
           { key: 'location', label: 'Standort' },
@@ -55,6 +63,7 @@ export function RestaurantResource({ resource, tenant }: { resource: string; ten
           {
             key: 'icon',
             label: 'Raum-Symbol',
+            type: 'icon-choices',
             default: 'room',
             options: [
               { value: 'room', label: 'Raum' },

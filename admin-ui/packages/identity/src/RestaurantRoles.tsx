@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, Save, Search, Pencil } from 'lucide-react';
 import { api } from '@platzhirsch/ui-runtime/api';
-import { useData, Loading, ErrorBox, Modal, type Row } from '@platzhirsch/ui-runtime/components';
+import { useData, Loading, ErrorBox, Modal, Form, type Row } from '@platzhirsch/ui-runtime/components';
 function Editor({
   role,
   catalog,
@@ -35,7 +35,8 @@ function Editor({
           permissions: Object.entries(catalog).map(([code, label]) => ({ code, label })),
         },
       ];
-  const [renaming, setRenaming] = useState(!role.id);
+  const [renaming, setRenaming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [search, setSearch] = useState('');
   const [group, setGroup] = useState(groups[0]?.module + ':' + groups[0]?.code);
   const active = groups.find((g) => g.module + ':' + g.code === group) || groups[0];
@@ -85,29 +86,14 @@ function Editor({
             Umbenennen
           </button>
           {onDelete && (
-            <button
-              type="button"
-              className="danger"
-              disabled={busy}
-              onClick={async () => {
-                if (!confirm('Unbenutzte Rolle löschen?')) return;
-                setBusy(true);
-                try {
-                  await onDelete();
-                } catch (e) {
-                  setError(e);
-                } finally {
-                  setBusy(false);
-                }
-              }}
-            >
+            <button type="button" className="danger" disabled={busy} onClick={() => setDeleting(true)}>
               <Trash2 size={14} />
               Löschen
             </button>
           )}
         </div>
       )}
-      {renaming && (
+      {!role.id && (
         <label className="rights-rename restaurant-role-name">
           Rollenname
           <input
@@ -119,6 +105,53 @@ function Editor({
             onChange={(e) => setName(e.target.value)}
           />
         </label>
+      )}
+      {renaming && (
+        <Modal title="Rolle umbenennen" close={() => setRenaming(false)}>
+          <Form
+            initial={{ name }}
+            fields={[{ key: 'name', label: 'Rollenname', required: true }]}
+            onSave={async (data) => {
+              setName(data.name);
+              setRenaming(false);
+            }}
+          />
+          <p>Mit Speichern in der Rechteansicht werden Name und Rechte gemeinsam übernommen.</p>
+        </Modal>
+      )}
+      {deleting && (
+        <Modal
+          title="Rolle löschen"
+          close={() => {
+            if (!busy) setDeleting(false);
+          }}
+        >
+          <p>Die unbenutzte Rolle „{role.name}“ löschen?</p>
+          <ErrorBox error={error} />
+          <div className="dialog-actions">
+            <button type="button" disabled={busy} onClick={() => setDeleting(false)}>
+              Abbrechen
+            </button>
+            <button
+              type="button"
+              className="danger"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  await onDelete?.();
+                  setDeleting(false);
+                } catch (e) {
+                  setError(e);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              Löschen bestätigen
+            </button>
+          </div>
+        </Modal>
       )}
       <ErrorBox error={error} />
       <div className="rights-workspace">
