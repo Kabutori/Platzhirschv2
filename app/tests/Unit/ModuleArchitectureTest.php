@@ -27,6 +27,7 @@ class ModuleArchitectureTest extends TestCase
                 'provisioning',
                 'billing',
                 'reporting',
+                'weather',
                 'support',
                 'reservation',
                 'widget',

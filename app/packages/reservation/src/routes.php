@@ -5,6 +5,7 @@ $r->middleware(['web', 'auth', 'tenant'])
     ->prefix('api/v1/restaurant')
     ->group(function ($r) {
         $r->patch('/rooms/{id}/tables', [C::class, 'assignTables'])->whereNumber('id');
+        $r->get('/weather', [C::class, 'weather']);
         $r->get('/hours-week', [C::class, 'week']);
         $r->put('/hours-week', [C::class, 'saveWeek']);
         $a = \App\Modules\Reservation\Http\AvailabilityController::class;

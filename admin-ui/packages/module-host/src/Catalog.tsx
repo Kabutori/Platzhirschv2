@@ -10,6 +10,10 @@ type Module = {
   permissions: { code: string; label: string; permissions: { code: string; label: string }[] }[];
 };
 const labels: Record<string, { name: string; description: string }> = {
+  weather: {
+    name: 'Wettervorhersage',
+    description: '7-Tage-Vorschau und Regenwarnungen für wetterabhängige Räume.',
+  },
   customer: { name: 'Customer', description: 'Restaurantprofile, Mandantenanlage und Testrestaurants.' },
   reservation: {
     name: 'Reservation',

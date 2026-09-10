@@ -27,7 +27,8 @@
     "@platzhirsch/widget-ui": "0.1.0",
     "@platzhirsch/customer-ui": "0.1.0",
     "@platzhirsch/module-host": "0.1.0",
-    "@platzhirsch/system-guide-ui": "0.1.0"
+    "@platzhirsch/system-guide-ui": "0.1.0",
+    "@platzhirsch/weather-ui": "0.1.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

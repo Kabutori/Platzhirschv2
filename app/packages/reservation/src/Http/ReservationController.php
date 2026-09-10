@@ -8,7 +8,24 @@ use App\Contracts\Module\AuditSink;
 use App\Modules\Reservation\PublicApi\ReservationGateway;
 class ReservationController
 {
-    public function __construct(private DatabaseManager $db, private AuditSink $audit) {}
+    public function __construct(
+        private DatabaseManager $db,
+        private AuditSink $audit,
+        private ?\App\Contracts\Module\WeatherForecast $weather = null,
+    ) {}
+    public function weather(Request $r): array
+    {
+        abort_unless(
+            $r->user()->hasPermission('reservation.read') ||
+                $r->user()->hasPermission('restaurant.configure'),
+            403,
+        );
+        $tenant = $r->attributes->get('tenant');
+        return $this->weather?->forecast($tenant->id, $tenant->timezone ?? 'Europe/Berlin') ?? [
+            'status' => 'inactive',
+            'days' => [],
+        ];
+    }
     private const RESOURCES = [
         'rooms' => 'rooms',
         'tables' => 'dining_tables',
@@ -164,6 +181,7 @@ class ReservationController
                 'name' => 'required|string|max:120',
                 'color' => ['required', Rule::in(['terracotta', 'sage', 'sky', 'mustard', 'plum', 'slate'])],
                 'outdoor' => 'required|boolean',
+                'weather_dependent' => 'sometimes|boolean',
                 'location' => 'nullable|string|max:200',
                 'note' => 'nullable|string|max:2000',
                 'icon' => 'sometimes|in:room,terrace,bar,event',

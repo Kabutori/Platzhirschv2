@@ -45,6 +45,7 @@ import { billingManifest } from '@platzhirsch/billing-ui';
 import { reportingManifest } from '@platzhirsch/reporting-ui';
 const ModuleShop = lazy(billingManifest.nav[0].screen);
 const Reporting = lazy(reportingManifest.nav[0].screen);
+const Weather = lazy(() => import('@platzhirsch/weather-ui'));
 const BillingAdministration = lazy(() => import('@platzhirsch/billing-ui/Administration.tsx'));
 const Placement = lazy(() => import('@platzhirsch/provisioning-ui/Placement.tsx'));
 const DatabaseAccess = lazy(() => import('@platzhirsch/provisioning-ui/DatabaseAccess.tsx'));
@@ -506,6 +507,9 @@ function Content({
     return (
       <Suspense fallback={<Loading />}>
         <Reservations tenant={tenant} mode={page} go={go} user={user} />
+        {user.enabled_modules?.includes('weather') && (
+          <Weather tenant={tenant} canConfigure={Boolean(allowed(user, 'restaurant.configure'))} />
+        )}
       </Suspense>
     );
   if (page === 'module-shop' && user.role === 'restaurant_admin')
@@ -536,6 +540,9 @@ function Content({
   return (
     <Suspense fallback={<Loading />}>
       <RestaurantResource resource={page} tenant={tenant} />
+      {page === 'rooms' && user.enabled_modules?.includes('weather') && (
+        <Weather tenant={tenant} canConfigure={Boolean(allowed(user, 'restaurant.configure'))} />
+      )}
     </Suspense>
   );
 }

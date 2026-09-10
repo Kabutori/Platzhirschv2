@@ -62,6 +62,12 @@ export function RestaurantResource({ resource, tenant }: { resource: string; ten
             ].map(([value, label]) => ({ value, label })),
           },
           { key: 'outdoor', label: 'Außenbereich', type: 'checkbox' },
+          {
+            key: 'weather_dependent',
+            label: 'Wetterabhängig?',
+            type: 'checkbox',
+            help: '7-Tage-Vorschau und Warnungen mit aktivem Wettermodul. Keine automatische Stornierung.',
+          },
           { key: 'location', label: 'Standort' },
           { key: 'note', label: 'Notiz', type: 'textarea' },
           {
