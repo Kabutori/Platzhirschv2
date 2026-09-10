@@ -27,6 +27,9 @@ Route::prefix('api')->group(function () {
     Route::prefix('v1/admin')
         ->middleware(['auth', 'system'])
         ->group(function () {
+            Route::get('mail-settings', [\App\MailSettings\Controller::class, 'index']);
+            Route::put('mail-settings', [\App\MailSettings\Controller::class, 'save']);
+            Route::post('mail-settings/test', [\App\MailSettings\Controller::class, 'test'])->middleware('throttle:3,1');
             Route::get('modules', fn() => app(\App\Core\Module\ModuleRegistry::class)->catalog());
             Route::get(
                 'permissions/families',

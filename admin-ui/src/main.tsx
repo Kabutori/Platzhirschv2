@@ -1,3 +1,4 @@
+import MailSettings from './MailSettings';
 const OdooPlaceholder = lazy(() => import('@platzhirsch/provisioning-ui/OdooPlaceholder.tsx'));
 const Releases = lazy(() => import('@platzhirsch/support-ui/Releases.tsx'));
 const Organizations = lazy(() => import('@platzhirsch/customer-ui/Organizations.tsx'));
@@ -113,6 +114,7 @@ const systemNav = [
   ['users', 'Benutzer', Users],
   ['roles', 'Rollen & Rechte', ShieldCheck],
   ['modules', 'Module', Code2],
+  ['database-servers', 'Serververwaltung', Building2],
   ['system-settings', 'System-Einstellungen', Settings],
   ['releases', 'Releases', ScrollText],
   ['audit-log', 'Audit Log', ScrollText],
@@ -551,6 +553,7 @@ function Infrastructure({ user }: { user: Row }) {
     ...(allowed(user, 'provisioning.servers.read') ? [['servers', 'Datenbankserver']] : []),
     ...(user.role === 'system_admin'
       ? [
+          ['smtp', 'E-Mail / SMTP'],
           ['access', 'SQL-Zugangsdaten'],
           ['move', 'Serverzuordnung & Umzüge'],
           ['odoo', 'Odoo'],
@@ -572,6 +575,8 @@ function Infrastructure({ user }: { user: Row }) {
       <Suspense fallback={<Loading />}>
         {tab === 'servers' ? (
           <DatabaseServers />
+        ) : tab === 'smtp' && user.role === 'system_admin' ? (
+          <MailSettings />
         ) : tab === 'access' && user.role === 'system_admin' ? (
           <DatabaseAccess />
         ) : tab === 'move' && user.role === 'system_admin' ? (

@@ -1731,3 +1731,5 @@ dialog > .notice {
     grid-template-columns: repeat(7, 110px);
   }
 }
+
+.smtp-form{display:grid;gap:16px;max-width:640px}.smtp-form>label{display:grid;gap:6px}.smtp-form>label:has(input[type=checkbox]){display:flex;align-items:center;gap:10px}.smtp-form input:not([type=checkbox]),.smtp-form select{width:100%}

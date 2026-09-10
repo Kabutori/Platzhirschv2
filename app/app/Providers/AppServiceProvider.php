@@ -9,6 +9,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Queue::before(fn() => app(\App\MailSettings\Settings::class)->apply());
         RateLimiter::for('registration', fn(Request $r) => [
             Limit::perMinute(2)->by('registration-minute:' . $r->ip()),
             Limit::perDay(5)->by('registration-ip:' . $r->ip()),

@@ -50,3 +50,9 @@ Die Registrierung löst keine Zahlung aus und aktiviert keine kostenpflichtigen 
 ## Prüfungen
 
 PHP-Tests decken Domain-/Keyword-Regeln, gesperrte Adressen, Bestätigung vor Kontoanlage, einmalige Links, Ablauf/Bereinigung, deaktivierte Registrierung, Wiederholungen und Limits ab. Browserprüfungen verwenden die tatsächlichen serverseitig gerenderten Blade-Views und erzeugen Desktop-/Mobilaufnahmen. Echte Anbieter-Mails oder Live-Registrierungen werden in CI nicht ausgelöst.
+
+## SMTP in der Admin-Oberfläche
+
+Unter **System-Einstellungen → E-Mail / SMTP** können Systemadministratoren Server, Port, STARTTLS/TLS, Benutzername, Passwort und Absender speichern. Die Daten werden verschlüsselt in der Plattformdatenbank gespeichert und überschreiben die Mail-Umgebungskonfiguration, sobald eine Konfiguration gespeichert wurde. Ein leeres Passwort behält das vorhandene bei; Entfernen erfordert die eigene Checkbox. API und Audit geben keine Zugangsdaten zurück. Ohne gespeicherte Konfiguration gelten weiterhin die bisherigen Umgebungswerte.
+
+Die Einstellungen werden vor HTTP-Anfragen und Hintergrundjobs neu geladen; ein Worker-Neustart ist deshalb nicht erforderlich. Der Button „Gespeicherte Verbindung prüfen“ prüft TLS und SMTP-Anmeldung ohne eine Nachricht zu senden. Zustellbarkeit ist separat zu prüfen. Module und Support bleiben eigene Hauptbereiche, die Datenbankserververwaltung ist zusätzlich direkt unter **Serververwaltung** erreichbar.
