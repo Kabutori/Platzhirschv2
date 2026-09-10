@@ -1,3 +1,10 @@
 @echo off
+setlocal
+cd /d "%~dp0"
+echo Platzhirsch - Update und Rollback
+echo Bitte als Administrator starten. Details: UPDATES-UND-WIEDERHERSTELLUNG.md
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0installer\Update-Platzhirsch.ps1" %*
-exit /b %ERRORLEVEL%
+set "PH_EXIT=%ERRORLEVEL%"
+if not "%PH_EXIT%"=="0" echo Vorgang angehalten. Details stehen oben. Exitcode: %PH_EXIT%
+if not "%GITHUB_ACTIONS%"=="true" pause
+exit /b %PH_EXIT%

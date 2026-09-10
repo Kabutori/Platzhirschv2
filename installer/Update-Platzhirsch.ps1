@@ -24,6 +24,12 @@ try {
     }
     if($Mode -eq 'Resume'){
         $journal=Get-Content "$root\maintenance.json" -Raw|ConvertFrom-Json
+        if($journal.phase -eq 'stopping'){
+            $active=@(Get-CimInstance Win32_Process|Where-Object {$_.ExecutablePath -and $_.ExecutablePath.StartsWith($root+'\runtime\php\',[StringComparison]::OrdinalIgnoreCase)})
+            if($active.Count -ne 0){throw 'PHP-Arbeit laeuft noch. Spaeter erneut Resume aufrufen.'}
+            Set-OperationPhase 'stopped'
+            $journal.phase='stopped'
+        }
         if($journal.phase -notin @('stopped','backed-up','verified','rolled-back')){throw 'Nicht abgeschlossene Datenaenderung: zuerst Rollback verwenden.'}
         if($PSCmdlet.ShouldProcess($root,'Geprueften Stand aus Wartung wieder starten')){Resume-Operations};return
     }

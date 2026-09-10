@@ -181,7 +181,9 @@ jobs:
 
           Entwicklung: Start-Development.bat im vollstaendig entpackten Paket startet die Einrichtung eines separaten Git-Checkouts mit eigenem Branch. PHP/MySQL-Laufzeitdateien einer vorhandenen Installation werden benoetigt; Entwicklungsdaten liegen separat. Kein automatischer Push oder Produktiv-Update. Details in DEVELOPMENT.md.
 
-          Ein echter Windows-Neustart, externe TLS-Topologien, automatische Zahlungsanbieter, versionsübergreifende Updates und koordinierte Wiederherstellung mehrerer Datenbankserver sind nicht abgenommen.
+          Betrieb: Update.bat und Recovery.bat ergänzen Anwendungsupdates der 0.1-Reihe mit Plattform-/Mandantenmigrationen und Datenbank-Rollback sowie koordinierte Sicherung zweier Datenbankserver und Rücksicherung auf einem sauberen Windows-Rechner. Die Pipeline prüft auch beschädigte Archive, fehlgeschlagene Migrationen, 10000 Binärdatenzeilen und begrenzte HTTP-Parallelität. Anleitung: UPDATES-UND-WIEDERHERSTELLUNG.md.
+
+          Ein echter Windows-Neustart, externe TLS-Topologien, automatische Zahlungsanbieter, Laufzeit-/MSI-Versionswechsel und Produktions-Kapazitätsgrenzen sind nicht abgenommen. Die mitgelieferte Neustartprüfung muss auf einer geeigneten Maschine ausgeführt werden.
           NOTES
           printf '\nPrüflauf: %s\nBuild-Commit: %s\n' "$CHECK_URL" "$RELEASE_COMMIT" >> release-notes.md
           gh release create "$RELEASE_TAG" ./*.zip SHA256SUMS.txt --target "$RELEASE_COMMIT" --prerelease --title "Platzhirsch Windows-Vorschau $RELEASE_TAG" --notes-file release-notes.md

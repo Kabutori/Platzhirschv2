@@ -21,8 +21,15 @@ function connectTarget(array $target): PDO {
         if (empty($target['ca']) || !is_readable($target['ca'])) throw new RuntimeException('Remote database requires trusted CA');
         $options[PDO::MYSQL_ATTR_SSL_CA] = $target['ca'];
         $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = true;
+        $options[PDO::MYSQL_ATTR_SSL_CIPHER] = 'DEFAULT';
     }
-    return new PDO('mysql:host=' . $target['host'] . ';port=' . $target['port'] . ';charset=utf8mb4', $target['username'], $target['password'], $options);
+    $pdo = new PDO('mysql:host=' . $target['host'] . ';port=' . $target['port'] . ';charset=utf8mb4', $target['username'], $target['password'], $options);
+    if (!in_array($target['host'], ['localhost', '127.0.0.1', '::1'], true)) {
+        $cipher = $pdo->query("SHOW SESSION STATUS LIKE 'Ssl_cipher'")->fetch(PDO::FETCH_NUM);
+        if (!$cipher || !$cipher[1]) throw new RuntimeException('Remote database did not negotiate TLS');
+    }
+    $pdo->exec("SET time_zone='+00:00'");
+    return $pdo;
 }
 function inventory(string $root): array {
     $state = document($root . '/installation.json');
@@ -31,7 +38,8 @@ function inventory(string $root): array {
         $secret = document($root . '/app/storage/app/private/server-' . $server->id . '.json');
         if (($secret['server_version'] ?? null) !== (int) $server->version) throw new RuntimeException('Stale server authorization');
         // A separate backup account may hold RELOAD/FLUSH_TABLES, SELECT and restore rights.
-        $override = $root . '/app/storage/app/private/recovery-server-' . $server->id . '.json';
+        $override = $root . '/operations-private/recovery-server-' . $server->id . '.json';
+        if (!is_file($override)) $override = $root . '/app/storage/app/private/recovery-server-' . $server->id . '.json';
         if (is_file($override)) $secret = array_replace($secret, document($override));
         $targets['server-' . $server->id] = ['host' => $server->host, 'port' => (int) $server->port,
             'username' => $secret['username'], 'password' => $secret['password'],
@@ -119,6 +127,10 @@ try {
         $targets = document($folder . '/targets.private.json');
         $mappingFile = $argv[4] ?? null;
         $fresh = $mappingFile && is_file($mappingFile);
+        $retry = ($argv[5] ?? '') === 'retry';
+        $identityFile = $root . '/operations-private/recovery-identities.json';
+        $identities = $fresh && $retry ? document($identityFile) : [];
+        if ($fresh && $retry && ($identities['archive'] ?? '') !== hash_file('sha256', $folder . '/databases.json')) throw new RuntimeException('Recovery retry archive differs');
         if ($fresh) {
             $mapping = document($mappingFile);
             if (array_diff(array_keys($targets), array_keys($mapping))) throw new RuntimeException('Recovery mapping must cover every server');
@@ -131,10 +143,13 @@ try {
             if (!$fresh && $uuid !== $saved['uuid']) throw new RuntimeException('Database server identity changed; explicit recovery mapping required');
             if (isset($seen[$uuid])) throw new RuntimeException('Recovery targets must be distinct servers');
             $seen[$uuid] = true;
-            if (explode('.', $pdo->query('SELECT VERSION()')->fetchColumn())[0] !== explode('.', $saved['version'])[0]) throw new RuntimeException('Database major version mismatch');
-            if ($fresh && (int) $pdo->query("SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME REGEXP '^ph_t_[a-f0-9]{24}$'")->fetchColumn()) throw new RuntimeException('New-machine targets must not contain restaurant schemas');
+            if (implode('.', array_slice(explode('.', $pdo->query('SELECT VERSION()')->fetchColumn()), 0, 2)) !== implode('.', array_slice(explode('.', $saved['version']), 0, 2))) throw new RuntimeException('Database major version mismatch');
+            if ($fresh && !$retry && (int) $pdo->query("SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME REGEXP '^ph_t_[a-f0-9]{24}$'")->fetchColumn()) throw new RuntimeException('New-machine targets must not contain restaurant schemas');
+            if ($fresh && $retry && ($identities['servers'][$key] ?? '') !== $uuid) throw new RuntimeException('Recovery retry target identity differs');
+            $identities['servers'][$key] = $uuid;
             $connections[$key] = $pdo;
         }
+        if ($fresh) { $identities['archive'] = hash_file('sha256', $folder . '/databases.json'); putDocument($identityFile, $identities); }
         // All files and targets are checked before the first schema change. Application stays stopped on any failure.
         foreach ($manifest['targets'] as $key => $saved) {
             $pdo = $connections[$key]; $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
@@ -191,7 +206,27 @@ try {
                 $id = (int) substr($key, 7);
                 DB::table('prov_db_servers')->where('id', $id)->update(['host' => $target['host'], 'port' => $target['port'], 'tls_required' => !in_array($target['host'], ['localhost','127.0.0.1','::1']), 'version' => DB::raw('version + 1')]);
                 $version = (int) DB::table('prov_db_servers')->where('id', $id)->value('version');
-                putDocument($root . '/app/storage/app/private/server-' . $id . '.json', ['username' => $target['username'], 'password' => $target['password'], 'account_host' => $target['account_host'], 'server_version' => $version]);
+                $pdo = $connections[$key];
+                $accountSuffix = substr(hash('sha256', $manifest['targets']['local']['uuid'] . '/' . $key), 0, 16);
+                $provisionUser = 'phpr_' . $accountSuffix; $provisionPassword = bin2hex(random_bytes(32));
+                $account = $pdo->quote($provisionUser) . '@' . $pdo->quote($target['account_host']);
+                $pdo->exec('CREATE USER IF NOT EXISTS ' . $account . ' IDENTIFIED BY ' . $pdo->quote($provisionPassword));
+                $pdo->exec('ALTER USER ' . $account . ' IDENTIFIED BY ' . $pdo->quote($provisionPassword));
+                $pdo->exec("REVOKE ALL PRIVILEGES, GRANT OPTION FROM $account");
+                $pdo->exec("GRANT CREATE USER ON *.* TO $account");
+                $pdo->exec("GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,ALTER,INDEX,DROP,REFERENCES,LOCK TABLES,TRIGGER ON `ph\\_t\\_%`.* TO $account WITH GRANT OPTION");
+                putDocument($root . '/app/storage/app/private/server-' . $id . '.json', ['username' => $provisionUser, 'password' => $provisionPassword, 'account_host' => $target['account_host'], 'server_version' => $version]);
+                // Recovery administrator secrets stay outside the worker-readable private directory.
+                putDocument($root . '/operations-private/recovery-server-' . $id . '.json', $target);
+                $probeName = 'ph_probe_' . $accountSuffix; $probePassword = bin2hex(random_bytes(32));
+                $probeAccount = $pdo->quote($probeName) . '@' . $pdo->quote($target['account_host']);
+                $pdo->exec('CREATE DATABASE IF NOT EXISTS ' . identifier($probeName));
+                $pdo->exec('CREATE USER IF NOT EXISTS ' . $probeAccount . ' IDENTIFIED BY ' . $pdo->quote($probePassword));
+                $pdo->exec('ALTER USER ' . $probeAccount . ' IDENTIFIED BY ' . $pdo->quote($probePassword));
+                $pdo->exec("REVOKE ALL PRIVILEGES, GRANT OPTION FROM $probeAccount");
+                $grant = str_replace('_', '\\_', $probeName);
+                $pdo->exec("GRANT SELECT,CREATE TEMPORARY TABLES ON `$grant`.* TO $probeAccount");
+                DB::table('prov_db_servers')->where('id', $id)->update(['database' => $probeName, 'username' => $probeName, 'password' => app('encrypter')->encryptString($probePassword)]);
             }
         }
         echo "All database contents and tenant accounts restored.\n";
@@ -202,6 +237,15 @@ try {
             config(['database.connections.mysql.username'=>'root','database.connections.mysql.password'=>$state['rootPassword']]); DB::purge();
             if (Artisan::call('migrate', ['--force'=>true]) !== 0) throw new RuntimeException('Platform migration failed');
         }
+        $registry = app(\App\Core\Module\ModuleRegistry::class);
+        $ordered = []; $visited = [];
+        $visit = function (string $code) use (&$visit, &$ordered, &$visited, $registry): void {
+            if (isset($visited[$code])) return;
+            $visited[$code] = true;
+            foreach ($registry->get($code)->dependencies() as $dependency => $version) $visit($dependency);
+            $ordered[] = $code;
+        };
+        foreach ($registry->catalog() as $module) $visit($module['code']);
         foreach (\App\Models\Tenant::where('status', 'active')->get() as $tenant) {
             $db = app(\App\Services\TenantDatabase::class);
             $db->connect($tenant, true);
@@ -212,12 +256,13 @@ try {
                     $account = $connection->quote($tenant->database_user) . '@' . $connection->quote($accountHost);
                     $connection->exec("GRANT CREATE,ALTER,INDEX,DROP,REFERENCES ON `$grant`.* TO $account");
                     try {
-                        foreach (app(\App\Core\Module\ModuleRegistry::class)->catalog() as $module) {
-                            $definition = app(\App\Core\Module\ModuleRegistry::class)->get($module['code']);
+                        foreach ($ordered as $code) {
+                            $definition = $registry->get($code);
                             $path = $definition->tenantMigrationsPath();
                             if (!$path || !is_dir($path)) continue;
-                            if ($module['code'] !== 'reservation' && !DB::table('billing_entitlements')->where('tenant_id', $tenant->id)->where('module_code', $module['code'])->where('status', 'active')->exists()) continue;
+                            if ($code !== 'reservation' && !DB::table('billing_entitlements')->where('tenant_id', $tenant->id)->where('module_code', $code)->where('status', 'active')->exists()) continue;
                             if (Artisan::call('migrate', ['--database'=>'tenant','--path'=>$path,'--realpath'=>true,'--force'=>true]) !== 0) throw new RuntimeException('Tenant migration failed');
+                            DB::table('billing_entitlements')->where('tenant_id', $tenant->id)->where('module_code', $code)->where('status', 'active')->update(['installed_version' => $definition->version(), 'updated_at' => now()]);
                         }
                     } finally { $connection->exec("REVOKE CREATE,ALTER,INDEX,DROP,REFERENCES ON `$grant`.* FROM $account"); }
                 }

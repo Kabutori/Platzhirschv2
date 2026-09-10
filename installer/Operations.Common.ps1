@@ -16,8 +16,9 @@ function Copy-OperationsTree([string]$From,[string]$To,[switch]$Mirror) {
     & robocopy.exe $From $To $mode /COPY:DAT /DCOPY:DAT /XJ /R:1 /W:1 /NFL /NDL /NJH /NJS /NP|Out-Null
     if($LASTEXITCODE -ge 8){throw 'Dateikopie fehlgeschlagen.'}
 }
-function Invoke-DatabaseOperation([string]$Mode,[string]$Folder,[string]$Mapping='') {
-    & "$root\runtime\php\php.exe" "$PSScriptRoot\Database-Recovery.php" $root $Mode $Folder $Mapping
+function Invoke-DatabaseOperation([string]$Mode,[string]$Folder,[string]$Mapping='',[switch]$RetryRecovery) {
+    $retryArgument=if($RetryRecovery){'retry'}else{''}
+    & "$root\runtime\php\php.exe" "$PSScriptRoot\Database-Recovery.php" $root $Mode $Folder $Mapping $retryArgument
     if($LASTEXITCODE -ne 0){throw "Datenbankoperation $Mode fehlgeschlagen. Anwendung bleibt angehalten."}
 }
 function Set-OperationPhase([string]$Phase,[string]$Backup='') {
@@ -58,8 +59,6 @@ function Repair-OperationsAcl {
 function Resume-Operations {
     Invoke-DatabaseOperation 'health' $root
     $journal=Get-Content "$root\maintenance.json" -Raw|ConvertFrom-Json
-    Set-ItemProperty IIS:\Sites\Platzhirsch -Name serverAutoStart -Value ([bool]$journal.siteAutoStart)
-    Set-ItemProperty IIS:\AppPools\Platzhirsch -Name autoStart -Value ([bool]$journal.poolAutoStart)
     if($journal.poolStarted){Start-WebAppPool Platzhirsch}
     if($journal.siteStarted){Start-Website Platzhirsch}
     if($journal.siteStarted){
@@ -67,6 +66,8 @@ function Resume-Operations {
         for($n=0;$n -lt 20;$n++){try{$response=Invoke-RestMethod "http://127.0.0.1:$($state.port)/api/bootstrap-status" -TimeoutSec 5;if($null -ne $response.bootstrapped){$ok=$true;break}}catch{};Start-Sleep -Seconds 1}
         if(-not $ok){Stop-Website Platzhirsch;Stop-WebAppPool Platzhirsch;throw 'HTTP-Pruefung fehlgeschlagen. Hintergrundaufgaben bleiben deaktiviert.'}
     }
+    Set-ItemProperty IIS:\Sites\Platzhirsch -Name serverAutoStart -Value ([bool]$journal.siteAutoStart)
+    Set-ItemProperty IIS:\AppPools\Platzhirsch -Name autoStart -Value ([bool]$journal.poolAutoStart)
     Remove-Item "$root\maintenance.json" -Force
     foreach($task in $journal.tasks){if($task.enabled){Enable-ScheduledTask $task.name|Out-Null;Start-ScheduledTask $task.name}}
 }
@@ -78,6 +79,7 @@ function Save-OperationsBackup([string]$Folder) {
     Copy-OperationsTree "$root\app" "$Folder\files\app"
     Copy-OperationsTree "$root\tasks" "$Folder\files\tasks"
     Copy-Item "$root\installation.json" "$Folder\files\installation.json"
+    if(Test-Path "$root\operations-private"){Copy-OperationsTree "$root\operations-private" "$Folder\files\operations-private"}
     $prefix="$Folder\files\"
     $files=@(Get-ChildItem "$Folder\files" -Recurse -Force -File|ForEach-Object {@{path=$_.FullName.Substring($prefix.Length);sha256=(Get-FileHash $_.FullName -Algorithm SHA256).Hash}})
     $dbPrefix="$Folder\databases\"
@@ -110,6 +112,11 @@ function Restore-OperationsBackup([string]$Folder) {
     Copy-OperationsTree "$Folder\files\app" "$root\app" -Mirror
     Copy-OperationsTree "$Folder\files\tasks" "$root\tasks" -Mirror
     Copy-Item "$Folder\files\installation.json" "$root\installation.json" -Force
+    if(Test-Path "$Folder\files\operations-private"){
+        New-Item -ItemType Directory "$root\operations-private" -Force|Out-Null
+        Protect-OperationsPath "$root\operations-private"
+        Copy-OperationsTree "$Folder\files\operations-private" "$root\operations-private" -Mirror
+    }
     Repair-OperationsAcl
     & "$root\runtime\php\php.exe" "$root\app\artisan" config:cache
     if($LASTEXITCODE -ne 0){throw 'Konfiguration konnte nicht wiederhergestellt werden.'}

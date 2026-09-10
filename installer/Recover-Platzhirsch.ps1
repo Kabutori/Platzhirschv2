@@ -6,7 +6,8 @@ param(
     [ValidatePattern('^[A-Za-z]:\\[A-Za-z0-9_-]+(?:\\[A-Za-z0-9_-]+)*$')][string]$InstallPath='C:\Platzhirsch',
     [Parameter(Mandatory)][string]$Destination,
     [string]$TargetMapping,
-    [switch]$SourceOffline
+    [switch]$SourceOffline,
+    [switch]$Retry
 )
 $ErrorActionPreference='Stop';Set-StrictMode -Version Latest
 Import-Module WebAdministration
@@ -23,6 +24,14 @@ try {
     Assert-OperationsPath $root
     if($Mode -ne 'Backup'){$manifest=Verify-OperationsBackup $Destination}
     if($Mode -eq 'Verify'){Invoke-DatabaseOperation 'verify' "$Destination\databases";Write-Host 'Sicherung vollstaendig und unveraendert.';return}
+    if($Retry){
+        if($Mode -notin @('Restore','NewMachine')){throw 'Retry gilt nur fuer eine Wiederherstellung.'}
+        $active=@(Get-CimInstance Win32_Process|Where-Object {$_.ExecutablePath -and $_.ExecutablePath.StartsWith($root+'\runtime\php\',[StringComparison]::OrdinalIgnoreCase)})
+        if($active.Count -ne 0){throw 'Vorherige PHP-Arbeit laeuft noch. Retry spaeter wiederholen.'}
+        $pending=Get-Content "$root\maintenance.json" -Raw|ConvertFrom-Json
+        if($pending.phase -ne 'restoring' -or $pending.source -ne $Destination -or $pending.mode -ne $Mode){throw 'Retry passt nicht zum vorhandenen Wartungsjournal.'}
+        if($pending.archiveHash -ne (Get-FileHash "$Destination\recovery.json").Hash){throw 'Retry-Sicherung wurde geaendert.'}
+    }
     if($Mode -eq 'NewMachine'){
         if(-not $SourceOffline){throw 'Originalinstallation muss abgeschaltet sein; mit -SourceOffline bestaetigen.'}
         if($manifest.version -ne $state.version){throw 'Zuerst dieselbe Paketversion auf dem Zielrechner installieren.'}
@@ -31,19 +40,32 @@ try {
         # The local target must be the newly installed instance, never an arbitrary platform server.
         $map=Get-Content $TargetMapping -Raw|ConvertFrom-Json
         if($map.local.host -ne '127.0.0.1' -or $map.local.port -ne $state.databasePort -or $map.local.username -ne 'root' -or $map.local.password -ne $state.rootPassword){throw 'Lokales Recovery-Ziel passt nicht zur neuen Installation.'}
-        $status=Invoke-RestMethod "http://127.0.0.1:$($state.port)/api/bootstrap-status"
-        if($status.bootstrapped){throw 'NewMachine erfordert eine frische Zielinstallation ohne eingerichteten Administrator.'}
+        if($Retry){
+            if($pending.mappingHash -ne (Get-FileHash $TargetMapping).Hash){throw 'Retry-Zielzuordnung wurde geaendert.'}
+        }else{
+            $status=Invoke-RestMethod "http://127.0.0.1:$($state.port)/api/bootstrap-status"
+            if($status.bootstrapped){throw 'NewMachine erfordert eine frische Zielinstallation ohne eingerichteten Administrator.'}
+        }
     }
     if(-not $PSCmdlet.ShouldProcess($root,"$Mode mit koordinierter Wartungsunterbrechung ausfuehren")){return}
-    Suspend-Operations
+    if(-not $Retry){Suspend-Operations}
     if($Mode -eq 'Backup'){
         Save-OperationsBackup $Destination
         Set-OperationPhase 'backed-up' $Destination
         Resume-Operations
         return
     }
-    $before=Join-Path (Split-Path $Destination -Parent) ('before-restore-'+[Guid]::NewGuid().ToString('N'))
-    Save-OperationsBackup $before
+    if($Retry){$before=$pending.backup}else{
+        $before=Join-Path (Split-Path $Destination -Parent) ('before-restore-'+[Guid]::NewGuid().ToString('N'))
+        Save-OperationsBackup $before
+        $pending=Get-Content "$root\maintenance.json" -Raw|ConvertFrom-Json
+        $pending|Add-Member -NotePropertyName source -NotePropertyValue $Destination
+        $pending|Add-Member -NotePropertyName mode -NotePropertyValue $Mode
+        $pending|Add-Member -NotePropertyName archiveHash -NotePropertyValue (Get-FileHash "$Destination\recovery.json").Hash
+        $mappingHash=if($TargetMapping){(Get-FileHash $TargetMapping).Hash}else{''}
+        $pending|Add-Member -NotePropertyName mappingHash -NotePropertyValue $mappingHash
+        Write-JsonFile "$root\maintenance.json" $pending
+    }
     Set-OperationPhase 'restoring' $before
     if($Mode -eq 'Restore'){
         Restore-OperationsBackup $Destination
@@ -61,7 +83,9 @@ try {
         Write-JsonFile "$root\app\storage\app\private\provision.json" @{username='ph_provision';password=$state.provisionPassword}
         Remove-Item "$root\app\bootstrap\cache\config.php" -Force -ErrorAction SilentlyContinue
         Repair-OperationsAcl
-        Invoke-DatabaseOperation 'restore' "$Destination\databases" $TargetMapping
+        New-Item -ItemType Directory "$root\operations-private" -Force|Out-Null
+        Protect-OperationsPath "$root\operations-private"
+        Invoke-DatabaseOperation 'restore' "$Destination\databases" $TargetMapping -RetryRecovery:$Retry
         & "$root\runtime\php\php.exe" "$root\app\artisan" config:cache
         if($LASTEXITCODE -ne 0){throw 'Konfiguration konnte nicht erzeugt werden.'}
     }
