@@ -1733,3 +1733,4 @@ dialog > .notice {
 }
 
 .smtp-form{display:grid;gap:16px;max-width:640px}.smtp-form>label{display:grid;gap:6px}.smtp-form>label:has(input[type=checkbox]){display:flex;align-items:center;gap:10px}.smtp-form input:not([type=checkbox]),.smtp-form select{width:100%}
+.smtp-form>label:has(input[type=checkbox]){flex-direction:row;justify-content:flex-start;text-align:left}.smtp-form input[type=checkbox]{width:18px;flex:0 0 18px;margin:0}.smtp-form .toolbar{flex-wrap:wrap}
