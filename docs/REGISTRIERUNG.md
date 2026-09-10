@@ -56,3 +56,11 @@ PHP-Tests decken Domain-/Keyword-Regeln, gesperrte Adressen, Bestätigung vor Ko
 Unter **System-Einstellungen → E-Mail / SMTP** können Systemadministratoren Server, Port, STARTTLS/TLS, Benutzername, Passwort und Absender speichern. Die Daten werden verschlüsselt in der Plattformdatenbank gespeichert und überschreiben die Mail-Umgebungskonfiguration, sobald eine Konfiguration gespeichert wurde. Ein leeres Passwort behält das vorhandene bei; Entfernen erfordert die eigene Checkbox. API und Audit geben keine Zugangsdaten zurück. Ohne gespeicherte Konfiguration gelten weiterhin die bisherigen Umgebungswerte.
 
 Die Einstellungen werden vor HTTP-Anfragen und Hintergrundjobs neu geladen; ein Worker-Neustart ist deshalb nicht erforderlich. Der Button „Gespeicherte Verbindung prüfen“ prüft TLS und SMTP-Anmeldung ohne eine Nachricht zu senden. Zustellbarkeit ist separat zu prüfen. Module und Support bleiben eigene Hauptbereiche, die Datenbankserververwaltung ist zusätzlich direkt unter **Serververwaltung** erreichbar.
+
+### WPOven als Testvoreinstellung bei Neuinstallation
+
+Neue Windows-Installationen und die `.env.example` enthalten `smtp.freesmtpservers.com`, Port `25`, ohne Benutzername/Passwort. Die Admin-Maske zeigt diese Voreinstellung auch an, solange kein eigener Server konfiguriert wurde. Bereits gespeicherte SMTP-Einstellungen werden beibehalten.
+
+WPOven ist ein öffentliches Capture-Postfach: Es fängt Nachrichten ab, zeigt sie anhand der Empfänger-/Absenderadresse an und löscht sie nach 48 Stunden. Es ist kein Versanddienst für echte Kundenmails. Deshalb bleibt `MAIL_MAILER=log`; das Aktivieren von produktivem Versand über diesen Host ist gesperrt. Verbindungstests verschicken keine Nachricht. Für echte Registrierungen einen eigenen SMTP-Anbieter mit STARTTLS oder TLS in der Admin-Oberfläche eintragen und aktivieren. Der WPOven-Testmodus ohne TLS ist ausschließlich für diesen festen Host zulässig.
+
+Quelle: https://www.wpoven.com/tools/free-smtp-server-for-testing

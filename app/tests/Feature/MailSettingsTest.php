@@ -36,4 +36,21 @@ class MailSettingsTest extends TestCase
         $this->putJson('/api/v1/admin/mail-settings',[...$this->payload(),'security'=>'none','host'=>'smtp://user:pass@host'])->assertUnprocessable()->assertJsonValidationErrors(['host','security']);
         $this->postJson('/api/v1/admin/mail-settings/test')->assertUnprocessable();
     }
+    public function test_wpoven_is_a_test_default_and_cannot_enable_registration_mail(): void {
+        $this->actingAs($this->user('system_admin'));
+        config(['mail.mailers.smtp.host' => null]);
+        $this->getJson('/api/v1/admin/mail-settings')->assertOk()
+            ->assertJsonPath('host', 'smtp.freesmtpservers.com')->assertJsonPath('port', 25)
+            ->assertJsonPath('enabled', false)->assertJsonPath('security', 'wpoven-test');
+        $test = [...$this->payload(), 'host'=>'smtp.freesmtpservers.com', 'port'=>25,
+            'security'=>'wpoven-test', 'username'=>'', 'password'=>'', 'enabled'=>false];
+        $this->putJson('/api/v1/admin/mail-settings', $test)->assertOk();
+        $this->assertSame('log', config('mail.default'));
+        $this->assertFalse(config('mail.mailers.smtp.require_tls'));
+        $this->putJson('/api/v1/admin/mail-settings', [...$test, 'enabled'=>true])->assertUnprocessable();
+        $this->putJson('/api/v1/admin/mail-settings', [...$test, 'host'=>'smtp.example.test'])->assertUnprocessable();
+        $this->putJson('/api/v1/admin/mail-settings', $this->payload())->assertOk();
+        $this->assertSame('smtp', config('mail.default'));
+        $this->assertTrue(config('mail.mailers.smtp.require_tls'));
+    }
 }

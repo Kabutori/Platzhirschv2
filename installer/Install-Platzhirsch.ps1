@@ -206,6 +206,12 @@ SESSION_SECURE_COOKIE=false
 CACHE_STORE=database
 QUEUE_CONNECTION=database
 MAIL_MAILER=log
+MAIL_HOST=smtp.freesmtpservers.com
+MAIL_PORT=25
+MAIL_SECURITY=wpoven-test
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_FROM_ADDRESS=noreply@example.invalid
 BOOTSTRAP_TOKEN_HASH=$tokenHash
 "@
         Write-Utf8 "$app\.env" $envText

@@ -5,6 +5,7 @@ return [
         'smtp' => [
             'transport' => 'smtp',
             'host' => env('MAIL_HOST'),
+            'security' => env('MAIL_SECURITY', 'starttls'),
             'port' => env('MAIL_PORT', 587),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
