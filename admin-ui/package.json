@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build && node ../widget-embed/build.mjs",
+    "build": "tsc --noEmit && vite build && node ../widget-embed/build.mjs && node ../landing/build.mjs",
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {

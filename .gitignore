@@ -18,3 +18,7 @@ admin-ui/playwright-report/
 
 .development/
 app/storage/app/private/*
+
+/app/public/landing/*.woff2
+/app/public/landing/tokens.css
+/app/public/landing/preview-*.html

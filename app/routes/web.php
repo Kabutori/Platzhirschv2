@@ -2,7 +2,14 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PlatformController;
 
-Route::get('/', fn() => redirect('/administration/login'));
+Route::get('/', [\App\Registration\RegistrationController::class, 'index']);
+Route::get('/registrierung', [\App\Registration\RegistrationController::class, 'index']);
+Route::post('/registrierung', [\App\Registration\RegistrationController::class, 'submit'])
+    ->middleware('throttle:registration');
+Route::get('/registrierung/bestaetigen/{token}', [\App\Registration\RegistrationController::class, 'confirm'])
+    ->where('token', '[a-f0-9]{64}')->middleware('throttle:20,1');
+Route::post('/registrierung/bestaetigen/{token}', [\App\Registration\RegistrationController::class, 'complete'])
+    ->where('token', '[a-f0-9]{64}')->middleware('throttle:10,1');
 Route::get('/admin/{path?}', function () {
     $file = public_path('admin/index.html');
     abort_unless(is_file($file), 503, 'Frontend noch nicht gebaut.');

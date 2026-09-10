@@ -22,10 +22,11 @@ Copy-Item "$root\docs\MODULE-UND-SERVER.md" "$out\MODULE-UND-SERVER.md"
 Copy-Item "$root\docs\SYSTEM-GUIDE.md" "$out\SYSTEM-GUIDE.md"
 # Package runtime files explicitly: no test databases, logs, developer environment
 # or cached configuration from the build machine may enter an installation.
-foreach($entry in @('app','bootstrap','config','database','public','routes','vendor','artisan','composer.json','composer.lock')) {
+foreach($entry in @('app','bootstrap','config','database','public','resources','routes','vendor','artisan','composer.json','composer.lock')) {
     Copy-Item "$root\app\$entry" "$out\payload\app" -Recurse
 }
 Get-ChildItem "$out\payload\app\bootstrap\cache" -File -Filter '*.php' | Remove-Item
+Get-ChildItem "$out\payload\app\public\landing" -File -Filter 'preview-*.html' -ErrorAction SilentlyContinue | Remove-Item
 foreach($directory in @('storage\logs','storage\framework\sessions','storage\framework\views','storage\framework\cache','storage\app\private')) {
     New-Item -ItemType Directory -Path "$out\payload\app\$directory" -Force | Out-Null
 }

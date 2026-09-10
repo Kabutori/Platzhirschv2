@@ -229,3 +229,19 @@ Schedule::command('reservation:notifications')->everyMinute()->withoutOverlappin
 // Provider requests share the same 30-minute cache and five-minute retry guard
 // as the UI. The installed Windows scheduler also runs this with no browser open.
 Schedule::command('weather:refresh')->everyFiveMinutes()->withoutOverlapping();
+
+Artisan::command('registration:check-website {website} {email}', function () {
+    try {
+        $result = app(\App\Registration\WebsiteCheck::class)->check($this->argument('website'), $this->argument('email'));
+        $this->info('Branche: ' . $result['category'] . '; Begriffe: ' . implode(', ', $result['keywords']));
+        return 0;
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        foreach ($e->errors() as $messages) foreach ($messages as $message) $this->error($message);
+        return 1;
+    }
+})->purpose('Website und E-Mail-Domain ohne Kontoanlage oder Mailversand prüfen');
+Artisan::command('registration:prune', function () {
+    DB::table('registration_requests')->whereNull('verified_at')->where('expires_at', '<=', now())->delete();
+    $this->info('Abgelaufene, unbestätigte Registrierungen entfernt.');
+});
+Schedule::command('registration:prune')->daily()->withoutOverlapping();

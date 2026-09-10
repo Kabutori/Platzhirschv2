@@ -10,6 +10,15 @@ const host = `<!doctype html><html lang="de"><meta charset="utf-8"><title>Widget
 for (const port of [4174, 4175]) {
   http
     .createServer(async (request, response) => {
+      if (/^\/landing\/[a-z0-9.-]+$/.test(request.url || '')) {
+        try {
+          const file = basename(request.url);
+          const data = await readFile(new URL('../app/public/landing/' + file, import.meta.url));
+          response.writeHead(200, { 'Content-Type': file.endsWith('.html') ? 'text/html; charset=utf-8' : file.endsWith('.css') ? 'text/css' : file.endsWith('.js') ? 'text/javascript' : 'font/woff2' });
+          response.end(data);
+        } catch { response.writeHead(404); response.end(); }
+        return;
+      }
       if (
         ['/admin/', '/administration/login', '/restaurant/login'].includes(request.url) ||
         /^\/admin\/assets\/[^/]+$/.test(request.url || '')

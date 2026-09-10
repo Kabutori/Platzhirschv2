@@ -5,6 +5,7 @@ on:
       - 'app/**'
       - 'admin-ui/**'
       - 'widget-embed/**'
+      - 'landing/**'
       - 'installer/**'
       - 'tools/**'
       - 'docs/**'
@@ -54,6 +55,7 @@ jobs:
         working-directory: admin-ui
       - run: npm run build
         working-directory: admin-ui
+      - run: php tools/Render-RegistrationPreview.php
       - run: npm audit --omit=dev --audit-level=high
         working-directory: admin-ui
       - run: npx playwright install chromium

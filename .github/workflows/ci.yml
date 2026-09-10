@@ -29,11 +29,18 @@ jobs:
         working-directory: app
       - run: composer audit --locked
         working-directory: app
+      - name: Render registration views for browser checks
+        run: php tools/Render-RegistrationPreview.php
+      - uses: actions/upload-artifact@v4
+        with:
+          name: registration-pages
+          path: app/public/landing/preview-*.html
       - uses: actions/upload-artifact@v4
         with:
           name: composer-lock
           path: app/composer.lock
   frontend:
+    needs: backend
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,6 +53,10 @@ jobs:
         working-directory: admin-ui
       - run: npm run build
         working-directory: admin-ui
+      - uses: actions/download-artifact@v4
+        with:
+          name: registration-pages
+          path: app/public/landing
       - run: npm audit --omit=dev --audit-level=high
         working-directory: admin-ui
       - run: npx playwright install --with-deps chromium
