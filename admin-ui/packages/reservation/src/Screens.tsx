@@ -238,7 +238,7 @@ export function RestaurantResource({ resource, tenant }: { resource: string; ten
               }}
             />
           )}
-          <div hidden={resource === 'rooms' && !!form.id && roomTab === 'tables'}>
+          <div className="dialog-form" hidden={resource === 'rooms' && !!form.id && roomTab === 'tables'}>
             <Form
               fields={fields}
               initial={form}

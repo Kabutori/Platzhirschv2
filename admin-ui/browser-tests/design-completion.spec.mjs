@@ -119,6 +119,12 @@ test('room colors and icons use selectable grids without submitting the editor',
   expect(saved).toBeUndefined();
   await mkdir('test-results', { recursive: true });
   await page.screenshot({ path: 'test-results/design-room-choices.png' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await expect(d.locator('.dialog-form')).toHaveCSS('padding-top', '24px');
+  await page.screenshot({ path: 'test-results/design-room-choices-mobile.png' });
+  await d.getByRole('button', { name: 'Speichern', exact: true }).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: 'test-results/design-room-actions-mobile.png' });
   await d.getByRole('button', { name: 'Speichern', exact: true }).click();
   await expect.poll(() => saved?.icon).toBe('terrace');
   expect(saved.color).toBe('sage');
