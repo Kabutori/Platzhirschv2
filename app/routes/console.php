@@ -226,3 +226,6 @@ Artisan::command('reservation:notifications', function () {
         });
 })->purpose('Fällige Reservierungsnachrichten zustellen');
 Schedule::command('reservation:notifications')->everyMinute()->withoutOverlapping(10);
+// Provider requests share the same 30-minute cache and five-minute retry guard
+// as the UI. The installed Windows scheduler also runs this with no browser open.
+Schedule::command('weather:refresh')->everyFiveMinutes()->withoutOverlapping();

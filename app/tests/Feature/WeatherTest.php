@@ -174,4 +174,57 @@ class WeatherTest extends TestCase
         $this->getJson('/api/v1/restaurant/weather')->assertJsonPath('status', 'inactive');
         \Illuminate\Support\Facades\Http::assertNothingSent();
     }
+
+    public function test_background_refresh_populates_the_shared_cache_without_a_browser(): void
+    {
+        $this->putJson('/api/v1/restaurant/weather/settings', $this->settings())->assertOk();
+        $this->mock(\App\Contracts\Module\TenantRuntime::class, function ($mock) {
+            $mock->shouldReceive('withTenant')->once()->with($this->tenant->id, \Mockery::type(\Closure::class))
+                ->andReturnUsing(fn($id, $callback) => $callback((object) [
+                    'id' => $id, 'timezone' => 'Europe/Berlin',
+                ]));
+        });
+        \Illuminate\Support\Facades\Http::fake([
+            'api.open-meteo.com/*' => \Illuminate\Support\Facades\Http::response($this->provider()),
+        ]);
+        $this->artisan('weather:refresh')->assertSuccessful();
+        $this->getJson('/api/v1/restaurant/weather')->assertJsonPath('status', 'fresh');
+        \Illuminate\Support\Facades\Http::assertSentCount(1);
+        $this->assertSame(0, DB::connection('tenant')->table('room_closures')->count());
+    }
+
+    public function test_background_refresh_skips_unlicensed_tenants_and_continues_after_failure(): void
+    {
+        $second = $this->tenant->replicate();
+        $second->database_name = 'ph_t_' . str_repeat('b', 24);
+        $second->database_user = 'phu_' . str_repeat('b', 24);
+        $second->save();
+        $third = $second->replicate();
+        $third->database_name = 'ph_t_' . str_repeat('c', 24);
+        $third->database_user = 'phu_' . str_repeat('c', 24);
+        $third->save();
+        $this->mock(\App\Contracts\Module\ModuleAccess::class, function ($mock) use ($third) {
+            $mock->shouldReceive('enabled')->andReturnUsing(fn($id) => $id === $third->id ? [] : ['weather']);
+        });
+        $this->mock(\App\Contracts\Module\TenantRuntime::class, function ($mock) use ($second, $third) {
+            $mock->shouldReceive('withTenant')->once()->with($this->tenant->id, \Mockery::type(\Closure::class))
+                ->andThrow(new \RuntimeException('secret-provider-key'));
+            $mock->shouldReceive('withTenant')->once()->with($second->id, \Mockery::type(\Closure::class))
+                ->andReturn(['status' => 'fresh']);
+            $mock->shouldNotReceive('withTenant')->with($third->id, \Mockery::type(\Closure::class));
+        });
+        $this->artisan('weather:refresh')
+            ->expectsOutput('Wetterprüfung: 1 Restaurants geprüft; 1 ohne aktuelle Vorhersage.')
+            ->assertFailed();
+        \Illuminate\Support\Facades\Http::assertNothingSent();
+    }
+
+    public function test_weather_refresh_is_scheduled_without_overlap(): void
+    {
+        $events = collect(app(\Illuminate\Console\Scheduling\Schedule::class)->events())
+            ->filter(fn($event) => str_contains($event->command ?? '', 'weather:refresh'));
+        $this->assertCount(1, $events);
+        $this->assertSame('*/5 * * * *', $events->first()->expression);
+        $this->assertTrue($events->first()->withoutOverlapping);
+    }
 }

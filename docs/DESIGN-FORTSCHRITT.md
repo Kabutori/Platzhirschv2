@@ -1,5 +1,11 @@
 # Design-Abgleich – 8. September 2026
 
+## Nachprüfung vom 10. September 2026
+
+Das Inventar wurde mit der unveränderten Referenz erneut erzeugt: **183 Definitionen**, Referenz-Hash siehe unten. Die veralteten Codebefunde für Mehrfachumzüge (B063–B065), Wetterzuordnung (B085) und den ausdrücklich gewünschten Odoo-Platzhalter (B172–B174) wurden korrigiert. Der Wetterabruf läuft jetzt auch ohne geöffneten Bildschirm über den Scheduler; siehe [Wetterautomatik](WETTERAUTOMATIK.md).
+
+**Die vollständige visuelle Einzelabnahme ist nicht bestanden.** Der in dieser Bearbeitung verfügbare Browser blockiert den lokalen Anwendungszugriff (`ERR_BLOCKED_BY_CLIENT`). Deshalb wurden keine zusätzlichen Buttons ohne Sichtprüfung als abgenommen markiert. Bestehende Desktopbefunde bleiben erhalten; offene mobile und andere Zustände bleiben offen. GitHub-Browsertests prüfen die Anwendung mit simulierten API-Antworten und erzeugen Aufnahmen, ersetzen aber ohne Einzelzuordnung und Sichtprüfung keine 183-fache Abnahme.
+
 Referenz: `design-template-main.zip` aus dem Projekt Platzhirschv2 (erneut bereitgestellt am 8. September). Die Admin-Vorlage `Platzhirsch Admin.dc.html` hat SHA-256 `eb67fafaae41861c29388a08eb7e635de89586954cdee1038faa8f5fdbae6768`. Referenzabschnitte: Navigation (ab Zeile 54), Einstellungen (ab 1762), Rollen (ab 2001).
 
 ## Dieser Umsetzungsschritt

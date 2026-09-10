@@ -36,8 +36,8 @@ function Settings({ tenant, close }: { tenant?: string; close: () => void }) {
             }
             fields={[
               { key: 'enabled', label: 'Wetter automatisch aktualisieren', type: 'checkbox' },
-              { key: 'latitude', label: 'Breitengrad', required: true, help: 'Zum Beispiel 52.52000' },
-              { key: 'longitude', label: 'Längengrad', required: true, help: 'Zum Beispiel 13.40500' },
+              { key: 'latitude', label: 'Breitengrad', required: true, help: 'Zum Beispiel 52.52000 (−90 bis 90)' },
+              { key: 'longitude', label: 'Längengrad', required: true, help: 'Zum Beispiel 13.40500 (−180 bis 180)' },
               {
                 key: 'mode',
                 label: 'Anbieternutzung',
@@ -52,6 +52,8 @@ function Settings({ tenant, close }: { tenant?: string; close: () => void }) {
                 label: 'Warnung ab Regenwahrscheinlichkeit (%)',
                 type: 'number',
                 required: true,
+                min: 1,
+                max: 100,
               },
             ]}
             onSave={async (data) => {
@@ -147,8 +149,8 @@ export default function Weather({
           )}
           {q.data.fetched_at && (
             <p className="muted">
-              Stand: {new Date(q.data.fetched_at).toLocaleString('de-DE')} · {q.data.timezone}. Automatische
-              Aktualisierung beim geöffneten Bildschirm.
+              Stand: {new Date(q.data.fetched_at).toLocaleString('de-DE', { timeZone: q.data.timezone })} · {q.data.timezone}.
+              {' '}Der Server aktualisiert die Vorhersage alle 30 Minuten, auch bei geschlossenem Bildschirm.
             </p>
           )}
         </>

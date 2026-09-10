@@ -1,6 +1,6 @@
 {
   "reference_sha256": "eb67fafaae41861c29388a08eb7e635de89586954cdee1038faa8f5fdbae6768",
-  "date": "2026-09-09",
+  "date": "2026-09-10",
   "controls": {
     "B001": {
       "Codeabgleich": "Bewusst anders",
@@ -447,19 +447,19 @@
       "Restabweichung": "Server anlegen/bearbeiten und Verbindung/Rechte getrennt prüfen. Tests nach Speichern, kein kompletter Cluster-Detaildialog wie Vorlage."
     },
     "B063": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/packages/provisioning/src/Placement.tsx",
-      "Restabweichung": "Bestätigter Einzelmandantenumzug vorhanden; keine Cluster-Massenmigration mehrerer Mandanten."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/provisioning/src/BatchMove.tsx",
+      "Restabweichung": "Mehrfachumzug mit expliziter Restaurantauswahl, Sicherungs- und Ausfallbestätigung, Vorschau und frischem Kennwort/TOTP; eigene Ansicht statt Aktion im Serverdetail. Visuelle Einzelabnahme offen."
     },
     "B064": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/packages/provisioning/src/Placement.tsx",
-      "Restabweichung": "Bestätigter Einzelmandantenumzug vorhanden; keine Cluster-Massenmigration mehrerer Mandanten."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/provisioning/src/BatchMove.tsx",
+      "Restabweichung": "Mehrfachumzug mit expliziter Restaurantauswahl, Sicherungs- und Ausfallbestätigung, Vorschau und frischem Kennwort/TOTP; eigene Ansicht statt Aktion im Serverdetail. Visuelle Einzelabnahme offen."
     },
     "B065": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/packages/provisioning/src/Placement.tsx",
-      "Restabweichung": "Bestätigter Einzelmandantenumzug vorhanden; keine Cluster-Massenmigration mehrerer Mandanten."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/provisioning/src/BatchMove.tsx",
+      "Restabweichung": "Mehrfachumzug mit expliziter Restaurantauswahl, Sicherungs- und Ausfallbestätigung, Vorschau und frischem Kennwort/TOTP; eigene Ansicht statt Aktion im Serverdetail. Visuelle Einzelabnahme offen."
     },
     "B068": {
       "Codeabgleich": "Funktion vorhanden",
@@ -547,9 +547,9 @@
       "Restabweichung": "Raumname, Standort, Notiz, Außenbereich und wählbares Farb-/Symbolraster vorhanden. Wetterautomatik der Vorlage nicht implementiert."
     },
     "B085": {
-      "Codeabgleich": "Teilweise",
-      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx",
-      "Restabweichung": "Raumname, Standort, Notiz, Außenbereich und wählbares Farb-/Symbolraster vorhanden. Wetterautomatik der Vorlage nicht implementiert."
+      "Codeabgleich": "Funktion vorhanden",
+      "Umsetzung": "admin-ui/packages/reservation/src/Screens.tsx; admin-ui/packages/weather/src/Weather.tsx",
+      "Restabweichung": "Raum als wetterabhängig markieren; separates Wettermodul mit 7-Tage-Vorschau, Warnschwelle und Hintergrundaktualisierung. Keine automatische Raumsperre oder Stornierung. Visuelle Einzelabnahme offen."
     },
     "B086": {
       "Codeabgleich": "Teilweise",
@@ -907,19 +907,19 @@
       "Restabweichung": "Erstinstallation über BAT/PowerShell mit erhöhten Rechten; keine beliebige SQL-/Betriebssystemausführung durch den Webprozess."
     },
     "B172": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/src/main.tsx",
-      "Restabweichung": "Odoo-Einstellungen, Verbindungsprüfung und Synchronisations-Schalter nicht implementiert."
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/packages/provisioning/src/OdooPlaceholder.tsx",
+      "Restabweichung": "Odoo bleibt gemäß Auftrag ein inaktiver Platzhalter. Verbindungsprüfung und Aktivierung sind deaktiviert; keine ausführbare Synchronisation. Visuelle Einzelabnahme offen."
     },
     "B173": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/src/main.tsx",
-      "Restabweichung": "Odoo-Einstellungen, Verbindungsprüfung und Synchronisations-Schalter nicht implementiert."
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/packages/provisioning/src/OdooPlaceholder.tsx",
+      "Restabweichung": "Odoo bleibt gemäß Auftrag ein inaktiver Platzhalter. Verbindungsprüfung und Aktivierung sind deaktiviert; keine ausführbare Synchronisation. Visuelle Einzelabnahme offen."
     },
     "B174": {
-      "Codeabgleich": "Nicht vorhanden",
-      "Umsetzung": "admin-ui/src/main.tsx",
-      "Restabweichung": "Odoo-Einstellungen, Verbindungsprüfung und Synchronisations-Schalter nicht implementiert."
+      "Codeabgleich": "Bewusst anders",
+      "Umsetzung": "admin-ui/packages/provisioning/src/OdooPlaceholder.tsx",
+      "Restabweichung": "Odoo bleibt gemäß Auftrag ein inaktiver Platzhalter. Verbindungsprüfung und Aktivierung sind deaktiviert; keine ausführbare Synchronisation. Visuelle Einzelabnahme offen."
     },
     "B181": {
       "Codeabgleich": "Funktion vorhanden",
