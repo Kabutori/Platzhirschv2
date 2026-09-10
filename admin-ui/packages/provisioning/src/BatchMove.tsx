@@ -103,7 +103,7 @@ export default function BatchMove({
             ))}
           </ul>
           <p>
-            Während des jeweiligen Umzugs ist das Restaurant gesperrt. Quelldatenbanken bleiben zur
+            Ab der Beauftragung sind alle ausgewählten Restaurants bis zu ihrem jeweiligen Abschluss gesperrt. Große Auswahlen können die Ausfallzeit verlängern. Quelldatenbanken bleiben zur
             Nachkontrolle erhalten.
           </p>
           <Form
