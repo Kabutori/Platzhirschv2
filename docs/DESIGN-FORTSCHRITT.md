@@ -6,6 +6,8 @@ Das Inventar wurde mit der unveränderten Referenz erneut erzeugt: **183 Definit
 
 **Die vollständige visuelle Einzelabnahme ist nicht bestanden.** Der in dieser Bearbeitung verfügbare Browser blockiert den lokalen Anwendungszugriff (`ERR_BLOCKED_BY_CLIENT`). Deshalb wurden keine zusätzlichen Buttons ohne Sichtprüfung als abgenommen markiert. Bestehende Desktopbefunde bleiben erhalten; offene mobile und andere Zustände bleiben offen. GitHub-Browsertests prüfen die Anwendung mit simulierten API-Antworten und erzeugen Aufnahmen, ersetzen aber ohne Einzelzuordnung und Sichtprüfung keine 183-fache Abnahme.
 
+Die über GitHub abgerufenen Aufnahmen wurden für Wetter, Raumdialog und Odoo-Platzhalter gesichtet. Dabei gefundene Fehler im Raumdialog sind korrigiert: Innenabstände auch bei verschachtelten Formularen; Wetter-Hilfetext unter der Beschriftung; beim Scrollen sichtbare Dialogüberschrift mit Schließen-Aktion. Neue Mobilaufnahmen zeigen Farbauswahl, Symbolauswahl und Speichern/Abbrechen. Der vollständige Anwendungslauf [34461091352](https://github.com/Kabutori/Platzhirschv2/actions/runs/34461091352) bestand vor der abschließenden fixierten Dialogüberschrift; deren gezielte Prüfung läuft im Folgecommit. Die vorhandenen Aufnahmen belegen weiterhin nicht sämtliche Zustände aller 183 Definitionen.
+
 Referenz: `design-template-main.zip` aus dem Projekt Platzhirschv2 (erneut bereitgestellt am 8. September). Die Admin-Vorlage `Platzhirsch Admin.dc.html` hat SHA-256 `eb67fafaae41861c29388a08eb7e635de89586954cdee1038faa8f5fdbae6768`. Referenzabschnitte: Navigation (ab Zeile 54), Einstellungen (ab 1762), Rollen (ab 2001).
 
 ## Dieser Umsetzungsschritt

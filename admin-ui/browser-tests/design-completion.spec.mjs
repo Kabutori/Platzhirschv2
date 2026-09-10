@@ -124,6 +124,7 @@ test('room colors and icons use selectable grids without submitting the editor',
   await expect(d.locator('.dialog-form')).toHaveCSS('padding-top', '24px');
   await page.screenshot({ path: 'test-results/design-room-choices-mobile.png' });
   await d.getByRole('button', { name: 'Speichern', exact: true }).scrollIntoViewIfNeeded();
+  await expect(d.getByRole('button', { name: 'Schließen', exact: true })).toBeInViewport();
   await page.screenshot({ path: 'test-results/design-room-actions-mobile.png' });
   await d.getByRole('button', { name: 'Speichern', exact: true }).click();
   await expect.poll(() => saved?.icon).toBe('terrace');
