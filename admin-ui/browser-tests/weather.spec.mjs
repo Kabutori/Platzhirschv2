@@ -15,6 +15,7 @@ for (const mobile of [false,true]) test(`weather configuration and forecast stat
   await route.fulfill({contentType:'application/json',body:JSON.stringify(body)});
  });
  await page.goto('/restaurant/login');
+ if(mobile) await page.getByRole('button',{name:'Menü',exact:true}).click();
  await page.getByRole('button',{name:'Räume',exact:true}).click();
  await expect(page.getByText('Wettervorhersage ist noch nicht eingerichtet oder ausgeschaltet.')).toBeVisible();
  await page.getByRole('button',{name:'Wetter einstellen'}).click();
@@ -31,6 +32,7 @@ for (const mobile of [false,true]) test(`weather configuration and forecast stat
  await page.getByRole('region',{name:'Wettervorhersage'}).scrollIntoViewIfNeeded();
  await page.screenshot({path:`test-results/design-weather-forecast-${mobile?'mobile':'desktop'}.png`});
  forecastStatus='stale';await page.reload();
+ if(mobile) await page.getByRole('button',{name:'Menü',exact:true}).click();
  await page.getByRole('button',{name:'Räume',exact:true}).click();
  await expect(page.getByText(/Veraltete Vorhersage/)).toBeVisible();
 });

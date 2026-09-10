@@ -94,6 +94,7 @@ class PlatformRoleTest extends TestCase
                     'reporting',
                     'reservation',
                     'support',
+                    'weather',
                     'widget',
                 ],
             ]);

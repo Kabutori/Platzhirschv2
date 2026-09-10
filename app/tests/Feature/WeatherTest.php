@@ -141,19 +141,16 @@ class WeatherTest extends TestCase
     {
         $this->putJson('/api/v1/restaurant/weather/settings', $this->settings())->assertOk();
         \Illuminate\Support\Facades\Http::fake([
-            'api.open-meteo.com/*' => \Illuminate\Support\Facades\Http::response($this->provider()),
+            'api.open-meteo.com/*' => \Illuminate\Support\Facades\Http::sequence()
+                ->push($this->provider())
+                ->push(['error' => 'secret-api-key'], 500),
         ]);
         $this->getJson('/api/v1/restaurant/weather')->assertJsonPath('status', 'fresh');
         $this->travel(31)->minutes();
-        \Illuminate\Support\Facades\Http::fake([
-            'api.open-meteo.com/*' => \Illuminate\Support\Facades\Http::response(
-                ['error' => 'secret-api-key'],
-                500,
-            ),
-        ]);
         $this->getJson('/api/v1/restaurant/weather')
             ->assertJsonPath('status', 'stale')
             ->assertDontSee('secret-api-key');
+        \Illuminate\Support\Facades\Http::assertSentCount(2);
     }
     public function test_missing_license_inactive_module_and_permission_do_not_call_provider(): void
     {
