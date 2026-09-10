@@ -71,6 +71,38 @@ class RestaurantTest extends TestCase
         // the persisted user just as the real login flow does (active = true).
         $this->actingAs($this->user->refresh());
     }
+    public function test_room_assignment_checks_previous_location_and_existing_bookings(): void
+    {
+        $db = DB::connection('tenant');
+        $room = $db
+            ->table('rooms')
+            ->insertGetId(['name' => 'Nebenraum', 'created_at' => now(), 'updated_at' => now()]);
+        $this->patchJson('/api/v1/restaurant/rooms/' . $room . '/tables', [
+            'tables' => [['id' => 1, 'room_id' => 99]],
+        ])->assertConflict();
+        $this->patchJson('/api/v1/restaurant/rooms/' . $room . '/tables', [
+            'tables' => [['id' => 1, 'room_id' => 1]],
+        ])
+            ->assertOk()
+            ->assertJsonPath('assigned', 1);
+        $this->assertSame($room, (int) $db->table('dining_tables')->where('id', 1)->value('room_id'));
+        $this->postJson('/api/v1/restaurant/reservations', [
+            'table_id' => 1,
+            'guest_name' => 'Guest',
+            'party_size' => 2,
+            'starts_at' => now()->addDays(2)->format('Y-m-d') . 'T18:00',
+            'duration_minutes' => 60,
+            'request_key' => '550e8400-e29b-41d4-a716-446655440000',
+        ])->assertCreated();
+        $this->patchJson('/api/v1/restaurant/rooms/1/tables', [
+            'tables' => [['id' => 1, 'room_id' => $room]],
+        ])->assertConflict();
+        $this->assertSame($room, (int) $db->table('dining_tables')->where('id', 1)->value('room_id'));
+        $this->user->update(['role' => 'staff']);
+        $this->actingAs($this->user->fresh())
+            ->patchJson('/api/v1/restaurant/rooms/1/tables', ['tables' => [['id' => 1, 'room_id' => $room]]])
+            ->assertForbidden();
+    }
     public function test_weekly_hours_are_atomic_version_checked_and_include_overnight_overlap(): void
     {
         $snapshot = $this->getJson('/api/v1/restaurant/hours-week')->assertOk()->json();

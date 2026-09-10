@@ -29,6 +29,7 @@ export function Tenants({ user }: { user: Row }) {
   });
   const qc = useQueryClient();
   const [form, setForm] = useState<Row | null>(null);
+  const [details, setDetails] = useState<Row | null>(null);
   const [demo, setDemo] = useState(false);
   const [demoNotice, setDemoNotice] = useState('');
   const [error, setError] = useState<unknown>();
@@ -170,8 +171,11 @@ export function Tenants({ user }: { user: Row }) {
               },
             ]}
             actions={(r) =>
-              user.role !== 'system_admin' ? null : (
+              user.role !== 'system_admin' ? (
+                <button onClick={() => setDetails(r)}>Details</button>
+              ) : (
                 <>
+                  <button onClick={() => setDetails(r)}>Details</button>
                   <button onClick={() => setForm(r)}>Bearbeiten</button>
                   {r.status === 'failed' ? (
                     <button onClick={() => action(r, '/retry', 'POST')}>Erneut einrichten</button>
@@ -199,6 +203,44 @@ export function Tenants({ user }: { user: Row }) {
         Ein neuer Mandant erhält eine eigene Datenbank. Anschließend legst du unter „Benutzer“ den
         Restaurantzugang an.
       </p>
+      {details && (
+        <Modal title="Mandantendetails" close={() => setDetails(null)}>
+          <dl className="details">
+            {[
+              ['Name', details.name],
+              ['Kundennummer', details.id],
+              ['Status', labels[details.status] || details.status],
+              ['Kontakt-E-Mail', details.email],
+              ['Telefon', details.phone],
+              ['Adresse', details.address],
+              ['Zeitzone', details.timezone],
+              ['Organisation', details.organization_id ? '#' + details.organization_id : 'Nicht zugeordnet'],
+              ['Datenbankserver', details.server_id ? '#' + details.server_id : 'Lokaler Server'],
+              ['Zuordnungsversion', details.placement_version],
+              ['Angelegt', details.created_at],
+            ].map(([label, value]) => (
+              <div key={String(label)}>
+                <dt>{label}</dt>
+                <dd>{String(value ?? '—')}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="dialog-actions">
+            <button onClick={() => setDetails(null)}>Schließen</button>
+            {user.role === 'system_admin' && (
+              <button
+                className="primary"
+                onClick={() => {
+                  setForm(details);
+                  setDetails(null);
+                }}
+              >
+                Bearbeiten
+              </button>
+            )}
+          </div>
+        </Modal>
+      )}
       {form && (
         <Modal title={form.id ? 'Mandant bearbeiten' : 'Neuer Mandant'} close={() => setForm(null)}>
           <Form

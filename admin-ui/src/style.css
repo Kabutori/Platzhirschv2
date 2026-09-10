@@ -1525,3 +1525,5 @@ dialog > p, dialog > ul, dialog > .notice { margin:16px 24px; }
 .field-choices button {white-space:normal;overflow-wrap:anywhere;flex-wrap:wrap;line-height:1.3;}
 .field-choices button svg {flex-shrink:0;}
 .batch-tenant-list {display:grid;gap:8px;max-height:320px;overflow:auto;border:1px solid var(--border);padding:14px;margin:16px 0;}
+.details > div {display:contents;}
+.details dd {overflow-wrap:anywhere;white-space:pre-wrap;}

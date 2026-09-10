@@ -1,3 +1,4 @@
+import { Modal } from '@platzhirsch/ui-runtime/components';
 import { useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@platzhirsch/ui-runtime/api';
@@ -37,6 +38,7 @@ export default function Servers() {
   });
   const qc = useQueryClient();
   const [editing, setEditing] = useState<Partial<Server> | null>(null);
+  const [details, setDetails] = useState<Server | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [results, setResults] = useState<Record<string, string>>({});
@@ -125,6 +127,7 @@ export default function Servers() {
               : 'Noch keine Provisionierungsfreigabe. Der Windows-Administrator kann diesen Server lokal autorisieren.'}
           </p>
           <div className="toolbar">
+            <button onClick={() => setDetails(server)}>Details</button>
             <button
               disabled={server.provisioning_enabled || !permits('provisioning.servers.manage')}
               onClick={() => edit(server)}
@@ -152,6 +155,41 @@ export default function Servers() {
           ))}
         </article>
       ))}
+      {details && (
+        <Modal title="Serverdetails" close={() => setDetails(null)}>
+          <dl className="details">
+            {Object.entries({
+              Name: details.name,
+              Adresse: details.host,
+              Port: details.port,
+              Region: details.region,
+              Zweck: details.purpose,
+              Prüfdatenbank: details.database,
+              Prüfbenutzer: details.username,
+              TLS: details.tls_required ? 'Erforderlich' : 'Nicht erzwungen',
+              Provisionierung: details.provisioning_enabled ? 'Freigegeben' : 'Nicht freigegeben',
+              Version: details.version,
+            }).map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{String(value ?? '—')}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="dialog-actions">
+            <button onClick={() => setDetails(null)}>Schließen</button>
+            <button
+              disabled={details.provisioning_enabled || !permits('provisioning.servers.manage')}
+              onClick={() => {
+                edit(details);
+                setDetails(null);
+              }}
+            >
+              Bearbeiten
+            </button>
+          </div>
+        </Modal>
+      )}
       {editing && (
         <section className="panel padded" aria-label={editing.id ? 'Server bearbeiten' : 'Server hinzufügen'}>
           <h3>{editing.id ? 'Server bearbeiten' : 'Server hinzufügen'}</h3>

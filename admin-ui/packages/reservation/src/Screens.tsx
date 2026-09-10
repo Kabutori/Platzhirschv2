@@ -1,3 +1,4 @@
+import RoomTables from './RoomTables';
 import HoursWeek from './HoursWeek';
 import Calendar from './Calendar';
 import BookingTools from './BookingTools';
@@ -35,6 +36,7 @@ export function RestaurantResource({ resource, tenant }: { resource: string; ten
     queryFn: () => api('v1/restaurant/rooms', 'GET', undefined, tenant),
     enabled: resource === 'tables',
   });
+  const [roomTab, setRoomTab] = useState('details');
   const [weekOpen, setWeekOpen] = useState(false);
   const [form, setForm] = useState<Row | null>(null);
   const [error, setError] = useState<unknown>();
@@ -202,16 +204,45 @@ export function RestaurantResource({ resource, tenant }: { resource: string; ten
         />
       )}
       {form && (
-        <Modal title={form.id ? 'Eintrag bearbeiten' : 'Neuer Eintrag'} close={() => setForm(null)}>
-          <Form
-            fields={fields}
-            initial={form}
-            onSave={async (data) => {
-              await api(path + (form.id ? '/' + form.id : ''), form.id ? 'PATCH' : 'POST', data, tenant);
-              setForm(null);
-              await qc.invalidateQueries();
-            }}
-          />
+        <Modal
+          title={form.id ? 'Eintrag bearbeiten' : 'Neuer Eintrag'}
+          close={() => {
+            setForm(null);
+            setRoomTab('details');
+          }}
+        >
+          {resource === 'rooms' && form.id && (
+            <nav className="settings-tabs padded" aria-label="Raum bearbeiten">
+              <button aria-pressed={roomTab === 'details'} onClick={() => setRoomTab('details')}>
+                Raumdetails
+              </button>
+              <button aria-pressed={roomTab === 'tables'} onClick={() => setRoomTab('tables')}>
+                Tische zuordnen
+              </button>
+            </nav>
+          )}
+          {resource === 'rooms' && form.id && roomTab === 'tables' && (
+            <RoomTables
+              room={form}
+              tenant={tenant}
+              done={async () => {
+                setForm(null);
+                setRoomTab('details');
+                await qc.invalidateQueries();
+              }}
+            />
+          )}
+          <div hidden={resource === 'rooms' && !!form.id && roomTab === 'tables'}>
+            <Form
+              fields={fields}
+              initial={form}
+              onSave={async (data) => {
+                await api(path + (form.id ? '/' + form.id : ''), form.id ? 'PATCH' : 'POST', data, tenant);
+                setForm(null);
+                await qc.invalidateQueries();
+              }}
+            />
+          </div>
         </Modal>
       )}
     </>

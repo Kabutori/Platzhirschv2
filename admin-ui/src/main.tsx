@@ -1,3 +1,4 @@
+const OdooPlaceholder = lazy(() => import('@platzhirsch/provisioning-ui/OdooPlaceholder.tsx'));
 const Releases = lazy(() => import('@platzhirsch/support-ui/Releases.tsx'));
 const Organizations = lazy(() => import('@platzhirsch/customer-ui/Organizations.tsx'));
 const Availability = lazy(() => import('@platzhirsch/reservation-ui/Availability.tsx'));
@@ -545,6 +546,7 @@ function Infrastructure({ user }: { user: Row }) {
       ? [
           ['access', 'SQL-Zugangsdaten'],
           ['move', 'Serverzuordnung & Umzüge'],
+          ['odoo', 'Odoo'],
         ]
       : []),
     ...(allowed(user, 'platform.health.read') ? [['health', 'Betriebsstatus']] : []),
@@ -567,6 +569,8 @@ function Infrastructure({ user }: { user: Row }) {
           <DatabaseAccess />
         ) : tab === 'move' && user.role === 'system_admin' ? (
           <Placement />
+        ) : tab === 'odoo' && user.role === 'system_admin' ? (
+          <OdooPlaceholder />
         ) : tab === 'health' ? (
           <Health />
         ) : null}

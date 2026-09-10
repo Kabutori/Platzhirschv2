@@ -25,6 +25,72 @@ class ReservationController
         abort_unless(isset(self::RESOURCES[$resource]), 404);
         return $this->db->connection('tenant')->table(self::RESOURCES[$resource])->orderBy('id')->get();
     }
+    public function assignTables(Request $r, int $id)
+    {
+        abort_unless($r->user()->hasPermission('restaurant.configure'), 403);
+        $v = $r->validate([
+            'tables' => ['required', 'array', 'min:1', 'max:100'],
+            'tables.*' => ['array:id,room_id'],
+            'tables.*.id' => ['required', 'integer', 'min:1', 'distinct'],
+            'tables.*.room_id' => ['required', 'integer', 'min:1'],
+        ]);
+        $db = $this->db->connection('tenant');
+        return $db->transaction(function () use ($r, $id, $v, $db) {
+            abort_unless($db->table('rooms')->where('id', $id)->lockForUpdate()->first(), 404);
+            $before = collect($v['tables'])->pluck('room_id', 'id');
+            $tables = $db
+                ->table('dining_tables')
+                ->whereIn('id', $before->keys())
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+            abort_unless(
+                $tables->count() === $before->count(),
+                409,
+                'Die Tischauswahl wurde inzwischen geändert.',
+            );
+            foreach ($tables as $table) {
+                abort_unless(
+                    $table->room_id == $before[$table->id],
+                    409,
+                    'Eine Raumzuordnung wurde inzwischen geändert. Bitte neu laden.',
+                );
+            }
+            $moving = $tables->filter(fn($table) => $table->room_id != $id)->pluck('id');
+            if ($moving->isNotEmpty()) {
+                abort_if(
+                    $db->table('table_combination_members')->whereIn('table_id', $moving)->exists(),
+                    409,
+                    'Tische sind in gespeicherten Kombinationen enthalten. Kombinationen vor dem Raumwechsel anpassen.',
+                );
+                abort_if(
+                    $db
+                        ->table('reservations')
+                        ->whereNotIn('status', ['cancelled', 'no_show'])
+                        ->where('ends_at', '>', now())
+                        ->where(
+                            fn($q) => $q
+                                ->whereIn('table_id', $moving)
+                                ->orWhereIn(
+                                    'id',
+                                    $db
+                                        ->table('reservation_extra_tables')
+                                        ->select('reservation_id')
+                                        ->whereIn('table_id', $moving),
+                                ),
+                        )
+                        ->exists(),
+                    409,
+                    'Tische mit laufenden oder zukünftigen Reservierungen können nicht in einen anderen Raum verschoben werden.',
+                );
+                $db->table('dining_tables')
+                    ->whereIn('id', $moving)
+                    ->update(['room_id' => $id, 'updated_at' => now()]);
+            }
+            $this->audit->record('restaurant.room_tables_assigned', $id, $r->attributes->get('tenant')->id);
+            return ['assigned' => $moving->count()];
+        });
+    }
     public function week(Request $r)
     {
         abort_unless($r->user()->hasPermission('restaurant.configure'), 403);
