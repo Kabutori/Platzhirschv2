@@ -1,3 +1,4 @@
+import BatchMove from './BatchMove';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { allPages, api } from '@platzhirsch/ui-runtime/api';
@@ -109,6 +110,15 @@ export default function Placement() {
           <button disabled={busy}>Geprüften Umzug starten</button>
         </form>
       </section>
+      {tenants.data && servers.data && (
+        <BatchMove
+          tenants={tenants.data}
+          servers={servers.data.servers || []}
+          done={async () => {
+            await qc.invalidateQueries();
+          }}
+        />
+      )}
       <section className="panel padded">
         <h3>Aufträge</h3>
         <div className="table-scroll">

@@ -26,6 +26,10 @@ Route::prefix('api')->group(function () {
                 fn() => app(\App\Core\Module\ModuleRegistry::class)->permissionFamilies(),
             );
             Route::get('dashboard', [PlatformController::class, 'dashboard']);
+            Route::post('tenant-moves', [
+                \App\Http\Controllers\TenantOperationController::class,
+                'moveBatch',
+            ])->middleware('throttle:3,1');
             Route::get('operations', [\App\Http\Controllers\TenantOperationController::class, 'index']);
             Route::post('tenants/{tenant}/move', [
                 \App\Http\Controllers\TenantOperationController::class,
