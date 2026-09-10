@@ -102,7 +102,7 @@ class TenantPlacementTest extends TestCase
         $this->actingAs($admin)->postJson('/api/v1/admin/tenant-moves', $data)->assertConflict();
         $this->assertDatabaseCount('tenant_operations', 0);
         $this->assertSame('active', $rows[0]->fresh()->status);
-        $this->assertNull($admin->fresh()->mfa_last_step);
+        $this->assertSame($admin->mfa_last_step, $admin->fresh()->mfa_last_step);
         $data['tenants'][1]['placement_version'] = 1;
         $this->postJson('/api/v1/admin/tenant-moves', $data)
             ->assertStatus(202)
