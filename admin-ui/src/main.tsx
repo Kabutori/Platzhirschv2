@@ -1,3 +1,4 @@
+import SystemOperations from './SystemOperations';
 import MailSettings from './MailSettings';
 const OdooPlaceholder = lazy(() => import('@platzhirsch/provisioning-ui/OdooPlaceholder.tsx'));
 const Releases = lazy(() => import('@platzhirsch/support-ui/Releases.tsx'));
@@ -769,7 +770,7 @@ function Health() {
       <nav className="settings-tabs" aria-label="Systemstatus">
         {[
           ['status', 'Übersicht'],
-          ['backups', 'Backups'],
+          ['backups', 'Backups & Updates'],
           ['migrations', 'Migrationen'],
         ].map(([key, label]) => (
           <button key={key} aria-pressed={tab === key} onClick={() => setTab(key)}>
@@ -778,29 +779,7 @@ function Health() {
         ))}
       </nav>
       {tab === 'backups' ? (
-        <section className="panel padded">
-          <h2>Backups & Wiederherstellung</h2>
-          <p>
-            Backups werden auf dem Windows-Server mit erhöhten Rechten ausgeführt. Der Webprozess besitzt
-            keine Sicherungs- oder Wiederherstellungsrechte.
-          </p>
-          <p>
-            Im Installationsordner die mitgelieferten Sicherungs- und Wiederherstellungsskripte verwenden. Die
-            Betriebsanleitung beschreibt Sicherungsumfang, Aufbewahrung und Wiederherstellung auf einer
-            Test-VM.
-          </p>
-          <a
-            href="https://github.com/Kabutori/Platzhirschv2/blob/codex/windows-application/docs/BETRIEB.md"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Betriebsanleitung öffnen
-          </a>
-          <p className="muted">
-            Eine erfolgreiche Dateisicherung allein bestätigt noch keine erfolgreiche Wiederherstellung. Der
-            Backup-Status wird hier nicht automatisch überwacht.
-          </p>
-        </section>
+        <SystemOperations />
       ) : tab === 'migrations' ? (
         <section className="panel">
           <div className="panel-head">

@@ -97,4 +97,7 @@ try {
         Resume-Operations
         throw 'Update abgebrochen; vorheriger Stand wiederhergestellt.'
     }
+        if(-not(Test-Path "$root\operations-ui\scripts\OperationsUI-Worker.ps1") -and (Test-Path "$PackagePath\installer\Enable-OperationsUI.ps1")){
+            & "$PackagePath\installer\Enable-OperationsUI.ps1" -InstallPath $root
+        }
 } finally {if($acquired){$mutex.ReleaseMutex()};$mutex.Dispose()}

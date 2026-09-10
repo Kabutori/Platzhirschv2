@@ -46,6 +46,8 @@ Route::prefix('api')->group(function () {
                 'move',
             ])->middleware('throttle:3,1');
             Route::get('audit-log', [PlatformController::class, 'audit']);
+            Route::get('system-operations', [\App\Operations\Controller::class, 'index']);
+            Route::post('system-operations', [\App\Operations\Controller::class, 'store'])->middleware('throttle:3,1');
             Route::get('health', [PlatformController::class, 'health']);
         });
 });

@@ -23,6 +23,7 @@ async function setup(page) {
         { code: 'identity', installed: true },
         { code: 'support', installed: true },
       ];
+    else if (u.pathname.endsWith('/system-operations')) body={available:false,backups:[],packages:[],jobs:[]};
     else if (u.pathname.endsWith('/health'))
       body = {
         version: '0.1.0',
@@ -66,8 +67,8 @@ test('audit tabs filter at the server and system tabs show actual migration hist
   await page.getByRole('button', { name: 'System', exact: true }).click();
   await page.getByRole('button', { name: 'Migrationen', exact: true }).click();
   await expect(page.getByText('support_release_notes')).toBeVisible();
-  await page.getByRole('button', { name: 'Backups', exact: true }).click();
-  await expect(page.getByRole('link', { name: 'Betriebsanleitung öffnen' })).toBeVisible();
+  await page.getByRole('button', { name: 'Backups & Updates', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Backups, Updates & Wiederherstellung' })).toBeVisible();
   await page.screenshot({ path: 'test-results/design-health-tabs.png' });
 });
 test('release editor publishes a categorized note and preserves mobile dialog layout', async ({ page }) => {

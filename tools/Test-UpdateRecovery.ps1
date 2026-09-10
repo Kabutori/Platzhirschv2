@@ -6,8 +6,27 @@ $recovery="$PackagePath\installer\Recover-Platzhirsch.ps1"
 $updater="$PackagePath\installer\Update-Platzhirsch.ps1"
 function Check-Data([string]$Mode){& $php "$PSScriptRoot\Test-OperationsData.php" $InstallPath $Mode;if($LASTEXITCODE -ne 0){throw "Operations fixture failed: $Mode"}}
 Check-Data seed
-$backup='C:\ph-coordinated-backup'
-& $recovery -Mode Backup -InstallPath $InstallPath -Destination $backup -Confirm:$false
+# Submit through the authenticated admin API; SYSTEM performs the real coordinated backup.
+$operation=Call-Api GET 'v1/admin/system-operations'
+if(-not $operation.available){throw 'Operations UI worker is not ready.'}
+$id=[Guid]::NewGuid().ToString()
+$null=Call-Api POST 'v1/admin/system-operations' @{action='backup';request_id=$id;password=$password;confirmation=$true} 202
+$finished=$false
+for($i=0;$i -lt 180;$i++){
+    Start-Sleep -Seconds 2
+    try{$view=Get-Content "$InstallPath\operations-ui\public\state.json" -Raw|ConvertFrom-Json}catch{continue}
+    $job=@($view.jobs|Where-Object {$_.id -eq $id})
+    if($job.Count -and $job[0].status -in @('success','failed','interrupted')){
+        if($job[0].status -ne 'success'){Get-Content "$InstallPath\operations-ui\private\$id.error.log";throw 'UI backup execution failed.'}
+        $finished=$true;break
+    }
+}
+if(-not $finished){throw 'UI backup timed out.'}
+$backup="$InstallPath-Backups\backup-$id"
+$operation=Call-Api GET 'v1/admin/system-operations'
+if(-not($operation.backups|Where-Object {$_.id -eq "backup-$id"})){throw 'Completed backup missing in admin catalog.'}
+if((Get-Content "$InstallPath\operations-ui\private\$id.json" -Raw).Contains($password)){throw 'Admin password leaked to operation queue.'}
+Write-Host 'Operations UI passed: authenticated submission, independent SYSTEM execution, maintenance reconnect, backup catalog and safe result.'
 & $recovery -Mode Verify -InstallPath $InstallPath -Destination $backup
 Check-Data change
 $corruptFile=(Get-ChildItem "$backup\databases" -Filter '*.jsonl'|Select-Object -First 1).FullName

@@ -304,6 +304,7 @@ GRANT SELECT ON platzhirsch_platform.* TO 'ph_provision'@'127.0.0.1';
     Wait-Health "http://127.0.0.1:$Port/api/bootstrap-status"
     Wait-Health "http://127.0.0.1:$Port/administration/login"
     $state.completed=$true;Write-Utf8 $marker ($state|ConvertTo-Json)
+    & "$PSScriptRoot\Enable-OperationsUI.ps1" -InstallPath $InstallPath
     Write-Status "Alle Pruefungen erfolgreich. Gesamtdauer: $([int]$script:InstallClock.Elapsed.TotalSeconds) Sekunden."
     Write-Host "`nInstallation abgeschlossen. Nur lokal erreichbar: http://localhost:$Port/administration/login" -ForegroundColor Green
     if(-not $Unattended){Write-Host "Einrichtungsschluessel: $($state.setupToken)" -ForegroundColor Yellow}
