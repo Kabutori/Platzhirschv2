@@ -1,0 +1,110 @@
+.reservation-filters {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.reservation-search {
+  flex: 1;
+  min-width: min(240px, 100%);
+}
+.reservation-filters label {
+  margin: 0;
+}
+.reservation-filters .section-tabs {
+  padding: 3px;
+  margin: 0;
+  border: 1px solid var(--border);
+  background: var(--input);
+  gap: 0;
+}
+.reservation-filters .section-tabs button {
+  min-height: 44px;
+}
+.reservation-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px;
+}
+.reservation-day {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 10px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.reservation-day.selected {
+  border-top: 2px solid var(--accent);
+}
+button.reservation-day-heading {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.reservation-day-heading span {
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 11px;
+}
+.reservation-week-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 10px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  text-align: left;
+  width: 100%;
+  min-width: 0;
+}
+.reservation-week-card strong,
+.reservation-week-card small {
+  overflow-wrap: anywhere;
+}
+.reservation-week-card code {
+  font-size: 10px;
+  white-space: normal;
+}
+.reservation-week-card .badge {
+  font-size: 10px;
+  white-space: normal;
+}
+.reservation-note {
+  max-width: 240px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.reservation-day > .muted {
+  font-size: 11px;
+}
+@media (max-width: 1200px) {
+  .reservation-week {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 650px) {
+  .reservation-week {
+    grid-template-columns: 1fr;
+  }
+  .reservation-filters > label {
+    width: 100%;
+  }
+  .date-picker {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 650px) {
+  .toolbar .button-row {
+    flex-wrap: wrap;
+  }
+}
