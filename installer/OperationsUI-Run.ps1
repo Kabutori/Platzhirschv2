@@ -14,5 +14,6 @@ try {
   'check' {& "$PSScriptRoot\Test-OperationsReadiness.ps1" -InstallPath $InstallPath -Requests 100 -Concurrency 8}
   default {throw 'Unbekannte Aktion.'}
  }
+ [IO.File]::WriteAllText("$dir\private\$JobId.result",'success')
  exit 0
-}catch{Write-Error -ErrorAction Continue $_;exit 1}
+}catch{[IO.File]::WriteAllText("$dir\private\$JobId.result",'failed');Write-Error -ErrorAction Continue $_;exit 1}

@@ -11,7 +11,7 @@ foreach($j in $jobs){if($j.status -eq 'running'){$j.status='interrupted';$j.mess
 $process=$null;$active=$null
 while($true){
  $backups=@(Catalog "$InstallPath-Backups" 'recovery.json');$packages=@(Catalog "$dir\packages" 'release-manifest.json')
- if($process -and $process.HasExited){$process.WaitForExit();$active.status=if($process.ExitCode -eq 0){'success'}else{'failed'};$active.message=if($process.ExitCode -eq 0){'Aktion erfolgreich abgeschlossen.'}else{'Aktion fehlgeschlagen. Details im geschuetzten Serverprotokoll; Wartungszustand pruefen.'};$active.finishedAt=[DateTime]::UtcNow.ToString('o');$process.Dispose();$process=$null}
+ if($process -and $process.HasExited){$process.WaitForExit();$ok=(Test-Path "$dir\private\$($active.id).result") -and ((Get-Content "$dir\private\$($active.id).result" -Raw) -eq 'success');$active.status=if($ok){'success'}else{'failed'};$active.message=if($ok){'Aktion erfolgreich abgeschlossen.'}else{'Aktion fehlgeschlagen. Details im geschuetzten Serverprotokoll; Wartungszustand pruefen.'};$active.finishedAt=[DateTime]::UtcNow.ToString('o');$process.Dispose();$process=$null}
  if(-not $process){
   foreach($file in @(Get-ChildItem "$dir\inbox" -File -Filter '*.json'|Sort-Object CreationTimeUtc)){
    if($file.Attributes -band [IO.FileAttributes]::ReparsePoint){Remove-Item -LiteralPath $file.FullName -Force;continue}

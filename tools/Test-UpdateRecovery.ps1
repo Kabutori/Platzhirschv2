@@ -17,7 +17,7 @@ for($i=0;$i -lt 180;$i++){
     try{$view=Get-Content "$InstallPath\operations-ui\public\state.json" -Raw|ConvertFrom-Json}catch{continue}
     $job=@($view.jobs|Where-Object {$_.id -eq $id})
     if($job.Count -and $job[0].status -in @('success','failed','interrupted')){
-        if($job[0].status -ne 'success'){Get-Content "$InstallPath\operations-ui\private\$id.error.log";throw 'UI backup execution failed.'}
+        if($job[0].status -ne 'success'){Get-Content "$InstallPath\operations-ui\private\$id.log","$InstallPath\operations-ui\private\$id.error.log";throw 'UI backup execution failed.'}
         $finished=$true;break
     }
 }
