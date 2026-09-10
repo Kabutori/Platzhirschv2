@@ -38,6 +38,7 @@ test('provisioning UI appears only for an installed module', async ({ page }) =>
   await page.goto('/administration/login');
   await expect(page.getByRole('button', { name: 'Mandanten', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Datenbankserver', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Serververwaltung', exact: true })).toHaveCount(0);
 });
 test('server checks report failure and editing never preloads a password', async ({ page }) => {
   const requests = await mock(page);

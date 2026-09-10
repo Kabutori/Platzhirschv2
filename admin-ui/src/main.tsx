@@ -280,6 +280,7 @@ function ShellBody({ user }: { user: Row }) {
               user.role === 'system_admin' ||
               provisioningVisible ||
               allowed(user, 'platform.health.read')) &&
+            (key !== 'database-servers' || provisioningVisible) &&
             (key !== 'roles' || identityVisible) &&
             (key !== 'releases' || installedCodes.includes('support')),
         )
