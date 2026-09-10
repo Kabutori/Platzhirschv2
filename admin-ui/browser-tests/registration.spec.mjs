@@ -1,0 +1,23 @@
+import {test,expect} from '@playwright/test';
+import {mkdir} from 'node:fs/promises';
+for (const mobile of [false,true]) test(`registration landing and confirmation ${mobile?'mobile':'desktop'}`,async({page})=>{
+  await page.setViewportSize(mobile?{width:390,height:844}:{width:1440,height:1000});
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/landing/preview-landing.html');
+  await expect(page.getByRole('heading',{name:'Ihr Betrieb. Ihr Platzhirsch.'})).toBeVisible();
+  await page.getByLabel('Name des Restaurants oder Hotels').fill('Restaurant Zur Linde');
+  await page.getByLabel('Ihr Vor- und Nachname').fill('Anna Beispiel');
+  await page.getByLabel('Website Ihres Betriebs').fill('www.linde.de');
+  await page.getByLabel('Geschäftliche E-Mail-Adresse').fill('kontakt@linde.de');
+  await page.getByRole('checkbox').check();
+  await mkdir('test-results',{recursive:true});
+  await page.screenshot({path:`test-results/design-registration-${mobile?'mobile':'desktop'}.png`,fullPage:true});
+  await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(mobile?390:1440);
+  await page.goto('/landing/preview-confirm.html');
+  await expect(page.getByRole('heading',{name:'Fast am Tisch.'})).toBeVisible();
+  await expect(page.getByLabel('Passwort',{exact:true})).toHaveAttribute('minlength','12');
+  await page.screenshot({path:`test-results/design-registration-confirm-${mobile?'mobile':'desktop'}.png`,fullPage:true});
+  await page.goto('/landing/preview-expired.html');
+  await expect(page.getByRole('link',{name:'Erneut registrieren'})).toBeVisible();
+  expect(errors).toEqual([]);
+});
