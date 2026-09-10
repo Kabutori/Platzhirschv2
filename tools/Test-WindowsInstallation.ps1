@@ -277,6 +277,7 @@ try {
     $snapshotRejected=$false
     try {& $snapshotScript -Mode Backup -InstallPath $target -Destination 'C:\ph-backups-after-placement' -Confirm:$false|Out-Null}catch{$snapshotRejected=$true}
     if(-not $snapshotRejected){throw 'Lokaler Snapshot hat externe Datenbanken nicht erkannt.'}
+    & "$PSScriptRoot\Test-UpdateRecovery.ps1" -InstallPath $target -PackagePath $PackagePath
 } finally {
     Remove-Item Env:\PH_CI_PASSWORD -ErrorAction SilentlyContinue
     Remove-Item "$target\ci-second-credentials.json",$secondInit -ErrorAction SilentlyContinue

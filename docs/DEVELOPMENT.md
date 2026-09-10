@@ -1,5 +1,7 @@
 # Windows: direkt in der IDE entwickeln
 
+Aktueller Ausbau: [Updates, koordinierte Sicherung und Wiederherstellung](UPDATES-UND-WIEDERHERSTELLUNG.md). Die folgenden älteren Aussagen zu fehlenden Anwendungsupdates und ausschließlich lokalen Snapshots werden durch diesen Ablauf ergänzt. Grenzen und aktueller CI-Nachweis stehen in der neuen Anleitung.
+
 Die Entwicklungsumgebung verwendet ein echtes Git-Checkout und Vite mit Live-Aktualisierung. Eine installierte Produktionsversion kann parallel laufen. Es gibt keinen automatischen Push und keine automatische Übernahme in Produktion.
 
 ## Einfach starten

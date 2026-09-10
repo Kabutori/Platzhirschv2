@@ -1,5 +1,7 @@
 # Platzhirsch – tatsächlicher Umsetzungsstand
 
+Aktueller Ausbau: [Updates, koordinierte Sicherung und Wiederherstellung](UPDATES-UND-WIEDERHERSTELLUNG.md). Die folgenden älteren Aussagen zu fehlenden Anwendungsupdates und ausschließlich lokalen Snapshots werden durch diesen Ablauf ergänzt. Grenzen und aktueller CI-Nachweis stehen in der neuen Anleitung.
+
 Nachtrag 10. September 2026: Das optionale Wettermodul enthält jetzt einen Hintergrundabruf über den vorhandenen Scheduler, zusätzlich zur 7-Tage-Vorschau und Regenwarnung. Siehe [Wetterautomatik](WETTERAUTOMATIK.md). Die vollständige visuelle Abnahme aller 183 Vorlagen-Buttons bleibt offen; [aktueller Prüfstand](DESIGN-FORTSCHRITT.md).
 
 Stand: 2026-09-08. Entwicklungszweig `codex/windows-application`, [Entwurfs-PR #1](https://github.com/Kabutori/Platzhirschv2/pull/1). Keine Produktionsfreigabe sämtlicher Konzeptphasen. Maßgeblich für ein Installationspaket sind der Commit und die erfolgreichen Prüfungen seines Releases.

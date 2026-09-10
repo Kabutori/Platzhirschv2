@@ -9,14 +9,16 @@ $out=Join-Path $root "dist\Platzhirsch-$Version-windows-x64"
 if(Test-Path $out){throw 'Ausgabeverzeichnis existiert bereits. Fuer einen neuen Build ein frisches Checkout verwenden.'}
 New-Item -ItemType Directory -Path "$out\packages","$out\payload\app","$out\installer" -Force|Out-Null
 Copy-Item "$root\Install.bat" $out
+Copy-Item "$root\Update.bat","$root\Recovery.bat" $out
 Copy-Item "$root\Start-Development.bat" $out
 Copy-Item "$root\Create-PullRequest.bat" $out
 New-Item -ItemType Directory -Path "$out\development" -Force|Out-Null
 Copy-Item "$root\development\Prepare-Development.ps1" "$out\development"
 Copy-Item "$root\development\Create-PullRequest.ps1" "$out\development"
 Copy-Item "$root\docs\DEVELOPMENT.md" "$out\DEVELOPMENT.md"
-Copy-Item "$root\installer\*.ps1" "$out\installer"
+Copy-Item "$root\installer\*.ps1","$root\installer\*.php" "$out\installer"
 Copy-Item "$root\docs\BETRIEB.md" "$out\BETRIEB.md"
+Copy-Item "$root\docs\UPDATES-UND-WIEDERHERSTELLUNG.md" "$out\UPDATES-UND-WIEDERHERSTELLUNG.md"
 Copy-Item "$root\docs\UMSETZUNGSSTAND.md" "$out\UMSETZUNGSSTAND.md"
 Copy-Item "$root\docs\MODULE-UND-SERVER.md" "$out\MODULE-UND-SERVER.md"
 Copy-Item "$root\docs\SYSTEM-GUIDE.md" "$out\SYSTEM-GUIDE.md"

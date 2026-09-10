@@ -1,5 +1,7 @@
 # Platzhirsch unter Windows
 
+Aktueller Ausbau: [Updates, koordinierte Sicherung und Wiederherstellung](UPDATES-UND-WIEDERHERSTELLUNG.md). Die folgenden älteren Aussagen zu fehlenden Anwendungsupdates und ausschließlich lokalen Snapshots werden durch diesen Ablauf ergänzt. Grenzen und aktueller CI-Nachweis stehen in der neuen Anleitung.
+
 ## Status
 
 Entwicklungsstand 0.1.0. Kein bereits abgenommenes Komplettprodukt. Vor jeder Installation `UMSETZUNGSSTAND.md` lesen. Auf einer separaten Test-VM beginnen; keine bestehenden Kundendaten verwenden.

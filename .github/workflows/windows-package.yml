@@ -12,6 +12,8 @@ on:
       - 'Install.bat'
       - 'Start-Development.bat'
       - 'Create-PullRequest.bat'
+      - 'Update.bat'
+      - 'Recovery.bat'
       - 'development/**'
       - '.github/workflows/windows-package.yml'
   workflow_dispatch:
@@ -28,7 +30,7 @@ concurrency:
 jobs:
   package:
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -82,7 +84,7 @@ jobs:
       matrix:
         os: [windows-2022, windows-2025]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -108,6 +110,13 @@ jobs:
       - name: Install and test IIS, MySQL and application
         shell: powershell
         run: ./tools/Test-WindowsInstallation.ps1 -PackagePath C:\ph-package
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'windows-2022'
+        with:
+          name: synthetic-recovery-fixture
+          path: C:/ph-recovery-fixture.zip
+          retention-days: 1
+          if-no-files-found: error
       - name: Test isolated development startup and restart
         shell: powershell
         run: |
@@ -120,8 +129,29 @@ jobs:
           foreach($port in @(5173,8000,33018)){
             if(Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue){throw 'Development process leaked'}
           }
-  publish:
+  recovery:
     needs: [package, installation]
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: Platzhirsch-Windows-Preview
+          path: package-download
+      - uses: actions/download-artifact@v4
+        with:
+          name: synthetic-recovery-fixture
+          path: recovery-download
+      - name: Restore onto a clean Windows machine
+        shell: powershell
+        run: |
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = Get-ChildItem package-download -Filter '*.zip' | Select-Object -First 1
+          [IO.Compression.ZipFile]::ExtractToDirectory($zip.FullName, 'C:\ph-package')
+          ./tools/Test-NewMachineRecovery.ps1 -PackagePath C:\ph-package -Archive (Resolve-Path recovery-download/ph-recovery-fixture.zip)
+  publish:
+    needs: [package, installation, recovery]
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
