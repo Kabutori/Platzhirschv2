@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {api} from './api';
+import {api,ApiError} from './api';
 type Item={id:string;label:string};
 type Job={id:string;action:string;status:string;createdAt:string;finishedAt?:string;message:string};
 type State={available:boolean;heartbeat?:string;backups:Item[];packages:Item[];jobs:Job[]};
@@ -16,7 +16,7 @@ export default function SystemOperations(){
  return <section className="panel padded" style={{overflowWrap:"anywhere"}}><h2>Backups, Updates & Wiederherstellung</h2>
  <p>Sichern Sie alle eingebundenen Datenbankserver gemeinsam und installieren Sie freigegebene Anwendungspakete mit automatischer Rücknahme bei Fehlern.</p>
  {q.isPending&&<p role="status">Betriebsverwaltung wird geladen …</p>}
- {q.error&&<p role="alert">Verbindung unterbrochen. Während der Wartung kann die Anwendung nicht antworten. Die Verbindung wird automatisch erneut geprüft. Bei anhaltender Unterbrechung muss das Wartungsjournal am Server geprüft werden.</p>}
+ {q.error instanceof ApiError && q.error.status===403 ? <p role="alert">Diese Betriebsaktionen sind ausschließlich für Systemadministratoren freigegeben.</p> : q.error&&<p role="alert">Verbindung unterbrochen. Während der Wartung kann die Anwendung nicht antworten. Die Verbindung wird automatisch erneut geprüft. Bei anhaltender Unterbrechung muss das Wartungsjournal am Server geprüft werden.</p>}
  {q.data&&!q.data.available&&<p role="alert">Die Windows-Betriebsverwaltung ist nicht erreichbar. Installieren bzw. aktivieren Sie die Verwaltung mit dem aktuellen Windows-Paket.</p>}
  {sent&&<p role="status">Auftrag übergeben. Der Status wird automatisch aktualisiert. Während der Ausführung kann die Weboberfläche vorübergehend nicht erreichbar sein.</p>}
  <div className="toolbar"><button disabled={disabled} onClick={()=>select('backup')}>Sicherung erstellen</button><button disabled={disabled} onClick={()=>select('check')}>Betrieb prüfen</button><button onClick={()=>q.refetch()} disabled={q.isFetching}>Aktualisieren</button></div>

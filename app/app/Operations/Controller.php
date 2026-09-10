@@ -14,7 +14,7 @@ class Controller
         return response()->json($state);
     }
     public function store(Request $request) {
-        $input=$request->validate(['action'=>'required|in:backup,verify,restore,rollback,update,check','target'=>'nullable|regex:/\A[a-zA-Z0-9_-]{1,100}\z/','password'=>'required|string','confirmation'=>'required|accepted','request_id'=>'required|uuid']);
+        $input=$request->validate(['action'=>'required|in:backup,verify,restore,rollback,update,check','target'=>'nullable|regex:/\A[a-zA-Z0-9][a-zA-Z0-9_.-]{0,99}\z/','password'=>'required|string','confirmation'=>'required|accepted','request_id'=>'required|uuid']);
         abort_unless(Hash::check($input['password'],$request->user()->password),422,'Passwort nicht korrekt.');
         $dir=$this->directory();
         abort_unless(is_file($dir.'/public/state.json'),503,'Windows-Betriebsverwaltung ist nicht eingerichtet.');

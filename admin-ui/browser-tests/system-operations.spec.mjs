@@ -9,7 +9,7 @@ test('operations require confirmation, submit a catalog ID and show safe results
  else if(p.endsWith('/modules'))body=[];
  else if(p.endsWith('/system-operations')){
  if(route.request().method()==='POST'){posted=route.request().postDataJSON();return route.fulfill({status:202,contentType:'application/json',body:JSON.stringify({id:posted.request_id,status:'queued'})})}
- body={available:true,backups:[{id:'backup-test',label:'Sicherung vom 10.09.2026'}],packages:[{id:'preview-102',label:'Windows Preview 102'}],jobs:posted?[{id:posted.request_id,action:'restore',status:'success',message:'Aktion erfolgreich abgeschlossen.',createdAt:'2026-09-10T12:00:00Z'}]:[]};
+ body={available:true,backups:[{id:'backup-test',label:'Sicherung vom 10.09.2026'}],packages:[{id:'Platzhirsch-0.1.0-preview.103',label:'Windows Preview 102'}],jobs:posted?[{id:posted.request_id,action:'restore',status:'success',message:'Aktion erfolgreich abgeschlossen.',createdAt:'2026-09-10T12:00:00Z'}]:[]};
  }
  await route.fulfill({contentType:'application/json',body:JSON.stringify(body)});
  });

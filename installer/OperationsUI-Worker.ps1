@@ -4,14 +4,14 @@ $ErrorActionPreference='Stop'
 $dir="$InstallPath\operations-ui";$utf8=New-Object Text.UTF8Encoding($false)
 function Write-Atomic($path,$value){$tmp=$path+'.tmp';[IO.File]::WriteAllText($tmp,($value|ConvertTo-Json -Depth 10),$utf8);Move-Item -LiteralPath $tmp -Destination $path -Force}
 function Catalog($folder,$manifest){
- @(Get-ChildItem -LiteralPath $folder -Directory|Where-Object {$_.Name -match '^[a-zA-Z0-9_-]{1,100}$' -and -not($_.Attributes -band [IO.FileAttributes]::ReparsePoint) -and (Test-Path (Join-Path $_.FullName $manifest))}|ForEach-Object {@{id=$_.Name;label=$_.Name}})
+ @(Get-ChildItem -LiteralPath $folder -Directory|Where-Object {$_.Name -match '^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,99}$' -and -not($_.Attributes -band [IO.FileAttributes]::ReparsePoint) -and (Test-Path (Join-Path $_.FullName $manifest))}|ForEach-Object {@{id=$_.Name;label=$_.Name}})
 }
 $jobs=@();if(Test-Path "$dir\private\history.json"){$jobs=@(Get-Content "$dir\private\history.json" -Raw|ConvertFrom-Json)}
 foreach($j in $jobs){if($j.status -eq 'running'){$j.status='interrupted';$j.message='Windows-Ausfuehrung unterbrochen. Wartungsjournal am Server pruefen.'}}
 $process=$null;$active=$null
 while($true){
  $backups=@(Catalog "$InstallPath-Backups" 'recovery.json');$packages=@(Catalog "$dir\packages" 'release-manifest.json')
- if($process -and $process.HasExited){$active.status=if($process.ExitCode -eq 0){'success'}else{'failed'};$active.message=if($process.ExitCode -eq 0){'Aktion erfolgreich abgeschlossen.'}else{'Aktion fehlgeschlagen. Details im geschuetzten Serverprotokoll; Wartungszustand pruefen.'};$active.finishedAt=[DateTime]::UtcNow.ToString('o');$process.Dispose();$process=$null}
+ if($process -and $process.HasExited){$process.WaitForExit();$active.status=if($process.ExitCode -eq 0){'success'}else{'failed'};$active.message=if($process.ExitCode -eq 0){'Aktion erfolgreich abgeschlossen.'}else{'Aktion fehlgeschlagen. Details im geschuetzten Serverprotokoll; Wartungszustand pruefen.'};$active.finishedAt=[DateTime]::UtcNow.ToString('o');$process.Dispose();$process=$null}
  if(-not $process){
   foreach($file in @(Get-ChildItem "$dir\inbox" -File -Filter '*.json'|Sort-Object CreationTimeUtc)){
    if($file.Attributes -band [IO.FileAttributes]::ReparsePoint){Remove-Item -LiteralPath $file.FullName -Force;continue}
