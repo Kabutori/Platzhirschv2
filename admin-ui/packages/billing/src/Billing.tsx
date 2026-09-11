@@ -1,0 +1,308 @@
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { api, portal } from '@platzhirsch/ui-runtime/api';
+import Orders from './Orders';
+const money = (n: number) =>
+  new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n / 100);
+function Party({
+  value = {},
+  issuer = false,
+  busy,
+  save,
+}: {
+  value?: any;
+  issuer?: boolean;
+  busy: boolean;
+  save: (v: any) => void;
+}) {
+  return (
+    <form
+      className="fields"
+      key={value.revision ?? 0}
+      onSubmit={(e) => {
+        e.preventDefault();
+        const v = Object.fromEntries(new FormData(e.currentTarget));
+        save({
+          ...v,
+          country: 'DE',
+          revision: value.revision ?? 0,
+          ...(issuer ? { tax_rate_bps: Number(v.tax_rate_bps) } : {}),
+        });
+      }}
+    >
+      {Object.entries({
+        name: 'Firmenname',
+        street: 'Straße und Hausnummer',
+        postal_code: 'Postleitzahl',
+        city: 'Ort',
+        email: 'Rechnungs-E-Mail',
+        tax_id: 'Steuernummer / USt-ID',
+      }).map(([key, label]) => (
+        <label key={key}>
+          {label}
+          <input
+            name={key}
+            defaultValue={value[key] ?? ''}
+            required={key !== 'tax_id' || issuer}
+            type={key === 'email' ? 'email' : 'text'}
+            maxLength={
+              key === 'tax_id'
+                ? 80
+                : key === 'postal_code'
+                  ? 20
+                  : key === 'email'
+                    ? 190
+                    : key === 'city'
+                      ? 100
+                      : 160
+            }
+          />
+        </label>
+      ))}
+      <p>Deutschland · EUR. Bestehende Belege behalten ihre gespeicherten Daten.</p>
+      {issuer && (
+        <>
+          <label>
+            Umsatzsteuer im Gesamtpreis
+            <select name="tax_rate_bps" required defaultValue={value.tax_rate_bps ?? ''}>
+              <option value="" disabled>
+                Bitte festlegen
+              </option>
+              <option value="1900">19 %</option>
+              <option value="700">7 %</option>
+              <option value="0">0 %</option>
+            </select>
+          </label>
+          <label>
+            Steuerhinweis (bei 0 % erforderlich)
+            <input name="tax_note" maxLength={250} defaultValue={value.tax_note ?? ''} />
+          </label>
+          <label>
+            Beleghinweis
+            <textarea name="payment_note" maxLength={500} defaultValue={value.payment_note ?? ''} />
+          </label>
+        </>
+      )}
+      <button disabled={busy}>Stammdaten speichern</button>
+    </form>
+  );
+}
+export default function Billing({ admin = false, tenant }: { admin?: boolean; tenant?: string }) {
+  const [tab, setTab] = useState('Rechnungen'),
+    [page, setPage] = useState(1),
+    [error, setError] = useState(''),
+    [notice, setNotice] = useState(''),
+    [busy, setBusy] = useState(false),
+    [customer, setCustomer] = useState('');
+  const qc = useQueryClient(),
+    base = admin ? 'v1/admin/billing' : 'v1/restaurant/billing';
+  const q = useQuery({
+    queryKey: ['billing-documents', admin, tenant, page],
+    queryFn: () => api(base + (admin ? '/documents' : '') + '?page=' + page, 'GET', undefined, tenant),
+  });
+  async function save(path: string, method: string, data?: any) {
+    setBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      await api(base + path, method, data, tenant);
+      await qc.invalidateQueries();
+      setNotice('Gespeichert.');
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function print(id: number) {
+    setError('');
+    const win = window.open('about:blank', '_blank');
+    if (!win) {
+      setError('Bitte das Öffnen der Druckansicht im Browser erlauben.');
+      return;
+    }
+    win.opener = null;
+    try {
+      const r = await fetch('/api/' + base + '/documents/' + id + '/print', {
+        credentials: 'same-origin',
+        headers: { 'X-Platzhirsch-Portal': portal, ...(tenant ? { 'X-Tenant-ID': tenant } : {}) },
+      });
+      if (!r.ok) throw new Error('Druckansicht konnte nicht geladen werden.');
+      const url = URL.createObjectURL(new Blob([await r.text()], { type: 'text/html' }));
+      win.location.href = url;
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (e) {
+      win.close();
+      setError((e as Error).message);
+    }
+  }
+  const data = q.data,
+    tabs = admin
+      ? ['Rechnungen', 'Laufzeiten', 'Kunden', 'Aussteller', 'Angebote & Bestellungen']
+      : ['Rechnungen', 'Laufzeiten', 'Rechnungsadresse'];
+  return (
+    <>
+      <p className="eyebrow">ABRECHNUNG</p>
+      <h2>Abrechnung</h2>
+      <p>Rechnungen und gebuchte Module. Verlängerungen und Zahlungen werden manuell bestätigt.</p>
+      <div className="settings-tabs">
+        {tabs.map((t) => (
+          <button
+            key={t}
+            aria-pressed={t === tab}
+            onClick={() => {
+              setTab(t);
+              setNotice('');
+            }}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+      {error && <p role="alert">{error}</p>}
+      {q.error && <p role="alert">{q.error.message}</p>}
+      {notice && <p role="status">{notice}</p>}
+      {q.isPending && <p>Abrechnung wird geladen …</p>}
+      {tab === 'Angebote & Bestellungen' && <Orders />}
+      {data && tab === 'Rechnungen' && (
+        <section className="panel padded">
+          <h3>Rechnungen</h3>
+          {admin && (
+            <p>
+              Aus bestätigten Aufträgen einen Entwurf erstellen, Druckansicht prüfen und verbindlich
+              ausstellen. PDF über den Druckdialog speichern.
+            </p>
+          )}
+          {!data.invoices.data.length && <p>Noch keine Rechnungen vorhanden.</p>}
+          {data.invoices.data.map((i: any) => (
+            <article className="panel padded" key={i.id}>
+              <h3>
+                {i.number ?? 'Entwurf #' + i.id} · {money(i.total_cents)}
+              </h3>
+              <p>
+                {i.kind === 'credit'
+                  ? 'Stornorechnung'
+                  : i.status === 'draft'
+                    ? 'Entwurf'
+                    : i.status === 'cancelled'
+                      ? 'Storniert'
+                      : 'Ausgestellt'}
+                {admin ? ' · Restaurant #' + i.tenant_id : ''}
+              </p>
+              <button onClick={() => void print(i.id)}>Druckansicht / PDF</button>
+              {admin && i.status === 'draft' && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void save('/documents/' + i.id + '/issue', 'POST', { confirmed: true });
+                  }}
+                >
+                  <label>
+                    <input type="checkbox" required /> Daten und Steuerangaben in der Druckansicht geprüft
+                  </label>
+                  <button disabled={busy}>Rechnung verbindlich ausstellen</button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void save('/documents/' + i.id, 'DELETE')}
+                  >
+                    Entwurf verwerfen
+                  </button>
+                </form>
+              )}
+              {admin && i.status === 'issued' && i.kind === 'invoice' && (
+                <details>
+                  <summary>Rechnung stornieren</summary>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const f = new FormData(e.currentTarget);
+                      void save('/documents/' + i.id + '/cancel', 'POST', {
+                        reason: f.get('reason'),
+                        confirmed: true,
+                      });
+                    }}
+                  >
+                    <label>
+                      Stornogrund
+                      <input name="reason" required maxLength={500} />
+                    </label>
+                    <label>
+                      <input type="checkbox" required /> Stornobeleg erstellen. Erstattung und Modulzugang
+                      werden dadurch nicht geändert.
+                    </label>
+                    <button disabled={busy}>Stornorechnung ausstellen</button>
+                  </form>
+                </details>
+              )}
+            </article>
+          ))}
+          <div className="toolbar">
+            <button disabled={page <= 1} onClick={() => setPage(page - 1)}>
+              Zurück
+            </button>
+            <span>
+              Seite {page} / {data.invoices.last_page}
+            </span>
+            <button disabled={page >= data.invoices.last_page} onClick={() => setPage(page + 1)}>
+              Weiter
+            </button>
+          </div>
+        </section>
+      )}
+      {data && tab === 'Laufzeiten' && (
+        <section className="panel padded">
+          <h3>Gebuchte Module</h3>
+          <p>Keine automatische Abbuchung. Eine Verlängerung benötigt eine neue Bestellung.</p>
+          {!data.subscriptions.length && <p>Noch keine gebuchten Module.</p>}
+          {data.subscriptions.map((s: any) => (
+            <article key={s.id}>
+              <h4>
+                {s.module_code}
+                {admin ? ' · Restaurant #' + s.tenant_id : ''}
+              </h4>
+              <p>
+                Bezahlt bis{' '}
+                {s.paid_until ? new Date(s.paid_until.replace(' ', 'T')).toLocaleString('de-DE') : '–'}
+              </p>
+            </article>
+          ))}
+        </section>
+      )}
+      {data && tab === 'Aussteller' && (
+        <section className="panel padded">
+          <h3>Rechnungsaussteller</h3>
+          <Party value={data.settings} issuer busy={busy} save={(v) => void save('/settings', 'PUT', v)} />
+        </section>
+      )}
+      {data && tab === 'Rechnungsadresse' && (
+        <section className="panel padded">
+          <h3>Rechnungsadresse</h3>
+          <Party value={data.profile} busy={busy} save={(v) => void save('/profile', 'PUT', v)} />
+        </section>
+      )}
+      {data && tab === 'Kunden' && (
+        <section className="panel padded">
+          <h3>Rechnungsdaten der Restaurants</h3>
+          <label>
+            Restaurant-ID
+            <input type="number" min="1" value={customer} onChange={(e) => setCustomer(e.target.value)} />
+          </label>
+          {data.profiles.map((p: any) => (
+            <button key={p.tenant_id} onClick={() => setCustomer(String(p.tenant_id))}>
+              {p.name} · #{p.tenant_id}
+            </button>
+          ))}
+          {Number(customer) > 0 && (
+            <Party
+              key={customer}
+              value={data.profiles.find((p: any) => String(p.tenant_id) === customer) ?? {}}
+              busy={busy}
+              save={(v) => void save('/profiles/' + customer, 'PUT', v)}
+            />
+          )}
+        </section>
+      )}
+    </>
+  );
+}
