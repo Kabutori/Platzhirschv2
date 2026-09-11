@@ -80,10 +80,36 @@ export default function Administration() {
               {(o.amount_cents / 100).toFixed(2)} {o.currency} ·{' '}
               {o.status === 'paid' ? 'Zahlung bestätigt' : 'Zahlung ausstehend'}
             </p>
-            {o.status === 'paid' && <form onSubmit={e => {e.preventDefault(); const f=new FormData(e.currentTarget); void save('orders/'+o.id+'/invoice','POST',o.period_start ? {} : {service_start:f.get('service_start'),service_end:f.get('service_end')});}}>
-              {!o.period_start && <><label>Leistungsbeginn<input name="service_start" type="date" required /></label><label>Leistungsende (exklusiv)<input name="service_end" type="date" required /></label></>}
-              <button disabled={busy}>Rechnungsentwurf erstellen</button><p>Beleg anschließend unter „Rechnungen“ prüfen und ausstellen.</p>
-            </form>}
+            {o.status === 'paid' && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const f = new FormData(e.currentTarget);
+                  void save(
+                    'orders/' + o.id + '/invoice',
+                    'POST',
+                    o.period_start
+                      ? {}
+                      : { service_start: f.get('service_start'), service_end: f.get('service_end') },
+                  );
+                }}
+              >
+                {!o.period_start && (
+                  <>
+                    <label>
+                      Leistungsbeginn
+                      <input name="service_start" type="date" required />
+                    </label>
+                    <label>
+                      Leistungsende (exklusiv)
+                      <input name="service_end" type="date" required />
+                    </label>
+                  </>
+                )}
+                <button disabled={busy}>Rechnungsentwurf erstellen</button>
+                <p>Beleg anschließend unter „Rechnungen“ prüfen und ausstellen.</p>
+              </form>
+            )}
             {o.status === 'pending' && (
               <form
                 onSubmit={(e) => {

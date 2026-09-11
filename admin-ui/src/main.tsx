@@ -207,7 +207,7 @@ const pagePermission: Record<string, string> = {
   overview: 'reservation.read',
   reporting: 'reporting.read',
   'module-shop': 'modules.manage',
-  'billing': 'modules.manage',
+  billing: 'modules.manage',
   reservations: 'reservation.read',
   waitlist: 'waitlist.read',
   notifications: 'restaurant.configure',
@@ -292,7 +292,7 @@ function ShellBody({ user }: { user: Row }) {
       : restaurantNav.filter(
           ([key]) =>
             (key !== 'reporting' || user.enabled_modules?.includes('reporting')) &&
-            (!['module-shop','billing'].includes(key) || user.role === 'restaurant_admin') &&
+            (!['module-shop', 'billing'].includes(key) || user.role === 'restaurant_admin') &&
             (!pagePermission[key] || allowed(user, pagePermission[key])),
         );
   const title = nav.find(([key]) => key === page)?.[1] || 'Platzhirsch';
@@ -520,7 +520,12 @@ function Content({
         )}
       </Suspense>
     );
-  if (page === 'billing' && user.role === 'restaurant_admin') return <Suspense fallback={<Loading />}><RestaurantBilling tenant={tenant}/></Suspense>;
+  if (page === 'billing' && user.role === 'restaurant_admin')
+    return (
+      <Suspense fallback={<Loading />}>
+        <RestaurantBilling tenant={tenant} />
+      </Suspense>
+    );
   if (page === 'module-shop' && user.role === 'restaurant_admin')
     return (
       <Suspense fallback={<Loading />}>
