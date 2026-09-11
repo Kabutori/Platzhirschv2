@@ -1,0 +1,38 @@
+name: Publish Platzhirsch 0.1.0
+on:
+  push:
+    branches: [main]
+    paths:
+      - releases/0.1.0.md
+      - .github/workflows/release-0.1.0.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: release-0.1.0
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify unchanged tested application
+        run: |
+          set -euo pipefail
+          git diff --exit-code f9868cdc7d641ff7c6887fddcece7f3734ce1737 HEAD -- . ':!releases/0.1.0.md' ':!.github/workflows/release-0.1.0.yml'
+      - name: Publish tested package as version 0.1.0
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir package-download
+          gh release download windows-preview-109-1 --dir package-download --pattern '*.zip' --pattern SHA256SUMS.txt
+          cd package-download
+          echo '1208934c422e4428fa107c6efdb078a803ecba1d0c731a5048316d3e702e0137  Platzhirsch-0.1.0-preview.109-windows-x64.zip' | sha256sum --check
+          sha256sum --check SHA256SUMS.txt
+          gh release create v0.1.0 ./*.zip SHA256SUMS.txt --target "$RELEASE_COMMIT" --title 'Platzhirsch 0.1.0' --notes-file ../releases/0.1.0.md --latest
