@@ -239,10 +239,12 @@ class ModuleController
                 ->first();
             $start =
                 $row && Carbon::parse($row->paid_until)->isFuture() ? Carbon::parse($row->paid_until) : now();
+            $periodStart = $start->copy();
+            $periodEnd = $start->copy()->addMonthNoOverflow();
             $this->db->table('billing_entitlements')->updateOrInsert(
                 ['tenant_id' => $order->tenant_id, 'module_code' => $order->module_code],
                 [
-                    'paid_until' => $start->addMonthNoOverflow(),
+                    'paid_until' => $periodEnd,
                     'status' => $row->status ?? 'inactive',
                     'created_at' => $row->created_at ?? now(),
                     'updated_at' => now(),
@@ -254,6 +256,9 @@ class ModuleController
                 ->update([
                     'status' => 'paid',
                     'payment_reference' => $d['payment_reference'],
+                    'period_start' => $periodStart,
+                    'period_end' => $periodEnd,
+                    'paid_at' => now(),
                     'updated_at' => now(),
                 ]);
             $this->audit->record('billing.payment_confirmed', (string) $id);

@@ -48,6 +48,7 @@ import { reportingManifest } from '@platzhirsch/reporting-ui';
 const ModuleShop = lazy(billingManifest.nav[0].screen);
 const Reporting = lazy(reportingManifest.nav[0].screen);
 const Weather = lazy(() => import('@platzhirsch/weather-ui'));
+const RestaurantBilling = lazy(() => import('@platzhirsch/billing-ui/Billing.tsx'));
 const BillingAdministration = lazy(() => import('@platzhirsch/billing-ui/Administration.tsx'));
 const Placement = lazy(() => import('@platzhirsch/provisioning-ui/Placement.tsx'));
 const DatabaseAccess = lazy(() => import('@platzhirsch/provisioning-ui/DatabaseAccess.tsx'));
@@ -115,6 +116,7 @@ const systemNav = [
   ['users', 'Benutzer', Users],
   ['roles', 'Rollen & Rechte', ShieldCheck],
   ['modules', 'Module', Code2],
+  ['billing-admin', 'Abrechnung', ScrollText],
   ['database-servers', 'Serververwaltung', Building2],
   ['system-settings', 'System-Einstellungen', Settings],
   ['releases', 'Releases', ScrollText],
@@ -130,6 +132,7 @@ const restaurantNav = [
   ['overview', 'Auswertung', LayoutDashboard],
   ['reporting', 'Erweiterte Auswertungen', LayoutDashboard],
   ['module-shop', 'Modul-Shop', Code2],
+  ['billing', 'Abrechnung', ScrollText],
   ['reservations', 'Reservierungen', CalendarDays],
   ['waitlist', 'Warteliste', Clock],
   ['notifications', 'Buchungsnachrichten', MessageSquare],
@@ -204,6 +207,7 @@ const pagePermission: Record<string, string> = {
   overview: 'reservation.read',
   reporting: 'reporting.read',
   'module-shop': 'modules.manage',
+  'billing': 'modules.manage',
   reservations: 'reservation.read',
   waitlist: 'waitlist.read',
   notifications: 'restaurant.configure',
@@ -288,7 +292,7 @@ function ShellBody({ user }: { user: Row }) {
       : restaurantNav.filter(
           ([key]) =>
             (key !== 'reporting' || user.enabled_modules?.includes('reporting')) &&
-            (key !== 'module-shop' || user.role === 'restaurant_admin') &&
+            (!['module-shop','billing'].includes(key) || user.role === 'restaurant_admin') &&
             (!pagePermission[key] || allowed(user, pagePermission[key])),
         );
   const title = nav.find(([key]) => key === page)?.[1] || 'Platzhirsch';
@@ -516,6 +520,7 @@ function Content({
         )}
       </Suspense>
     );
+  if (page === 'billing' && user.role === 'restaurant_admin') return <Suspense fallback={<Loading />}><RestaurantBilling tenant={tenant}/></Suspense>;
   if (page === 'module-shop' && user.role === 'restaurant_admin')
     return (
       <Suspense fallback={<Loading />}>
