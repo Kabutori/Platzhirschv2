@@ -1,0 +1,108 @@
+name: Build and publish one module
+on:
+  workflow_dispatch:
+    inputs:
+      module:
+        description: 'Package directory (e.g. reporting, billing, weather)'
+        required: true
+        type: string
+      version:
+        description: 'Expected version already committed in the package manifests'
+        required: true
+        type: string
+      publish:
+        description: 'Publish immutable module release (main only)'
+        default: false
+        type: boolean
+permissions:
+  contents: read
+concurrency:
+  group: module-release-${{ inputs.module }}-${{ inputs.version }}
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.metadata.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_sqlite, mbstring, intl, openssl, zip
+          tools: composer:v2
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare application
+        run: mkdir -p app/storage/logs app/storage/framework/{sessions,views,cache} app/bootstrap/cache
+      - run: composer install --no-interaction --prefer-dist
+        working-directory: app
+      - run: composer test
+        working-directory: app
+      - run: npm ci
+        working-directory: admin-ui
+      - run: npm run build
+        working-directory: admin-ui
+      - run: python -m unittest discover -s tools/modules -p 'test_*.py'
+      - name: Build selected module
+        env:
+          MODULE: ${{ inputs.module }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          python tools/modules/packages.py --output dist/module --module "$MODULE"
+          python - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          m, v = os.environ['MODULE'], os.environ['VERSION']
+          assert re.fullmatch(r'[a-z][a-z0-9-]*', m), 'Invalid module name'
+          assert re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)', v), 'Invalid version'
+          data = json.loads(Path('dist/module/modules.json').read_text())
+          assert all(p['version'] == v for p in data['packages']), 'Expected version differs from source manifests'
+          Path('dist/module/RELEASE.md').write_text(f'# Module {m} {v}\n\nIndependent PHP/UI source packages. Install into a development composition, resolve dependencies and build/test the complete application before deploying. These are not Windows installation archives.\n\nSource: {data["sourceCommit"]}\n')
+          PY
+      - name: Set validated release tag
+        id: metadata
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = json.loads(Path('dist/module/modules.json').read_text())
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write('tag=module-' + os.environ['MODULE'] + '-v' + data['packages'][0]['version'] + '\n')
+          PY
+        env:
+          MODULE: ${{ inputs.module }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: module-release
+          path: dist/module/*
+          if-no-files-found: error
+  publish:
+    needs: build
+    if: inputs.publish && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: module-release
+          path: module-release
+      - name: Publish immutable module archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.build.outputs.tag }}
+          SOURCE: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          cd module-release
+          sha256sum --check SHA256SUMS.txt
+          shopt -s nullglob
+          assets=(./*.zip ./*.tgz modules.json SHA256SUMS.txt)
+          gh release create "$TAG" "${assets[@]}" --target "$SOURCE" --title "$TAG" --notes-file RELEASE.md --latest=false

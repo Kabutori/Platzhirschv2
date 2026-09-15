@@ -30,7 +30,7 @@ class ReservationServiceProvider extends ServiceProvider implements Module
     }
     public function version(): string
     {
-        return '0.1.0';
+        return \App\Core\Module\PackageVersion::read(dirname(__DIR__) . '/composer.json');
     }
     public function dependencies(): array
     {
