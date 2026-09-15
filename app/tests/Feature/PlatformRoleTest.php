@@ -87,6 +87,10 @@ class PlatformRoleTest extends TestCase
             ->assertOk()
             ->assertJsonFragment([
                 'installed_modules' => [
+                    'audit',
+                    'notification',
+                    'release',
+                    'integration-odoo',
                     'billing',
                     'customer',
                     'identity',
