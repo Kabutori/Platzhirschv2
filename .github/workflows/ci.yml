@@ -89,3 +89,64 @@ jobs:
           Copy-Item Start-Development.bat $package
           Copy-Item development/Prepare-Development.ps1 "$package\development"
           ./tools/Test-DevelopmentBootstrap.ps1 -PackagePath $package
+
+  module-packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s tools/modules -p 'test_*.py'
+      - run: python tools/modules/packages.py --check
+      - run: python tools/modules/packages.py --output dist/modules
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_sqlite, mbstring, intl, openssl, zip
+          tools: composer:v2
+          coverage: none
+      - name: Install PHP modules from independent archives
+        run: |
+          mkdir -p app/storage/logs app/storage/framework/{sessions,views,cache} app/bootstrap/cache
+          python - <<'PYCODE'
+          import json, shutil
+          from pathlib import Path
+          archives = Path('dist/php-artifacts')
+          archives.mkdir()
+          for archive in Path('dist/modules').glob('*.zip'):
+              shutil.copy2(archive, archives / archive.name)
+          p = Path('app/composer.json')
+          data = json.loads(p.read_text())
+          data['repositories'] = [{'type': 'artifact', 'url': str(archives.resolve())}]
+          p.write_text(json.dumps(data, indent=2))
+          Path('app/composer.lock').unlink(missing_ok=True)
+          PYCODE
+          composer install --working-dir=app --no-interaction --prefer-dist
+          composer test --working-dir=app
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build UI from independent npm archives
+        run: |
+          python - <<'PYCODE'
+          import json, shutil, tarfile
+          from pathlib import Path
+          for archive in Path('dist/modules').glob('*.tgz'):
+              with tarfile.open(archive) as t:
+                  name = json.load(t.extractfile('package/package.json'))['name']
+                  matches = [p.parent for p in Path('admin-ui/packages').glob('*/package.json') if json.loads(p.read_text())['name'] == name]
+                  assert len(matches) == 1
+                  target = matches[0]
+                  staging = Path('dist/unpacked') / target.name
+                  t.extractall(staging, filter='data')
+                  shutil.rmtree(target)
+                  shutil.copytree(staging / 'package', target)
+          PYCODE
+          npm ci --prefix admin-ui
+          npm run build --prefix admin-ui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: independent-module-packages
+          path: dist/modules/*
+          if-no-files-found: error
