@@ -1,0 +1,12 @@
+{
+  "name": "@platzhirsch/widget-embed",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "src",
+    "build.mjs"
+  ],
+  "scripts": {
+    "build": "node build.mjs"
+  }
+}

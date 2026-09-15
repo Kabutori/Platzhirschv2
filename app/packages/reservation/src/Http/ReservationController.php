@@ -335,7 +335,7 @@ class ReservationController
                     'updated_at' => now()->utc(),
                     'version' => $this->db->raw('version + 1'),
                 ]);
-            app(\App\Modules\Reservation\Application\ReservationNotifications::class)->enqueue(
+            app(\App\Contracts\Module\ReservationNotifier::class)->enqueue(
                 $db->table('reservations')->find($id),
             );
         });

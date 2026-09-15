@@ -7,6 +7,7 @@ class ReservationServiceProvider extends ServiceProvider implements Module
 {
     public function register(): void
     {
+        $this->app->bind(\App\Contracts\Module\ReservationReadModel::class, Application\ReservationReadModel::class);
         $this->app->bind(
             \App\Modules\Reservation\PublicApi\ReservationGateway::class,
             \App\Modules\Reservation\Application\ReservationService::class,
