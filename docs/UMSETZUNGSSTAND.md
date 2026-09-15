@@ -1,5 +1,7 @@
 # Platzhirsch – tatsächlicher Umsetzungsstand
 
+Aktualisierung 15. September 2026: 18 Einzel-Repositories mit eigener CI, getrennte Audit-/Notification-/Release-Module und commitgebundene Quellübernahme sind umgesetzt. Siehe [Einzel-Repositories](EINZEL-REPOSITORIES.md). Ältere Aussagen unten zu noch fehlenden Repository-Aufteilungen sind damit überholt. Die private Paketregistry und administrative Versionsauswahl bleiben offen.
+
 Aktueller Ausbau: [Updates, koordinierte Sicherung und Wiederherstellung](UPDATES-UND-WIEDERHERSTELLUNG.md). Die folgenden älteren Aussagen zu fehlenden Anwendungsupdates und ausschließlich lokalen Snapshots werden durch diesen Ablauf ergänzt. Grenzen und aktueller CI-Nachweis stehen in der neuen Anleitung.
 
 Nachtrag 10. September 2026: Das optionale Wettermodul enthält jetzt einen Hintergrundabruf über den vorhandenen Scheduler, zusätzlich zur 7-Tage-Vorschau und Regenwarnung. Siehe [Wetterautomatik](WETTERAUTOMATIK.md). Die vollständige visuelle Abnahme aller 183 Vorlagen-Buttons bleibt offen; [aktueller Prüfstand](DESIGN-FORTSCHRITT.md).

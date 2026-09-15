@@ -18,8 +18,6 @@ $r->middleware(['web', 'auth', 'tenant'])
             ->where('kind', 'room-closures|table-combinations')
             ->whereNumber('id');
 
-        $r->get('/notifications', [\App\Modules\Reservation\Http\NotificationController::class, 'index']);
-        $r->patch('/notifications', [\App\Modules\Reservation\Http\NotificationController::class, 'save']);
         $r->get('/waitlist', [\App\Modules\Reservation\Http\WaitlistController::class, 'index']);
         $r->post('/waitlist', [\App\Modules\Reservation\Http\WaitlistController::class, 'save']);
         $r->patch('/waitlist/{id}', [

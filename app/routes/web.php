@@ -45,7 +45,6 @@ Route::prefix('api')->group(function () {
                 \App\Http\Controllers\TenantOperationController::class,
                 'move',
             ])->middleware('throttle:3,1');
-            Route::get('audit-log', [PlatformController::class, 'audit']);
             Route::get('system-operations', [\App\Operations\Controller::class, 'index']);
             Route::post('system-operations', [\App\Operations\Controller::class, 'store'])->middleware('throttle:3,1,system-operations:');
             Route::get('health', [PlatformController::class, 'health']);

@@ -214,7 +214,7 @@ Artisan::command('reservation:notifications', function () {
                     app(\App\Contracts\Module\TenantRuntime::class)->withTenant($tenant->id, function (
                         $context,
                     ) {
-                        app(\App\Modules\Reservation\Application\ReservationNotifications::class)->dispatch(
+                        app(\App\Contracts\Module\ReservationNotifier::class)->dispatch(
                             $context->name,
                             $context->timezone,
                         );

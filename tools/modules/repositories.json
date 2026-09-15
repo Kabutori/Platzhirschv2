@@ -1,0 +1,170 @@
+{
+  "platzhirsch-module-identity": [
+    [
+      "app/packages/identity",
+      "."
+    ],
+    [
+      "admin-ui/packages/identity",
+      "ui"
+    ]
+  ],
+  "platzhirsch-module-customer": [
+    [
+      "app/packages/customer",
+      "."
+    ],
+    [
+      "admin-ui/packages/customer",
+      "ui"
+    ]
+  ],
+  "platzhirsch-module-provisioning": [
+    [
+      "app/packages/provisioning",
+      "."
+    ],
+    [
+      "admin-ui/packages/provisioning",
+      "ui"
+    ]
+  ],
+  "platzhirsch-module-reservation": [
+    [
+      "app/packages/reservation",
+      "."
+    ],
+    [
+      "admin-ui/packages/reservation",
+      "ui"
+    ]
+  ],
+  "platzhirsch-module-widget": [
+    [
+      "app/packages/widget",
+      "."
+    ],
+    [
+      "admin-ui/packages/widget",
+      "ui"
+    ]
+  ],
+  "platzhirsch-module-billing": [
+    [
+      "app/packages/billing",
+      "."
+    ],
+    [
+      "admin-ui/packages/billing",
+      "ui"
+    ]
+  ],
+  "platzhirsch-module-support": [
+    [
+      "app/packages/support",
+      "."
+    ],
+    [
+      "admin-ui/packages/support",
+      "ui"
+    ]
+  ],
+  "platzhirsch-module-reporting": [
+    [
+      "app/packages/reporting",
+      "."
+    ],
+    [
+      "admin-ui/packages/reporting",
+      "ui"
+    ]
+  ],
+  "platzhirsch-module-weather": [
+    [
+      "app/packages/weather",
+      "."
+    ],
+    [
+      "admin-ui/packages/weather",
+      "ui"
+    ]
+  ],
+  "platzhirsch-module-audit": [
+    [
+      "app/packages/audit",
+      "."
+    ],
+    [
+      "admin-ui/packages/audit",
+      "ui"
+    ]
+  ],
+  "platzhirsch-module-notification": [
+    [
+      "app/packages/notification",
+      "."
+    ],
+    [
+      "admin-ui/packages/notification",
+      "ui"
+    ]
+  ],
+  "platzhirsch-module-release": [
+    [
+      "app/packages/release",
+      "."
+    ],
+    [
+      "admin-ui/packages/release",
+      "ui"
+    ]
+  ],
+  "platzhirsch-module-integration-odoo": [
+    [
+      "app/packages/integration-odoo",
+      "."
+    ],
+    [
+      "admin-ui/packages/integration-odoo",
+      "ui"
+    ]
+  ],
+  "platzhirsch-contracts": [
+    [
+      "app/packages/contracts",
+      "."
+    ]
+  ],
+  "platzhirsch-module-host": [
+    [
+      "app/packages/module-host",
+      "."
+    ],
+    [
+      "admin-ui/packages/module-host",
+      "ui"
+    ],
+    [
+      "admin-ui/packages/system-guide",
+      "system-guide"
+    ]
+  ],
+  "platzhirsch-design-tokens": [
+    [
+      "admin-ui/packages/design-tokens",
+      "."
+    ]
+  ],
+  "platzhirsch-ui": [
+    [
+      "admin-ui/packages/ui-runtime",
+      "."
+    ]
+  ],
+  "platzhirsch-widget-embed": [
+    [
+      "widget-embed",
+      "."
+    ]
+  ]
+}

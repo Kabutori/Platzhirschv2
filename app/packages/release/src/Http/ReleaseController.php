@@ -1,5 +1,5 @@
 <?php
-namespace App\Modules\Support\Http;
+namespace App\Modules\Release\Http;
 use Illuminate\Http\Request;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Validation\Rule;

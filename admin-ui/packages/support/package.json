@@ -10,7 +10,8 @@
     "./*": "./src/*"
   },
   "dependencies": {
-    "@platzhirsch/ui-runtime": "0.1.0"
+    "@platzhirsch/ui-runtime": "0.1.0",
+    "@platzhirsch/release-ui": "0.1.0"
   },
   "peerDependencies": {
     "react": "^19.2.0",
