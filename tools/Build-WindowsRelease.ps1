@@ -22,6 +22,7 @@ Copy-Item "$root\docs\UPDATES-UND-WIEDERHERSTELLUNG.md" "$out\UPDATES-UND-WIEDER
 Copy-Item "$root\docs\UMSETZUNGSSTAND.md" "$out\UMSETZUNGSSTAND.md"
 Copy-Item "$root\docs\MODULE-UND-SERVER.md" "$out\MODULE-UND-SERVER.md"
 Copy-Item "$root\docs\SYSTEM-GUIDE.md" "$out\SYSTEM-GUIDE.md"
+Copy-Item "$root\modules.lock.json" "$out\module-sources.json"
 # Package runtime files explicitly: no test databases, logs, developer environment
 # or cached configuration from the build machine may enter an installation.
 foreach($entry in @('app','bootstrap','config','database','public','resources','routes','vendor','artisan','composer.json','composer.lock')) {

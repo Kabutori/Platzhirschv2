@@ -1,4 +1,6 @@
-# Eigenständige Modulpakete – erster Umsetzungsschritt
+# Eigenständige Modulpakete
+
+Aktualisierung: Alle 18 Einzel-Repositories sind befüllt. Die kontrollierte Übernahme ihrer festen Commits ist in [EINZEL-REPOSITORIES.md](EINZEL-REPOSITORIES.md) beschrieben.
 
 Die Modulversion wird jetzt aus der jeweiligen `composer.json` gelesen. Ein Modulupdate erfordert keine Änderung der Versionsnummer des Module Host. Die Versionsangaben in PHP und UI müssen übereinstimmen; andere Module und der Kern behalten ihre eigenen Versionen. Aktuelle Abhängigkeiten sind weiterhin exakt festgelegt: ein inkompatibler oder nicht angepasster Paketstand wird abgelehnt.
 
@@ -18,7 +20,7 @@ Für eine neue Modulversion: PHP-/UI-Version ändern, abhängige exakte Paketanf
 
 ## Weiter offen gemäß Konzept 3.2, 3.3 und 6.3
 
-- Tatsächliche Trennung in eigene Modul-Repositories und Einrichtung privater Composer-/npm-Registries. Die Archive liefern die Paketgrenzen; die Repositories und Registries sind damit noch nicht eingerichtet.
+- Einrichtung privater Composer-/npm-Registries. Die Einzel-Repositories sind inzwischen eingerichtet; die Anwendung verwendet derzeit überprüfte, commitgebundene Quellkopien.
 - Bezug veröffentlichter Module aus diesen Registries statt lokaler Workspace-Pakete.
 - Geschützter Auswahl-, Vorschau- und Freigabeablauf für Modulversionen in der Verwaltung, der einen geprüften Anwendungsbuild auslöst.
 - Eigenständiger Modulrollback mit passender Datenmigration. Der vorhandene Anwendungsrollback bleibt maßgeblich.

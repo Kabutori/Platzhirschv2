@@ -6,7 +6,7 @@ from pathlib import Path
 import argparse, hashlib, json, subprocess, shutil
 ROOT=Path(__file__).resolve().parents[2]
 LOCK=ROOT/'modules.lock.json'
-def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+def digest(path):return hashlib.sha256(path.read_bytes().replace(b'\r\n',b'\n')).hexdigest()
 def tracked(root):return [Path(p) for p in subprocess.check_output(['git','ls-files','-z'],cwd=root).decode().split('\0') if p]
 def verify(root=ROOT):
  lock=json.loads((root/'modules.lock.json').read_text())
@@ -41,11 +41,11 @@ def import_checkout(name, checkout, commit):
    rel=full.relative_to(source)
    if not any(rel==Path(a) or rel.is_relative_to(a) for a in allowed):continue
    if full.is_symlink() or '..' in rel.parts or any(x.startswith('.') for x in rel.parts):raise ValueError('Unsupported package file')
-   new[rel.as_posix()]=full.read_bytes()
+   new[rel.as_posix()]=full.read_bytes().replace(b'\r\n',b'\n')
   if not new:raise ValueError('Empty package')
   prepared.append((p,target,new))
  # Refuse to overwrite local package edits before replacing any directory.
- verify()
+ verify(ROOT)
  for p,target,new in prepared:
   old=next(x for x in entry['packages'] if x['target']==p['target'])
   for oldfile in old['files']:
