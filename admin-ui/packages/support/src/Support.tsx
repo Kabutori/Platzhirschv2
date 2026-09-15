@@ -1,4 +1,4 @@
-import Releases from './Releases';
+import Releases from '@platzhirsch/release-ui/Releases.tsx';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Plus, ChevronRight } from 'lucide-react';

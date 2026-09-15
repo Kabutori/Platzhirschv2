@@ -1,8 +1,8 @@
 <?php
-namespace App\Modules\Reservation\Http;
+namespace App\Modules\Notification\Http;
 use Illuminate\Http\Request;
 use Illuminate\Database\DatabaseManager;
-use App\Modules\Reservation\Application\ReservationNotifications;
+use App\Modules\Notification\Application\ReservationNotifications;
 class NotificationController
 {
     public function __construct(private DatabaseManager $db) {}

@@ -28,7 +28,11 @@
     "@platzhirsch/customer-ui": "0.1.0",
     "@platzhirsch/module-host": "0.1.0",
     "@platzhirsch/system-guide-ui": "0.1.0",
-    "@platzhirsch/weather-ui": "0.1.0"
+    "@platzhirsch/weather-ui": "0.1.0",
+    "@platzhirsch/audit-ui": "0.1.0",
+    "@platzhirsch/notification-ui": "0.1.0",
+    "@platzhirsch/release-ui": "0.1.0",
+    "@platzhirsch/integration-odoo-ui": "0.1.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

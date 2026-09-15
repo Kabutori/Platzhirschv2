@@ -1,12 +1,17 @@
 <?php
-namespace App\Modules\Reservation\Application;
+namespace App\Modules\Notification\Application;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Http\Client\Factory;
 use Carbon\CarbonImmutable;
-class ReservationNotifications
+class ReservationNotifications implements \App\Contracts\Module\ReservationNotifier
 {
-    public function __construct(private DatabaseManager $db, private Mailer $mail, private Factory $http) {}
+    public function __construct(
+        private DatabaseManager $db,
+        private Mailer $mail,
+        private Factory $http,
+        private \App\Contracts\Module\ReservationReadModel $reservations,
+    ) {}
     public function readiness(): array
     {
         return [
@@ -79,7 +84,7 @@ class ReservationNotifications
                 if (!$e || $e->status !== 'pending') {
                     return null;
                 }
-                $r = $db->table('reservations')->find($e->reservation_id);
+                $r = $this->reservations->findForNotification((int) $e->reservation_id);
                 if (
                     !$r ||
                     (int) $r->version !== (int) $e->version ||

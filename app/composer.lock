@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c69d1d5734f2ea8307a4b170cf82f965",
+    "content-hash": "c16210397013f073bb5bef55857186ec",
     "packages": [
         {
             "name": "brick/math",
@@ -2494,6 +2494,38 @@
             "time": "2026-08-24T00:54:40+00:00"
         },
         {
+            "name": "platzhirsch/audit",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/audit",
+                "reference": "045f79238fe55fd439dca145f3d172c79640489e"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\Audit\\AuditServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Audit\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
             "name": "platzhirsch/billing",
             "version": "0.1.0",
             "dist": {
@@ -2612,6 +2644,38 @@
             }
         },
         {
+            "name": "platzhirsch/integration-odoo",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/integration-odoo",
+                "reference": "5d267d709ba38ffb9e981f9fcd4471ae8102a202"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\IntegrationOdoo\\IntegrationOdooServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\IntegrationOdoo\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
             "name": "platzhirsch/module-host",
             "version": "0.1.0",
             "dist": {
@@ -2627,6 +2691,39 @@
             "autoload": {
                 "psr-4": {
                     "App\\Core\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "platzhirsch/notification",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/notification",
+                "reference": "31e5f5589dad48e4717ce6b3eedcfcb66685d0cd"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.0",
+                "platzhirsch/reservation": "0.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\Notification\\NotificationServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Notification\\": "src/"
                 }
             },
             "transport-options": {
@@ -2659,6 +2756,38 @@
             "autoload": {
                 "psr-4": {
                     "App\\Modules\\Provisioning\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "platzhirsch/release",
+            "version": "0.1.0",
+            "dist": {
+                "type": "path",
+                "url": "packages/release",
+                "reference": "b24f0fa36df06fba8f7b1326146085b7a321b8b9"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\Release\\ReleaseServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Release\\": "src/"
                 }
             },
             "transport-options": {
@@ -2767,18 +2896,18 @@
         {
             "name": "platzhirsch/weather",
             "version": "0.1.0",
-            "type": "library",
+            "dist": {
+                "type": "path",
+                "url": "packages/weather",
+                "reference": "da1a2c62183b12a2e95997dc8a11db400eda9682"
+            },
             "require": {
+                "laravel/framework": "^13.0",
                 "php": "^8.3",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.0",
-                "laravel/framework": "^13.0"
+                "platzhirsch/module-host": "0.1.0"
             },
-            "autoload": {
-                "psr-4": {
-                    "App\\Modules\\Weather\\": "src/"
-                }
-            },
+            "type": "library",
             "extra": {
                 "laravel": {
                     "providers": [
@@ -2786,10 +2915,10 @@
                     ]
                 }
             },
-            "dist": {
-                "type": "path",
-                "url": "packages/weather",
-                "reference": "a0f48de5c4a3d52e322f02f83cae2ec39686ece1"
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Weather\\": "src/"
+                }
             },
             "transport-options": {
                 "symlink": false,

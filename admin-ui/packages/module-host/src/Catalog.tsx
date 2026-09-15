@@ -54,7 +54,26 @@ export default function Catalog() {
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-      <p className="muted">Installierte Basismodule</p>
+      <p className="muted">Installierte Module und ihre eigenen Paketversionen</p>
+      <button
+        disabled={!q.data}
+        onClick={() => {
+          const content = {
+            exportedAt: new Date().toISOString(),
+            modules: q.data?.map((m) => ({ code: m.code, version: m.version, dependencies: m.dependencies })),
+          };
+          const url = URL.createObjectURL(
+            new Blob([JSON.stringify(content, null, 2)], { type: 'application/json' }),
+          );
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'platzhirsch-modulversionen.json';
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }}
+      >
+        Versionsstand exportieren
+      </button>
       {q.isPending && <p role="status">Module werden geladen …</p>}
       {q.error && <p role="alert">{q.error.message}</p>}
       <div className="module-cards">
@@ -125,9 +144,11 @@ export default function Catalog() {
           erforderlichen Mandantenmigrationen.
         </p>
         <p className="muted">
-          Basismodule liegen in eigenen Composer- und npm-Paketen und werden zusammen mit dem geprüften
-          Release ausgeliefert. Neue ausführbare Module werden im Entwicklungsprojekt registriert und beim
-          Paketbau geprüft.
+          Jedes Modul besitzt eine eigene Paketversion. PHP- und UI-Pakete können im Entwicklungsprojekt
+          separat gebaut und veröffentlicht werden. Die Installation erfolgt weiterhin über ein gemeinsam
+          geprüftes Anwendungspaket unter „System → Backups & Updates“. Ein Modulpaket allein ist kein
+          installierbares Windows-Update. Die direkte Versionsauswahl in dieser Oberfläche folgt im weiteren
+          Ausbau.
         </p>
       </section>
     </>

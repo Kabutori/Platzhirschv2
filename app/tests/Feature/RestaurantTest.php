@@ -852,11 +852,11 @@ class RestaurantTest extends TestCase
             \Illuminate\Contracts\Mail\Mailer::class,
             fn($mailer) => $mailer->shouldReceive('raw')->once()->andReturnNull(),
         );
-        app(\App\Modules\Reservation\Application\ReservationNotifications::class)->dispatch(
+        app(\App\Contracts\Module\ReservationNotifier::class)->dispatch(
             'Restaurant',
             'Europe/Berlin',
         );
-        app(\App\Modules\Reservation\Application\ReservationNotifications::class)->dispatch(
+        app(\App\Contracts\Module\ReservationNotifier::class)->dispatch(
             'Restaurant',
             'Europe/Berlin',
         );
@@ -883,7 +883,7 @@ class RestaurantTest extends TestCase
             ...$this->payload(),
             'phone' => '+491709876543',
         ])->assertCreated();
-        $service = app(\App\Modules\Reservation\Application\ReservationNotifications::class);
+        $service = app(\App\Contracts\Module\ReservationNotifier::class);
         $service->dispatch('Restaurant', 'Europe/Berlin');
         $service->dispatch('Restaurant', 'Europe/Berlin');
         \Illuminate\Support\Facades\Http::assertSentCount(1);

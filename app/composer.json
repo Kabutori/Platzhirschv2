@@ -17,7 +17,11 @@
     "platzhirsch/widget": "0.1.0",
     "platzhirsch/customer": "0.1.0",
     "platzhirsch/module-host": "0.1.0",
-    "platzhirsch/weather": "0.1.0"
+    "platzhirsch/weather": "0.1.0",
+    "platzhirsch/audit": "0.1.0",
+    "platzhirsch/notification": "0.1.0",
+    "platzhirsch/release": "0.1.0",
+    "platzhirsch/integration-odoo": "0.1.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^12.0",
