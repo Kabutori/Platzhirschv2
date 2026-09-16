@@ -4,7 +4,7 @@ import {api,ApiError} from './api';
 type Item={id:string;label:string};
 type Job={id:string;action:string;status:string;createdAt:string;finishedAt?:string;message:string};
 type State={available:boolean;heartbeat?:string;backups:Item[];packages:Item[];jobs:Job[]};
-const labels:Record<string,string>={backup:'Sicherung erstellen',verify:'Sicherung prüfen',restore:'Wiederherstellen',rollback:'Rollback',update:'Update installieren',check:'Betrieb prüfen'};
+const labels:Record<string,string>={'stage-module-update':'Modulupdate bereitstellen',backup:'Sicherung erstellen',verify:'Sicherung prüfen',restore:'Wiederherstellen',rollback:'Rollback',update:'Update installieren',check:'Betrieb prüfen'};
 const statuses:Record<string,string>={queued:'Wartet',running:'Wird ausgeführt',success:'Erfolgreich',failed:'Fehlgeschlagen',interrupted:'Unterbrochen'};
 export default function SystemOperations(){
  const q=useQuery({queryKey:['system-operations'],queryFn:()=>api<State>('v1/admin/system-operations'),refetchInterval:5000,retry:false});

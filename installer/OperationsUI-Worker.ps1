@@ -17,9 +17,10 @@ while($true){
    if($file.Attributes -band [IO.FileAttributes]::ReparsePoint){Remove-Item -LiteralPath $file.FullName -Force;continue}
    if($file.Length -gt 4096){Remove-Item -LiteralPath $file.FullName -Force;continue}
    try{$r=Get-Content -LiteralPath $file.FullName -Raw|ConvertFrom-Json}catch{continue}
-   if($r.id -notmatch '^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$' -or $file.BaseName -ne $r.id -or $r.action -notin @('backup','verify','restore','rollback','update','check')){Remove-Item -LiteralPath $file.FullName -Force;continue}
+   if($r.id -notmatch '^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$' -or $file.BaseName -ne $r.id -or $r.action -notin @('backup','verify','restore','rollback','update','check','stage-module-update')){Remove-Item -LiteralPath $file.FullName -Force;continue}
    if(Test-Path "$dir\private\$($r.id).json"){Remove-Item -LiteralPath $file.FullName -Force;continue}
    $valid=$true
+   if($r.action -eq 'stage-module-update'){$valid=$r.target -match '^windows-preview-[0-9]+-[0-9]+$'}
    if($r.action -in @('verify','restore','rollback')){$valid=$r.target -in @($backups|ForEach-Object {$_.id})}
    if($r.action -eq 'update'){$valid=$r.target -in @($packages|ForEach-Object {$_.id})}
    try{if([DateTime]::Parse($r.createdAt).ToUniversalTime() -lt [DateTime]::UtcNow.AddMinutes(-5)){$valid=$false}}catch{$valid=$false}

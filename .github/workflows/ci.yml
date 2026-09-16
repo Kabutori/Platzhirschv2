@@ -151,3 +151,35 @@ jobs:
           name: independent-module-packages
           path: dist/modules/*
           if-no-files-found: error
+
+  private-registry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_sqlite, mbstring, intl, openssl, zip, sodium
+          tools: composer:v2
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compose application through Composer and npm registry protocols
+        run: |
+          python tools/modules/registry.py seed --output .module-build
+          export MODULE_COMPOSITION="$(python -c 'import json; d=json.load(open(".module-build/index.json")); print(json.dumps({k:{"version":v["installed"],"commit":v["versions"][v["installed"]]["commit"]} for k,v in d["repositories"].items()}))')"
+          python tools/modules/registry.py compose --output .module-build
+          python tools/modules/registry.py serve --output .module-build > /tmp/registry.log 2>&1 &
+          for n in $(seq 1 30); do curl -fsS http://127.0.0.1:18761/composer/packages.json >/dev/null && break || sleep 1; done
+          mkdir -p app/storage/logs app/storage/framework/{sessions,views,cache} app/bootstrap/cache
+          composer update 'platzhirsch/*' --working-dir=app --no-interaction --no-install --no-scripts
+          composer install --working-dir=app --no-interaction --prefer-dist
+          composer test --working-dir=app
+          rm admin-ui/package-lock.json
+          npm install --prefix admin-ui --package-lock-only --ignore-scripts
+          npm ci --prefix admin-ui
+          npm run build --prefix admin-ui

@@ -1,4 +1,5 @@
 name: Windows installation package (preview)
+run-name: ${{ inputs.request_id && format('Module composition {0}', inputs.request_id) || 'Windows installation package' }}
 on:
   pull_request:
     paths:
@@ -18,6 +19,15 @@ on:
       - '.github/workflows/windows-package.yml'
   workflow_dispatch:
     inputs:
+      composition:
+        description: 'Exact module selection JSON from administration'
+        required: false
+      request_id:
+        description: 'Administration build request UUID'
+        required: false
+      base_commit:
+        description: 'Approved main commit'
+        required: false
       version:
         description: Package version
         required: true
@@ -25,8 +35,8 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: windows-package-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: windows-package-${{ inputs.request_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 jobs:
   package:
     runs-on: windows-latest
@@ -42,6 +52,39 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare private module registry
+        shell: pwsh
+        env:
+          MODULE_COMPOSITION: ${{ inputs.composition }}
+          MODULE_REQUEST_ID: ${{ inputs.request_id }}
+          MODULE_BASE_COMMIT: ${{ inputs.base_commit }}
+          MODULE_REPOSITORY_TOKEN: ${{ github.event_name == 'workflow_dispatch' && secrets.MODULE_REPOSITORY_TOKEN || '' }}
+        run: |
+          if ($env:MODULE_COMPOSITION) {
+            if ('${{ github.ref }}' -ne 'refs/heads/main' -or $env:MODULE_BASE_COMMIT -ne (git rev-parse HEAD) -or $env:MODULE_REQUEST_ID -notmatch '^[a-f0-9-]{36}$') { throw 'Approved main commit/request required' }
+            python tools/modules/registry.py compose --output .module-build
+            if ($LASTEXITCODE -ne 0) { throw 'Module composition failed' }
+            Copy-Item .module-build app/resources/module-registry -Recurse
+            $process = Start-Process python -ArgumentList 'tools/modules/registry.py','serve','--output','.module-build' -PassThru -RedirectStandardOutput registry-server.log -RedirectStandardError registry-server.error.log
+            for ($i=0; $i -lt 30; $i++) {
+              try { Invoke-WebRequest http://127.0.0.1:18761/composer/packages.json -TimeoutSec 2 | Out-Null; break } catch { Start-Sleep -Seconds 1 }
+            }
+            Push-Location app
+            composer update 'platzhirsch/*' --no-install --no-scripts --no-interaction
+            if ($LASTEXITCODE -ne 0) { throw 'Composer composition failed' }
+            Pop-Location
+            Push-Location admin-ui
+            Remove-Item package-lock.json
+            npm install --package-lock-only --ignore-scripts
+            if ($LASTEXITCODE -ne 0) { throw 'npm composition failed' }
+            Pop-Location
+          } else {
+            python tools/modules/registry.py seed
+            if ($LASTEXITCODE -ne 0) { throw 'Registry seed failed' }
+          }
       - name: Prepare runtime directories
         shell: pwsh
         run: New-Item -ItemType Directory -Force app/storage/logs,app/storage/framework/sessions,app/storage/framework/views,app/storage/framework/cache,app/bootstrap/cache | Out-Null
