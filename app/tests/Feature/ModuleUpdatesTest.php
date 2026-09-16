@@ -213,4 +213,49 @@ class ModuleUpdatesTest extends TestCase
         $this->assertSame('stage-module-update', $job['action']);
         $this->assertArrayNotHasKey('password', $job);
     }
+    public function test_pipeline_secret_is_sealed_and_never_sent_as_plaintext(): void
+    {
+        $this->login();
+        $pair = sodium_crypto_box_keypair();
+        Http::fake([
+            '*/actions/secrets/public-key' => Http::response([
+                'key' => base64_encode(sodium_crypto_box_publickey($pair)),
+                'key_id' => 'test-key',
+            ]),
+            '*/actions/secrets/MODULE_REPOSITORY_TOKEN' => Http::response(null, 204),
+        ]);
+        $this->putJson('/api/v1/admin/module-updates/settings', [
+            ...$this->auth(),
+            'github_token' => 'private-test-token',
+            'configure_pipeline' => true,
+        ])
+            ->assertOk()
+            ->assertDontSee('private-test-token');
+        Http::assertSent(
+            fn($r) => str_ends_with($r->url(), '/MODULE_REPOSITORY_TOKEN') &&
+                $r['key_id'] === 'test-key' &&
+                sodium_crypto_box_seal_open(base64_decode($r['encrypted_value']), $pair) ===
+                    'private-test-token',
+        );
+        $this->assertTrue(app(Settings::class)->read()['pipeline_configured']);
+    }
+    public function test_registry_serves_scoped_npm_and_rejects_changed_archives(): void
+    {
+        $index = json_decode(File::get($this->dir . '/index.json'), true);
+        $package = $index['repositories']['platzhirsch-module-test']['versions']['0.1.0']['packages'][0];
+        $package['name'] = '@platzhirsch/test-ui';
+        $package['kind'] = 'npm';
+        $package['manifest'] = ['name' => $package['name'], 'version' => '0.1.0'];
+        $index['repositories']['platzhirsch-module-test']['versions']['0.1.0']['packages'][] = $package;
+        File::put($this->dir . '/index.json', json_encode($index));
+        app(Settings::class)->save(['github_token' => '', 'reader_hash' => hash('sha256', 'reader')]);
+        $this->withToken('reader')
+            ->getJson('/api/module-registry/npm/@platzhirsch%2Ftest-ui')
+            ->assertOk()
+            ->assertJsonPath('name', '@platzhirsch/test-ui');
+        File::put($this->dir . '/test.zip', 'modified');
+        $this->withToken('reader')
+            ->getJson('/api/module-registry/files/' . $package['sha256'])
+            ->assertNotFound();
+    }
 }

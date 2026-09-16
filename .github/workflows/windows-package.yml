@@ -41,6 +41,8 @@ jobs:
   package:
     runs-on: windows-latest
     timeout-minutes: 45
+    env:
+      COMPOSER_MAX_PARALLEL_HTTP: 1
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2

@@ -1,3 +1,4 @@
+import './ModuleUpdates.css';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from './api';
@@ -105,7 +106,7 @@ export default function ModuleUpdates() {
     });
   }
   return (
-    <section className="panel padded">
+    <section className="panel padded module-update-panel">
       <h2>Modulversionen & Updates</h2>
       <p>
         Wählen Sie die Modulversionen für die gesamte Plattform. Vor der Installation werden Abhängigkeiten,
@@ -177,7 +178,7 @@ export default function ModuleUpdates() {
       </details>
       <h3>Zusammenstellung</h3>
       <div style={{ overflowX: 'auto' }}>
-        <table>
+        <table className="module-version-table">
           <thead>
             <tr>
               <th>Repository</th>
@@ -190,8 +191,8 @@ export default function ModuleUpdates() {
             {Object.entries(q.data?.repositories ?? {}).map(([repo, row]) => (
               <tr key={repo}>
                 <td>{repo.replace('platzhirsch-', '')}</td>
-                <td>{row.installed}</td>
-                <td>
+                <td data-label="Installiert">{row.installed}</td>
+                <td data-label="Zielversion">
                   <select
                     aria-label={`Zielversion ${repo}`}
                     disabled={busy || !!action}
@@ -208,7 +209,7 @@ export default function ModuleUpdates() {
                       ))}
                   </select>
                 </td>
-                <td>
+                <td data-label="Paketquelle">
                   <button
                     disabled={busy || !q.data?.github_configured}
                     onClick={() =>
