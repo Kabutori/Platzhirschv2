@@ -51,4 +51,4 @@ CI kontrolliert die Quellkopien gegen `modules.lock.json`, installiert die PHP-M
 
 Die historische Notification-Migration bleibt im Reservierungs-Basisschema; Audit-Basistabellen bleiben im Plattform-Basisschema. Ihre Namen werden bei bestehenden Installationen nicht verändert. Neue Laufzeitlogik liegt in den getrennten Modulen. Der ReservationNotifier-/ReservationReadModel-Vertrag vermeidet eine direkte gegenseitige Abhängigkeit zwischen Reservierung und Versand.
 
-Eine private Satis-/npm-Registry und die direkte Modulauswahl in der Admin-Oberfläche sind weiterhin separate Ausbauschritte. Die Repository-Trennung und die kontrollierte Übernahme funktionieren ohne diese Dienste. Version 0.1.0 bleibt als bestehender Release unverändert.
+Die integrierte private Composer-/npm-Quelle und die Modulauswahl unter Administration → Module → Versionen & Updates sind in [MODUL-UPDATES.md](MODUL-UPDATES.md) beschrieben. Version 0.1.0 bleibt als bestehender Release unverändert.

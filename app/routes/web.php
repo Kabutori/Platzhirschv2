@@ -30,6 +30,16 @@ Route::prefix('api')->group(function () {
             Route::get('mail-settings', [\App\MailSettings\Controller::class, 'index']);
             Route::put('mail-settings', [\App\MailSettings\Controller::class, 'save']);
             Route::post('mail-settings/test', [\App\MailSettings\Controller::class, 'test'])->middleware('throttle:3,1');
+            Route::prefix('module-updates')->group(function () {
+                $controller = \App\ModuleUpdates\Controller::class;
+                Route::get('/', [$controller, 'index']);
+                Route::put('settings', [$controller, 'settings'])->middleware('throttle:5,1');
+                Route::post('sync', [$controller, 'sync'])->middleware('throttle:30,1');
+                Route::post('preview', [$controller, 'preview']);
+                Route::post('builds', [$controller, 'build'])->middleware('throttle:3,1');
+                Route::post('builds/{id}/refresh', [$controller, 'refresh'])->whereUuid('id');
+                Route::post('builds/{id}/stage', [$controller, 'stage'])->whereUuid('id')->middleware('throttle:3,1');
+            });
             Route::get('modules', fn() => app(\App\Core\Module\ModuleRegistry::class)->catalog());
             Route::get(
                 'permissions/families',

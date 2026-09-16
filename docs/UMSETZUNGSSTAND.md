@@ -1,6 +1,8 @@
 # Platzhirsch – tatsächlicher Umsetzungsstand
 
-Aktualisierung 15. September 2026: 18 Einzel-Repositories mit eigener CI, getrennte Audit-/Notification-/Release-Module und commitgebundene Quellübernahme sind umgesetzt. Siehe [Einzel-Repositories](EINZEL-REPOSITORIES.md). Ältere Aussagen unten zu noch fehlenden Repository-Aufteilungen sind damit überholt. Die private Paketregistry und administrative Versionsauswahl bleiben offen.
+Aktualisierung 16. September 2026: Private Composer-/npm-Paketquelle, Modulversionsauswahl, Abhängigkeitsvorschau, verschlüsselte GitHub-/CI-Einrichtung und Freigabe geprüfter Windows-Modulbuilds sind implementiert. Die Bereitstellung erfolgt in der Administration; die Installation nutzt den vorhandenen Sicherungs-/Rollbackablauf. Der Betreiber hinterlegt seinen GitHub-Zugang einmal in der Oberfläche. Siehe [Modulversionen und Paketquelle](MODUL-UPDATES.md).
+
+Aktualisierung 15. September 2026: 18 Einzel-Repositories mit eigener CI, getrennte Audit-/Notification-/Release-Module und commitgebundene Quellübernahme sind umgesetzt. Siehe [Einzel-Repositories](EINZEL-REPOSITORIES.md). Ältere Aussagen unten zu noch fehlenden Repository-Aufteilungen sind damit überholt. Diese Repository-Aufteilung ist die Grundlage der nachfolgenden Versionsverwaltung.
 
 Aktueller Ausbau: [Updates, koordinierte Sicherung und Wiederherstellung](UPDATES-UND-WIEDERHERSTELLUNG.md). Die folgenden älteren Aussagen zu fehlenden Anwendungsupdates und ausschließlich lokalen Snapshots werden durch diesen Ablauf ergänzt. Grenzen und aktueller CI-Nachweis stehen in der neuen Anleitung.
 
