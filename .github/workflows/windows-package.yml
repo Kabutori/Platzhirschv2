@@ -36,7 +36,7 @@ permissions:
   contents: read
 concurrency:
   group: windows-package-${{ inputs.request_id || github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   package:
     runs-on: windows-latest
@@ -65,26 +65,27 @@ jobs:
         run: |
           if ($env:MODULE_COMPOSITION) {
             if ('${{ github.ref }}' -ne 'refs/heads/main' -or $env:MODULE_BASE_COMMIT -ne (git rev-parse HEAD) -or $env:MODULE_REQUEST_ID -notmatch '^[a-f0-9-]{36}$') { throw 'Approved main commit/request required' }
-            python tools/modules/registry.py compose --output .module-build
-            if ($LASTEXITCODE -ne 0) { throw 'Module composition failed' }
-            Copy-Item .module-build app/resources/module-registry -Recurse
-            $process = Start-Process python -ArgumentList 'tools/modules/registry.py','serve','--output','.module-build' -PassThru -RedirectStandardOutput registry-server.log -RedirectStandardError registry-server.error.log
-            for ($i=0; $i -lt 30; $i++) {
-              try { Invoke-WebRequest http://127.0.0.1:18761/composer/packages.json -TimeoutSec 2 | Out-Null; break } catch { Start-Sleep -Seconds 1 }
-            }
-            Push-Location app
-            composer update 'platzhirsch/*' --no-install --no-scripts --no-interaction
-            if ($LASTEXITCODE -ne 0) { throw 'Composer composition failed' }
-            Pop-Location
-            Push-Location admin-ui
-            Remove-Item package-lock.json
-            npm install --package-lock-only --ignore-scripts
-            if ($LASTEXITCODE -ne 0) { throw 'npm composition failed' }
-            Pop-Location
           } else {
-            python tools/modules/registry.py seed
+            python tools/modules/registry.py seed --output .module-build
             if ($LASTEXITCODE -ne 0) { throw 'Registry seed failed' }
+            $env:MODULE_COMPOSITION = python -c 'import json; d=json.load(open(".module-build/index.json")); print(json.dumps({k:{"version":v["installed"],"commit":v["versions"][v["installed"]]["commit"]} for k,v in d["repositories"].items()}))'
           }
+          python tools/modules/registry.py compose --output .module-build
+          if ($LASTEXITCODE -ne 0) { throw 'Module composition failed' }
+          Copy-Item .module-build app/resources/module-registry -Recurse
+          $process = Start-Process python -ArgumentList 'tools/modules/registry.py','serve','--output','.module-build' -PassThru -RedirectStandardOutput registry-server.log -RedirectStandardError registry-server.error.log
+          for ($i=0; $i -lt 30; $i++) {
+            try { Invoke-WebRequest http://127.0.0.1:18761/composer/packages.json -TimeoutSec 2 | Out-Null; break } catch { Start-Sleep -Seconds 1 }
+          }
+          Push-Location app
+          composer update 'platzhirsch/*' --no-install --no-scripts --no-interaction
+          if ($LASTEXITCODE -ne 0) { throw 'Composer composition failed' }
+          Pop-Location
+          Push-Location admin-ui
+          Remove-Item package-lock.json
+          npm install --package-lock-only --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { throw 'npm composition failed' }
+          Pop-Location
       - name: Prepare runtime directories
         shell: pwsh
         run: New-Item -ItemType Directory -Force app/storage/logs,app/storage/framework/sessions,app/storage/framework/views,app/storage/framework/cache,app/bootstrap/cache | Out-Null
