@@ -81,6 +81,9 @@ jobs:
       - name: Parse installer with Windows PowerShell 5.1
         shell: powershell
         run: ./tools/Check-PowerShell.ps1
+      - name: Test verified module update staging
+        shell: powershell
+        run: ./tools/Test-ModuleUpdateStage.ps1
       - name: Test automatic development checkout without installed application
         shell: powershell
         run: |
