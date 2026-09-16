@@ -22,3 +22,11 @@ app/storage/app/private/*
 /app/public/landing/*.woff2
 /app/public/landing/tokens.css
 /app/public/landing/preview-*.html
+
+/app/resources/module-registry/
+/.module-build/
+/module-composition.json
+
+__pycache__/
+
+/app/storage/app/module-registry/

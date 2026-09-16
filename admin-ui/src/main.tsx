@@ -1,3 +1,4 @@
+import ModuleUpdates from './ModuleUpdates';
 import AuditPage, { AuditRows } from '@platzhirsch/audit-ui/Audit.tsx';
 import SystemOperations from './SystemOperations';
 import MailSettings from './MailSettings';
@@ -611,13 +612,14 @@ function ModuleCenter({ user }: { user: Row }) {
         <button aria-pressed={tab === 'catalog'} onClick={() => setTab('catalog')}>
           Modul-Katalog
         </button>
+        {user.role === 'system_admin' && <button aria-pressed={tab === 'updates'} onClick={() => setTab('updates')}>Versionen & Updates</button>}
         {user.role === 'system_admin' && (
           <button aria-pressed={tab === 'billing'} onClick={() => setTab('billing')}>
             Angebote & Bestellungen
           </button>
         )}
       </nav>
-      {tab === 'catalog' ? (
+      {tab === 'updates' && user.role === 'system_admin' ? <ModuleUpdates /> : tab === 'catalog' ? (
         <ModuleCatalog />
       ) : user.role === 'system_admin' ? (
         <Suspense fallback={<Loading />}>

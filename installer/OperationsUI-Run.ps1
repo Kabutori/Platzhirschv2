@@ -6,6 +6,7 @@ $dir="$InstallPath\operations-ui"
 $job=Get-Content "$dir\private\$JobId.json" -Raw|ConvertFrom-Json
 try {
  switch($job.action){
+  'stage-module-update' {& "$PSScriptRoot\Stage-ModuleUpdate.ps1" -InstallPath $InstallPath -Tag $job.target}
   'backup' {& "$PSScriptRoot\Recover-Platzhirsch.ps1" -Mode Backup -InstallPath $InstallPath -Destination "$InstallPath-Backups\backup-$JobId" -Confirm:$false}
   'verify' {& "$PSScriptRoot\Recover-Platzhirsch.ps1" -Mode Verify -InstallPath $InstallPath -Destination "$InstallPath-Backups\$($job.target)" -Confirm:$false}
   'restore' {& "$PSScriptRoot\Recover-Platzhirsch.ps1" -Mode Restore -InstallPath $InstallPath -Destination "$InstallPath-Backups\$($job.target)" -Confirm:$false}

@@ -1,0 +1,43 @@
+.module-update-panel {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 700px) {
+  .module-version-table,
+  .module-version-table tbody {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+  .module-version-table thead {
+    display: none;
+  }
+  .module-version-table tr {
+    display: block;
+    padding: 12px 0;
+    border-bottom: 1px solid #343434;
+  }
+  .module-version-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border: 0;
+    white-space: normal;
+  }
+  .module-version-table td::before {
+    content: attr(data-label);
+    font-size: 12px;
+    color: #a3a3a3;
+  }
+  .module-version-table td:first-child {
+    display: block;
+    font-weight: 600;
+  }
+  .module-version-table td:first-child::before {
+    display: none;
+  }
+  .module-version-table select {
+    width: 140px;
+  }
+}
