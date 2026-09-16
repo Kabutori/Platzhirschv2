@@ -28,3 +28,5 @@ app/storage/app/private/*
 /module-composition.json
 
 __pycache__/
+
+/app/storage/app/module-registry/

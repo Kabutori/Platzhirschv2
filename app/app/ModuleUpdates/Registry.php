@@ -136,7 +136,7 @@ class Registry
                     422,
                     'Paketprüfsumme stimmt nicht.',
                 );
-                $dir = storage_path('app/private/module-registry');
+                $dir = storage_path('app/module-registry');
                 File::ensureDirectoryExists($dir);
                 $path = $dir . '/' . $record['sha256'];
                 if (!is_file($path)) {
@@ -169,15 +169,15 @@ class Registry
             foreach ($r['versions'] as $v) {
                 foreach ($v['packages'] as $p) {
                     if ($p['sha256'] === $hash) {
-                        $file = storage_path('app/private/module-registry/' . $hash);
+                        $file = storage_path('app/module-registry/' . $hash);
                         if (!is_file($file)) {
                             $file = $this->seedPath() . '/' . $p['file'];
                         }
                         abort_unless(is_file($file) && hash_equals($hash, hash_file('sha256', $file)), 404);
                         return $file;
                     }
-                };
-            };
+                }
+            }
         }
         abort(404);
     }
@@ -203,8 +203,8 @@ class Registry
                             'dist' => ['tarball' => $base . '/files/' . $p['sha256'], 'shasum' => $p['sha1']],
                         ];
                     }
-                };
-            };
+                }
+            }
         }
         if ($npm === null) {
             return ['packages' => (object) $packages];

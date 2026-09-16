@@ -73,6 +73,39 @@ try {
         'email' => 'admin@example.test',
         'password' => $password,
     ]);
+    $catalog = callApi('administration', 'GET', 'v1/admin/module-updates');
+    check(count($catalog['repositories']) === 18, 'module_registry_incomplete');
+    $selection = [];
+    foreach ($catalog['repositories'] as $name => $repository) {
+        $selection[$name] = $repository['installed'];
+    }
+    $preview = callApi('administration', 'POST', 'v1/admin/module-updates/preview', [
+        'selection' => $selection,
+    ]);
+    check($preview['compatible'] === true, 'installed_module_composition_incompatible');
+    $reader = callApi('administration', 'PUT', 'v1/admin/module-updates/settings', [
+        'password' => $password,
+        'confirmation' => true,
+        'rotate_reader' => true,
+    ])['reader_token'];
+    $registryClient = curl_init('http://127.0.0.1:8378/api/module-registry/composer/packages.json');
+    curl_setopt_array($registryClient, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => ['Accept: application/json'],
+    ]);
+    curl_exec($registryClient);
+    check(curl_getinfo($registryClient, CURLINFO_RESPONSE_CODE) === 401, 'registry_allows_anonymous');
+    curl_setopt($registryClient, CURLOPT_HTTPHEADER, [
+        'Accept: application/json',
+        'Authorization: Bearer ' . $reader,
+    ]);
+    $metadata = json_decode(curl_exec($registryClient), true);
+    check(
+        curl_getinfo($registryClient, CURLINFO_RESPONSE_CODE) === 200 &&
+            isset($metadata['packages']['platzhirsch/contracts']),
+        'registry_authenticated_read_failed',
+    );
+    curl_close($registryClient);
     callApi('restaurant', 'POST', 'v1/admin/auth/login', [
         'email' => 'demo-owner@example.test',
         'password' => $password,
