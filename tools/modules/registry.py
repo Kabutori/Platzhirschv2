@@ -118,9 +118,17 @@ class Handler(SimpleHTTPRequestHandler):
   else:self.send_error(404);return
   blob=json.dumps(data).encode();self.send_response(200);self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(blob)));self.end_headers();self.wfile.write(blob)
 if __name__=='__main__':
- p=argparse.ArgumentParser();p.add_argument('action',choices=['seed','compose','serve']);p.add_argument('--output',type=Path,default=ROOT/'app/resources/module-registry');a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument('action',choices=['seed','compose','serve','run']);p.add_argument('--output',type=Path,default=ROOT/'app/resources/module-registry');p.add_argument('--command',nargs=argparse.REMAINDER);a=p.parse_args()
  if a.action=='seed':seed(ROOT,a.output)
  elif a.action=='compose':compose(ROOT,json.loads(os.environ['MODULE_COMPOSITION']),a.output)
  else:
   from functools import partial
-  ThreadingHTTPServer(('127.0.0.1',18761),partial(Handler,directory=str(a.output))).serve_forever()
+  server=ThreadingHTTPServer(('127.0.0.1',18761),partial(Handler,directory=str(a.output.resolve())))
+  if a.action=='serve':server.serve_forever()
+  else:
+   import subprocess,threading
+   if not a.command:p.error('--command required')
+   thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+   try:result=subprocess.run(a.command,shell=os.name=='nt');code=result.returncode
+   finally:server.shutdown();server.server_close();thread.join()
+   raise SystemExit(code)

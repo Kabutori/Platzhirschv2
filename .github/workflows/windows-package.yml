@@ -41,8 +41,6 @@ jobs:
   package:
     runs-on: windows-latest
     timeout-minutes: 45
-    env:
-      COMPOSER_MAX_PARALLEL_HTTP: 1
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -75,31 +73,27 @@ jobs:
           python tools/modules/registry.py compose --output .module-build
           if ($LASTEXITCODE -ne 0) { throw 'Module composition failed' }
           Copy-Item .module-build app/resources/module-registry -Recurse
-          $process = Start-Process python -ArgumentList 'tools/modules/registry.py','serve','--output','.module-build' -PassThru -RedirectStandardOutput registry-server.log -RedirectStandardError registry-server.error.log
-          for ($i=0; $i -lt 30; $i++) {
-            try { Invoke-WebRequest http://127.0.0.1:18761/composer/packages.json -TimeoutSec 2 | Out-Null; break } catch { Start-Sleep -Seconds 1 }
-          }
           Push-Location app
-          composer update 'platzhirsch/*' --no-install --no-scripts --no-interaction
+          python ../tools/modules/registry.py run --output ../.module-build --command composer update 'platzhirsch/*' --no-install --no-scripts --no-interaction
           if ($LASTEXITCODE -ne 0) { throw 'Composer composition failed' }
           Pop-Location
           Push-Location admin-ui
           Remove-Item package-lock.json
-          npm install --package-lock-only --ignore-scripts
+          python ../tools/modules/registry.py run --output ../.module-build --command npm install --package-lock-only --ignore-scripts
           if ($LASTEXITCODE -ne 0) { throw 'npm composition failed' }
           Pop-Location
       - name: Prepare runtime directories
         shell: pwsh
         run: New-Item -ItemType Directory -Force app/storage/logs,app/storage/framework/sessions,app/storage/framework/views,app/storage/framework/cache,app/bootstrap/cache | Out-Null
-      - run: composer install --no-interaction --prefer-dist
+      - run: python ../tools/modules/registry.py run --output ../.module-build --command composer install --no-interaction --prefer-dist
         working-directory: app
       - run: composer test
         working-directory: app
-      - run: composer audit --locked
+      - run: python ../tools/modules/registry.py run --output ../.module-build --command composer audit --locked
         working-directory: app
-      - run: composer install --no-dev --no-interaction --classmap-authoritative
+      - run: python ../tools/modules/registry.py run --output ../.module-build --command composer install --no-dev --no-interaction --classmap-authoritative
         working-directory: app
-      - run: npm ci
+      - run: python ../tools/modules/registry.py run --output ../.module-build --command npm ci
         working-directory: admin-ui
       - run: npm run build
         working-directory: admin-ui
