@@ -1,10 +1,11 @@
 {
   "name": "platzhirsch/module-host",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "library",
   "require": {
     "php": "^8.3",
-    "platzhirsch/contracts": "0.1.0"
+    "platzhirsch/contracts": "0.1.0",
+    "dompdf/dompdf": "^3.1"
   },
   "autoload": {
     "psr-4": {

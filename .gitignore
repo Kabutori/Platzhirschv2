@@ -30,3 +30,6 @@ app/storage/app/private/*
 __pycache__/
 
 /app/storage/app/module-registry/
+
+/test-results/
+/playwright-report/

@@ -3,6 +3,7 @@ for (const admin of [true, false])
   test(`billing ${admin ? 'admin' : 'restaurant'} navigation and invoice view`, async ({ page }) => {
     await page.route('**/api/**', async (route) => {
       const path = new URL(route.request().url()).pathname;
+      if (path.endsWith('/documents/1/pdf')) return route.fulfill({contentType:'application/pdf',body:'%PDF-1.4 test fixture'});
       let body = {};
       if (path.endsWith('/auth/me'))
         body = {
@@ -40,7 +41,10 @@ for (const admin of [true, false])
     await page.goto(admin ? '/administration/login' : '/restaurant/login');
     await page.getByRole('button', { name: 'Abrechnung', exact: true }).click();
     await expect(page.getByText('PH-2026-000001 ·')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Druckansicht / PDF' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Druckansicht', exact: true })).toBeVisible();
+    const downloadPromise = page.waitForEvent('download');
+    await page.locator('article').getByRole('button', {name:'PDF herunterladen',exact:true}).click();
+    expect((await downloadPromise).suggestedFilename()).toBe('beleg-1.pdf');
     if (!admin) await expect(page.getByText('Rechnung stornieren', { exact: true })).toHaveCount(0);
     await page.screenshot({
       path: `test-results/design-billing-${admin ? 'admin' : 'restaurant'}.png`,

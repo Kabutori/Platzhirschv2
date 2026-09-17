@@ -30,7 +30,7 @@ class NotificationServiceProvider extends ServiceProvider implements Module
     }
     public function dependencies(): array
     {
-        return ['reservation' => '0.1.0'];
+        return ['reservation' => '0.1.1'];
     }
     public function optionalDependencies(): array
     {

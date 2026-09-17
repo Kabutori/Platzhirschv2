@@ -27,6 +27,18 @@ jobs:
         run: find app/app app/packages app/config app/database app/routes app/tests installer -name '*.php' -print0 | xargs -0 -n1 php -l
       - run: composer test
         working-directory: app
+      - name: Real SMTP STARTTLS delivery, registration and invoice flow
+        env:
+          PLATZHIRSCH_SMTP_TEST_DIRECTORY: /tmp/platzhirsch-smtp-test
+        run: |
+          mkdir -p "$PLATZHIRSCH_SMTP_TEST_DIRECTORY"
+          openssl req -x509 -newkey rsa:2048 -nodes -keyout "$PLATZHIRSCH_SMTP_TEST_DIRECTORY/key.pem" -out "$PLATZHIRSCH_SMTP_TEST_DIRECTORY/cert.pem" -days 1 -subj /CN=localhost -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'
+          python tools/mail/test_smtp.py --directory "$PLATZHIRSCH_SMTP_TEST_DIRECTORY" &
+          SMTP_TEST_PID=$!
+          trap 'kill "$SMTP_TEST_PID"' EXIT
+          python -c "import socket,time; time.sleep(1); socket.create_connection(('127.0.0.1',25252)).close()"
+          cd app
+          php -d openssl.cafile="$PLATZHIRSCH_SMTP_TEST_DIRECTORY/cert.pem" vendor/bin/phpunit --filter SmtpDeliveryTest
       - run: composer audit --locked
         working-directory: app
       - name: Render registration views for browser checks

@@ -22,10 +22,11 @@ class InvoicePrint
         $html =
             '<!doctype html><html lang="de"><meta charset="utf-8"><title>' .
             $e($invoice['number'] ?? 'Rechnungsentwurf') .
-            '</title><style>body{font:15px/1.6 system-ui;color:#172c32;max-width:850px;margin:40px auto;padding:24px}h1{font-size:36px}header{border-bottom:3px solid #315c50;padding-bottom:24px}section{margin:32px 0}table{width:100%;border-collapse:collapse}th,td{padding:12px 0;border-bottom:1px solid #ddd;text-align:left}td:last-child,th:last-child{text-align:right}.totals{text-align:right}.hint{background:#eef3ef;padding:16px}@page{size:A4;margin:18mm}@media print{body{margin:0;padding:0}.hint{display:none}}</style><body><p class="hint">Druckansicht: Im Browser „Drucken“ wählen und bei Bedarf als PDF speichern.</p><header>' .
+            '</title><style>body{font:11px/1.4 "DejaVu Sans",sans-serif;color:#172c32;max-width:850px;margin:40px auto;padding:24px}h1{font-size:24px}header{border-bottom:3px solid #315c50;padding-bottom:24px}section{margin:32px 0}table{width:100%;border-collapse:collapse}th,td{padding:12px 0;border-bottom:1px solid #ddd;text-align:left}td:last-child,th:last-child{text-align:right}.totals{text-align:right}.hint{background:#eef3ef;padding:16px}@page{size:A4;margin:18mm}@media print{body{margin:0;padding:0}.hint{display:none}}</style><body><p class="hint">Druckansicht: Im Browser „Drucken“ wählen und bei Bedarf als PDF speichern.</p><header>' .
             $party($p['seller']) .
             '</header><h1>' .
             $title .
+            (!empty($p['test_mode']) ? ' · TESTBELEG – keine Zahlungsforderung' : '') .
             ($draft ? ' · ENTWURF' : '') .
             '</h1><p>Belegnummer: ' .
             $e($invoice['number'] ?? 'Noch nicht vergeben') .
@@ -61,14 +62,24 @@ class InvoicePrint
         if (!empty($p['seller']['tax_note'])) {
             $html .= '<p>' . $e($p['seller']['tax_note']) . '</p>';
         }
-        $html .=
-            $invoice['kind'] === 'credit'
-                ? '<p>Dieser Beleg löst keine automatische Erstattung aus.</p>'
-                : '<p>Zahlung bereits bestätigt' .
-                    (!empty($p['paid_at']) ? ' am ' . $e(substr($p['paid_at'], 0, 10)) : '') .
-                    '. Referenz: ' .
-                    $e($p['payment_reference']) .
-                    '</p>';
+        if ($invoice['kind'] === 'credit') {
+            $html .= '<p>Dieser Beleg löst keine automatische Erstattung aus.</p>';
+        } elseif (($invoice['payment_status'] ?? 'paid') === 'paid') {
+            $html .= '<p>Zahlung bestätigt. Referenz: ' . $e($p['payment_reference'] ?? '') . '</p>';
+        } else {
+            $html .=
+                '<p>Zahlungsstatus: ' .
+                $e(
+                    [
+                        'unpaid' => 'Offen',
+                        'void' => 'Beim Anbieter aufgehoben',
+                        'uncollectible' => 'Beim Anbieter als uneinbringlich markiert',
+                    ][$invoice['payment_status']] ?? $invoice['payment_status'],
+                ) .
+                '. Fällig am: ' .
+                $e(substr($invoice['due_at'] ?? '', 0, 10)) .
+                '</p>';
+        }
         return $html . '<p>' . $e($p['seller']['payment_note'] ?? '') . '</p></body></html>';
     }
 }

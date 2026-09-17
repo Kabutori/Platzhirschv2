@@ -1,11 +1,11 @@
 {
   "name": "platzhirsch/integration-odoo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "library",
   "require": {
     "php": "^8.3",
     "platzhirsch/contracts": "0.1.0",
-    "platzhirsch/module-host": "0.1.0",
+    "platzhirsch/module-host": "0.1.1",
     "laravel/framework": "^13.0"
   },
   "autoload": {
