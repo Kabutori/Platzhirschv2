@@ -6,7 +6,7 @@ class SystemAdmin
     {
         abort_unless($request->user()?->isSystem() && $request->user()->active, 403);
         if ($request->user()->role !== 'system_admin') {
-            $path = $request->path();
+            $path = $request->attributes->get('api.original_path', $request->path());
             $permission = match (true) {
                 str_starts_with($path, 'api/v1/admin/platform-roles') => 'platform.roles.manage',
                 str_starts_with($path, 'api/v1/admin/users') => 'platform.users.read',

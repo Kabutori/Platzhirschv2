@@ -1,0 +1,110 @@
+{
+  "status": "published-draft-pull-requests",
+  "repositories": [
+    {
+      "repository": "Kabutori/platzhirsch-module-audit",
+      "commit": "08d48e550d7f37203357b80633365150d471297e",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-audit/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-billing",
+      "commit": "df2493b805d2259af666ca6a0763cee6f23c3cfe",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-billing/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-customer",
+      "commit": "4b16271c9aba9a60b95b850378c61a6521c29130",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-customer/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-host",
+      "commit": "4e744560ad0b9d8ec7790e71534e8c06bbd2c1a3",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-host/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-identity",
+      "commit": "7faecacba32be6104cad0ede7fee24c0d39370fc",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-identity/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-integration-odoo",
+      "commit": "83e06d5a149fe1105c15d9c275c05e5f108d3a21",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-integration-odoo/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-notification",
+      "commit": "af66e2dd71ab6cb2fb3e6448f64418283f1a5aa8",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-notification/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-provisioning",
+      "commit": "4a3f66337ff5765bdc6f30526a3d8af9ff46769f",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-provisioning/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-release",
+      "commit": "7888ce08a696ef235051b1303c16e32cce319a0f",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-release/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-reporting",
+      "commit": "3f66627e3ab01ef7df175332311c30671ea504eb",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-reporting/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-reservation",
+      "commit": "08399d6bf31e414a3be625712a94f2266718b568",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-reservation/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-support",
+      "commit": "7e9c1824d4fc3ff4864af60bd9fd4346d350a495",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-support/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-weather",
+      "commit": "e87a2679a0cc99e9244794da3d3c37fa46f9849e",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-weather/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-widget",
+      "commit": "b4662acf4d7998f75f460613229730414d237752",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-widget/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-ui",
+      "commit": "97ddb46e21e90e85f939cfbb5d93750e322b939f",
+      "pr": "https://github.com/Kabutori/platzhirsch-ui/pull/1",
+      "branch": "codex/exports-api-0.1.1",
+      "version": "0.1.1"
+    }
+  ]
+}

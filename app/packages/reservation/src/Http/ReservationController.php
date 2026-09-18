@@ -345,57 +345,22 @@ class ReservationController
     public function export(Request $r)
     {
         abort_unless($r->user()->hasPermission('reservation.export'), 403);
-        $r->validate(['format' => 'sometimes|in:csv,xlsx,print']);
+        $r->validate(['format' => 'sometimes|in:csv,xlsx,pdf,print']);
         $rows = $this->reservations($r);
         $this->audit->record('reservation.exported', $r->input('date'), $r->attributes->get('tenant')->id);
-        $format = $r->input('format', 'csv');
-        if ($format !== 'csv') {
-            $export = app(\App\Modules\Reservation\Application\ReservationExport::class);
-            $values = $export->rows($rows, $r->attributes->get('tenant')->timezone);
-            if ($format === 'xlsx') {
-                return response($export->xlsx($values), 200, [
-                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    'Content-Disposition' =>
-                        'attachment; filename="reservierungen-' . $r->input('date') . '.xlsx"',
-                    'Cache-Control' => 'no-store',
-                ]);
-            }
+        $export = app(\App\Modules\Reservation\Application\ReservationExport::class);
+        $values = $export->rows($rows, $r->attributes->get('tenant')->timezone);
+        if ($r->input('format') === 'print') {
             return response($export->printable($values, $r->input('date')), 200, [
                 'Content-Type' => 'text/html; charset=UTF-8',
-                'Cache-Control' => 'no-store',
+                'Cache-Control' => 'private, no-store',
             ]);
         }
-        return response()->streamDownload(
-            function () use ($rows) {
-                $out = fopen('php://output', 'w');
-                fwrite($out, "\xEF\xBB\xBF");
-                fputcsv(
-                    $out,
-                    ['ID', 'Gast', 'Tisch', 'Personen', 'Beginn UTC', 'Ende UTC', 'Status'],
-                    ';',
-                    '"',
-                    '',
-                );
-                foreach ($rows as $row) {
-                    $values = [
-                        $row->id,
-                        $row->guest_name,
-                        $row->table_name,
-                        $row->party_size,
-                        $row->starts_at,
-                        $row->ends_at,
-                        $row->status,
-                    ];
-                    $values = array_map(
-                        fn($v) => preg_match('/^[=+@\-\t\r\n]/', (string) $v) ? "'" . $v : $v,
-                        $values,
-                    );
-                    fputcsv($out, $values, ';', '"', '');
-                }
-                fclose($out);
-            },
-            'reservierungen.csv',
-            ['Content-Type' => 'text/csv; charset=UTF-8'],
+        return app(\App\Core\Export\TableExport::class)->response(
+            $values,
+            $r->input('format', 'csv'),
+            'reservierungen-' . $r->input('date'),
+            'Reservierungen ' . $r->input('date'),
         );
     }
 }

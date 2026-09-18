@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "module": "reservation",
+  "api_version": "1.0.0",
+  "operations": [
+    {
+      "id": "reservation.get.restaurant_export",
+      "method": "GET",
+      "uri": "api/v1/restaurant/export",
+      "action": "App\\Modules\\Reservation\\Http\\ReservationController@export",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.get.restaurant_hours_week",
+      "method": "GET",
+      "uri": "api/v1/restaurant/hours-week",
+      "action": "App\\Modules\\Reservation\\Http\\ReservationController@week",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.put.restaurant_hours_week",
+      "method": "PUT",
+      "uri": "api/v1/restaurant/hours-week",
+      "action": "App\\Modules\\Reservation\\Http\\ReservationController@saveWeek",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.get.restaurant_reservations",
+      "method": "GET",
+      "uri": "api/v1/restaurant/reservations",
+      "action": "App\\Modules\\Reservation\\Http\\ReservationController@reservations",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.post.restaurant_reservations",
+      "method": "POST",
+      "uri": "api/v1/restaurant/reservations",
+      "action": "App\\Modules\\Reservation\\Http\\ReservationController@saveReservation",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.patch.restaurant_reservations_id",
+      "method": "PATCH",
+      "uri": "api/v1/restaurant/reservations/{id}",
+      "action": "App\\Modules\\Reservation\\Http\\ReservationController@saveReservation",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.post.restaurant_reservations_id_cancel",
+      "method": "POST",
+      "uri": "api/v1/restaurant/reservations/{id}/cancel",
+      "action": "App\\Modules\\Reservation\\Http\\ReservationController@cancel",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.patch.restaurant_rooms_id_tables",
+      "method": "PATCH",
+      "uri": "api/v1/restaurant/rooms/{id}/tables",
+      "action": "App\\Modules\\Reservation\\Http\\ReservationController@assignTables",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.get.restaurant_waitlist",
+      "method": "GET",
+      "uri": "api/v1/restaurant/waitlist",
+      "action": "App\\Modules\\Reservation\\Http\\WaitlistController@index",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.post.restaurant_waitlist",
+      "method": "POST",
+      "uri": "api/v1/restaurant/waitlist",
+      "action": "App\\Modules\\Reservation\\Http\\WaitlistController@save",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.patch.restaurant_waitlist_id",
+      "method": "PATCH",
+      "uri": "api/v1/restaurant/waitlist/{id}",
+      "action": "App\\Modules\\Reservation\\Http\\WaitlistController@save",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.post.restaurant_waitlist_id_book",
+      "method": "POST",
+      "uri": "api/v1/restaurant/waitlist/{id}/book",
+      "action": "App\\Modules\\Reservation\\Http\\WaitlistController@book",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.get.restaurant_weather",
+      "method": "GET",
+      "uri": "api/v1/restaurant/weather",
+      "action": "App\\Modules\\Reservation\\Http\\ReservationController@weather",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.get.restaurant_kind",
+      "method": "GET",
+      "uri": "api/v1/restaurant/{kind}",
+      "action": "App\\Modules\\Reservation\\Http\\AvailabilityController@index",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.post.restaurant_kind",
+      "method": "POST",
+      "uri": "api/v1/restaurant/{kind}",
+      "action": "App\\Modules\\Reservation\\Http\\AvailabilityController@save",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.patch.restaurant_kind_id",
+      "method": "PATCH",
+      "uri": "api/v1/restaurant/{kind}/{id}",
+      "action": "App\\Modules\\Reservation\\Http\\AvailabilityController@save",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.delete.restaurant_kind_id",
+      "method": "DELETE",
+      "uri": "api/v1/restaurant/{kind}/{id}",
+      "action": "App\\Modules\\Reservation\\Http\\AvailabilityController@delete",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.get.restaurant_resource",
+      "method": "GET",
+      "uri": "api/v1/restaurant/{resource}",
+      "action": "App\\Modules\\Reservation\\Http\\ReservationController@index",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.post.restaurant_resource",
+      "method": "POST",
+      "uri": "api/v1/restaurant/{resource}",
+      "action": "App\\Modules\\Reservation\\Http\\ReservationController@save",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.patch.restaurant_resource_id",
+      "method": "PATCH",
+      "uri": "api/v1/restaurant/{resource}/{id}",
+      "action": "App\\Modules\\Reservation\\Http\\ReservationController@save",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reservation.delete.restaurant_resource_id",
+      "method": "DELETE",
+      "uri": "api/v1/restaurant/{resource}/{id}",
+      "action": "App\\Modules\\Reservation\\Http\\ReservationController@delete",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reservation:write",
+      "confirmation": false,
+      "mcp": true
+    }
+  ]
+}

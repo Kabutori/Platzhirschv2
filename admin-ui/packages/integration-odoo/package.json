@@ -1,6 +1,6 @@
 {
   "name": "@platzhirsch/integration-odoo-ui",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "type": "module",
   "files": [
     "src"
@@ -10,7 +10,7 @@
     "./*": "./src/*"
   },
   "dependencies": {
-    "@platzhirsch/ui-runtime": "0.1.0"
+    "@platzhirsch/ui-runtime": "0.1.1"
   },
   "peerDependencies": {
     "react": "^19.2.0",

@@ -1,0 +1,89 @@
+{
+  "status": "published-awaiting-ci-and-merge",
+  "repositories": [
+    {
+      "repository": "Kabutori/platzhirsch-module-host",
+      "commit": "32e1bc46fd7a3664e3a0f41d164d7365efab1810",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-host/pull/1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-identity",
+      "commit": "1bd87e45b014b89d982ebde4b940d21b77836a39",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-identity/pull/1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-customer",
+      "commit": "d7fa1fb4a44db2fec05b7ce0374cbecebc053130",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-customer/pull/1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-provisioning",
+      "commit": "fb4fcf668f37578072ff0b3018e711fea9beaf1e",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-provisioning/pull/1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-reservation",
+      "commit": "2485dda5cba18cb2fb933bce7b15b4b570858b1e",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-reservation/pull/1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-widget",
+      "commit": "17e07f521f87a4abb34cc13a4fea6aaf22a6397d",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-widget/pull/1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-billing",
+      "commit": "48f7606ca168da252701ce831e079f7e2655b84d",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-billing/pull/1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-support",
+      "commit": "6ac2890175ad40c5710d88d00d4800a8c4f665e2",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-support/pull/1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-reporting",
+      "commit": "903e463248f87b227b15ca48d775242adf60b05c",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-reporting/pull/1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-weather",
+      "commit": "40a33785da78d2f075431f54ff24d57d4d710733",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-weather/pull/1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-audit",
+      "commit": "e6285e56c06d11688d804b8ec6e096eeb8d7a24e",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-audit/pull/1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-notification",
+      "commit": "073f5f73570d232acdf5b98efa8287ba6aa06f63",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-notification/pull/1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-release",
+      "commit": "36f84e24d718fe6a14254ebd15496a658d20aacd",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-release/pull/1"
+    },
+    {
+      "repository": "Kabutori/platzhirsch-module-integration-odoo",
+      "commit": "1202060597b5dd9a616ed514adee44f49f27e06d",
+      "version": "0.1.2",
+      "pr": "https://github.com/Kabutori/platzhirsch-module-integration-odoo/pull/1"
+    }
+  ]
+}

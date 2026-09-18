@@ -173,9 +173,9 @@ export function PreferencesPage({
                 />
               </div>
               <div className="preference-row">
-                <span>Drucken / PDF · Browser-Druckdialog</span>
+                <span>PDF-Download · Browser-Druckdialog</span>
                 <Toggle
-                  label="Drucken / PDF anbieten"
+                  label="PDF-Download anbieten"
                   checked={value.pdfEnabled}
                   onChange={() => save({ ...value, pdfEnabled: !value.pdfEnabled })}
                 />

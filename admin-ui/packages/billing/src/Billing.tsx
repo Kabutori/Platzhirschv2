@@ -1,7 +1,9 @@
+import { ExportButtons, downloadFile } from '@platzhirsch/ui-runtime/exports';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, portal } from '@platzhirsch/ui-runtime/api';
 import Orders from './Orders';
+import Automation from './Automation';
 const money = (n: number) =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n / 100);
 function Party({
@@ -138,13 +140,20 @@ export default function Billing({ admin = false, tenant }: { admin?: boolean; te
   }
   const data = q.data,
     tabs = admin
-      ? ['Rechnungen', 'Laufzeiten', 'Kunden', 'Aussteller', 'Angebote & Bestellungen']
-      : ['Rechnungen', 'Laufzeiten', 'Rechnungsadresse'];
+      ? [
+          'Rechnungen',
+          'Abonnements & Versand',
+          'Laufzeiten',
+          'Kunden',
+          'Aussteller',
+          'Angebote & Bestellungen',
+        ]
+      : ['Rechnungen', 'Abonnements & Zahlungen', 'Laufzeiten', 'Rechnungsadresse'];
   return (
     <>
       <p className="eyebrow">ABRECHNUNG</p>
       <h2>Abrechnung</h2>
-      <p>Rechnungen und gebuchte Module. Verlängerungen und Zahlungen werden manuell bestätigt.</p>
+      <p>Rechnungen, gebuchte Module und monatliche Abonnements.</p>
       <div className="settings-tabs">
         {tabs.map((t) => (
           <button
@@ -164,13 +173,15 @@ export default function Billing({ admin = false, tenant }: { admin?: boolean; te
       {notice && <p role="status">{notice}</p>}
       {q.isPending && <p>Abrechnung wird geladen …</p>}
       {tab === 'Angebote & Bestellungen' && <Orders />}
+      {tab.startsWith('Abonnements &') && <Automation admin={admin} tenant={tenant} />}
       {data && tab === 'Rechnungen' && (
         <section className="panel padded">
           <h3>Rechnungen</h3>
+          <ExportButtons path={base + '/export'} filename="rechnungsuebersicht" tenant={tenant} />
           {admin && (
             <p>
               Aus bestätigten Aufträgen einen Entwurf erstellen, Druckansicht prüfen und verbindlich
-              ausstellen. PDF über den Druckdialog speichern.
+              ausstellen. Belege direkt als PDF herunterladen.
             </p>
           )}
           {!data.invoices.data.length && <p>Noch keine Rechnungen vorhanden.</p>}
@@ -189,7 +200,27 @@ export default function Billing({ admin = false, tenant }: { admin?: boolean; te
                       : 'Ausgestellt'}
                 {admin ? ' · Restaurant #' + i.tenant_id : ''}
               </p>
-              <button onClick={() => void print(i.id)}>Druckansicht / PDF</button>
+              <button onClick={() => void print(i.id)}>Druckansicht</button>
+              <button
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true);
+                  setError('');
+                  try {
+                    await downloadFile(
+                      base + '/documents/' + i.id + '/pdf',
+                      'beleg-' + i.id + '.pdf',
+                      tenant,
+                    );
+                  } catch (e) {
+                    setError((e as Error).message);
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              >
+                PDF herunterladen
+              </button>
               {admin && i.status === 'draft' && (
                 <form
                   onSubmit={(e) => {
@@ -210,7 +241,27 @@ export default function Billing({ admin = false, tenant }: { admin?: boolean; te
                   </button>
                 </form>
               )}
-              {admin && i.status === 'issued' && i.kind === 'invoice' && (
+              {i.payment_status && (
+                <p>
+                  Zahlung:{' '}
+                  {i.payment_status === 'paid'
+                    ? 'Bestätigt'
+                    : i.payment_status === 'unpaid'
+                      ? 'Offen'
+                      : i.payment_status}
+                </p>
+              )}
+              {admin && i.status === 'issued' && (
+                <button
+                  disabled={busy}
+                  onClick={() =>
+                    void save('/automation/documents/' + i.id + '/send', 'POST', { confirmed: true })
+                  }
+                >
+                  Rechnungsversand vormerken
+                </button>
+              )}
+              {admin && i.status === 'issued' && i.kind === 'invoice' && !i.provider_id && (
                 <details>
                   <summary>Rechnung stornieren</summary>
                   <form
@@ -253,7 +304,7 @@ export default function Billing({ admin = false, tenant }: { admin?: boolean; te
       {data && tab === 'Laufzeiten' && (
         <section className="panel padded">
           <h3>Gebuchte Module</h3>
-          <p>Keine automatische Abbuchung. Eine Verlängerung benötigt eine neue Bestellung.</p>
+          <p>Bezahlte Nutzungszeiträume. Monatliche Verlängerungen verwalten Sie unter Abonnements.</p>
           {!data.subscriptions.length && <p>Noch keine gebuchten Module.</p>}
           {data.subscriptions.map((s: any) => (
             <article key={s.id}>

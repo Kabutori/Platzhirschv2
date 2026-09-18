@@ -20,6 +20,12 @@ class BillingServiceProvider extends ServiceProvider implements Module
     {
         $this->loadMigrationsFrom($this->platformMigrationsPath());
         $this->loadRoutesFrom(__DIR__ . '/routes.php');
+        $this->app->booted(function () {
+            app(\Illuminate\Console\Scheduling\Schedule::class)
+                ->job(new RunBilling())
+                ->hourly()
+                ->withoutOverlapping();
+        });
     }
     public function name(): string
     {

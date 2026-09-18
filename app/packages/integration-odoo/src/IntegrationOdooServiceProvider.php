@@ -12,7 +12,7 @@ class IntegrationOdooServiceProvider extends ServiceProvider implements Module
         }
         $this->app->make(ModuleRegistry::class)->register($this);
     }
-    public function boot(): void {}
+    public function boot(): void { app('router')->middleware(['web','auth','system'])->get('api/v1/admin/integrations/odoo',[StatusController::class,'index']); }
     public function name(): string
     {
         return 'integration-odoo';

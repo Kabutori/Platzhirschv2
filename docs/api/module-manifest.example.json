@@ -1,0 +1,36 @@
+{
+  "$comment": "Proposed contract example; not registered or callable in the current runtime.",
+  "schema_version": 1,
+  "module": "reservation",
+  "package_version": "0.1.1",
+  "api_major": 1,
+  "contract_version": "1.0.0",
+  "kind": "business-module",
+  "operations": [
+    {
+      "id": "reservation.list",
+      "method": "GET",
+      "path": "/reservation/reservations",
+      "context": "tenant",
+      "scopes": ["reservation:read"],
+      "permission": "reservation.read",
+      "entitlement": null,
+      "request_schema": "#/components/schemas/ReservationListQuery",
+      "response_schema": "#/components/schemas/ReservationPage",
+      "mcp": { "name": "reservation_list", "read_only": true }
+    },
+    {
+      "id": "reservation.create",
+      "method": "POST",
+      "path": "/reservation/reservations",
+      "context": "tenant",
+      "scopes": ["reservation:write"],
+      "permission": "reservation.write",
+      "entitlement": null,
+      "idempotency_required": true,
+      "request_schema": "#/components/schemas/ReservationCreate",
+      "response_schema": "#/components/schemas/Reservation",
+      "mcp": { "name": "reservation_create", "read_only": false, "confirmation_required": true }
+    }
+  ]
+}

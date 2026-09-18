@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "module": "audit",
+  "api_version": "1.0.0",
+  "operations": [
+    {
+      "id": "audit.get.admin_audit_log",
+      "method": "GET",
+      "uri": "api/v1/admin/audit-log",
+      "action": "App\\Modules\\Audit\\Http\\AuditController@index",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "audit:read",
+      "confirmation": false,
+      "mcp": true
+    }
+  ]
+}

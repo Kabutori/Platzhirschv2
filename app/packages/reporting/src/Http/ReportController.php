@@ -47,6 +47,39 @@ class ReportController
                 ->get(),
         ];
     }
+    public function export(Request $r)
+    {
+        $this->authorize($r, 'reporting.read');
+        $d = $this->range($r);
+        $r->validate(['format' => 'required|in:csv,xlsx,pdf']);
+        $rows = [
+            [
+                'Tag',
+                'Reservierungen',
+                'Gäste',
+                'Storniert',
+                'Nicht erschienen',
+                'Eingetroffen / abgeschlossen',
+            ],
+        ];
+        foreach ($this->reports->daily($d['from'], $d['to']) as $day) {
+            $day = (array) $day;
+            $rows[] = [
+                $day['date'],
+                (int) $day['reservations'],
+                (int) $day['guests'],
+                (int) $day['cancelled'],
+                (int) ($day['no_show'] ?? 0),
+                (int) ($day['arrived'] ?? 0),
+            ];
+        }
+        return app(\App\Core\Export\TableExport::class)->response(
+            $rows,
+            $r->input('format'),
+            'auswertung-' . $d['from'] . '-' . $d['to'],
+            'Auswertung ' . $d['from'] . ' – ' . $d['to'],
+        );
+    }
     public function save(Request $r)
     {
         $this->authorize($r, 'reporting.manage');
