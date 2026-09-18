@@ -1,3 +1,4 @@
+import ApiAccess from './ApiAccess';
 import ModuleUpdates from './ModuleUpdates';
 import AuditPage, { AuditRows } from '@platzhirsch/audit-ui/Audit.tsx';
 import SystemOperations from './SystemOperations';
@@ -551,6 +552,7 @@ function Content({
     return (
       <Suspense fallback={<Loading />}>
         <Profile tenant={tenant} />
+        {user.role === 'restaurant_admin' && <ApiAccess />}
       </Suspense>
     );
   return (
@@ -568,6 +570,7 @@ function Infrastructure({ user }: { user: Row }) {
     ...(user.role === 'system_admin'
       ? [
           ['smtp', 'E-Mail / SMTP'],
+          ['api-access', 'API & MCP'],
           ['access', 'SQL-Zugangsdaten'],
           ['move', 'Serverzuordnung & Umzüge'],
           ['odoo', 'Odoo'],
@@ -587,7 +590,9 @@ function Infrastructure({ user }: { user: Row }) {
         ))}
       </nav>
       <Suspense fallback={<Loading />}>
-        {tab === 'servers' ? (
+        {tab === 'api-access' && user.role === 'system_admin' ? (
+          <ApiAccess system />
+        ) : tab === 'servers' ? (
           <DatabaseServers />
         ) : tab === 'smtp' && user.role === 'system_admin' ? (
           <MailSettings />

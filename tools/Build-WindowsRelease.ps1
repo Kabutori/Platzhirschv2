@@ -22,6 +22,9 @@ Copy-Item "$root\docs\UPDATES-UND-WIEDERHERSTELLUNG.md" "$out\UPDATES-UND-WIEDER
 Copy-Item "$root\docs\UMSETZUNGSSTAND.md" "$out\UMSETZUNGSSTAND.md"
 Copy-Item "$root\docs\MODULE-UND-SERVER.md" "$out\MODULE-UND-SERVER.md"
 Copy-Item "$root\docs\SYSTEM-GUIDE.md" "$out\SYSTEM-GUIDE.md"
+New-Item -ItemType Directory -Path "$out\mcp" -Force | Out-Null
+Copy-Item "$root\admin-ui\packages\mcp\src\server.mjs" "$out\mcp\server.mjs"
+Copy-Item "$root\docs\API-BETRIEB.md" "$out\API-BETRIEB.md"
 Copy-Item "$root\modules.lock.json" "$out\module-sources.json"
 if(Test-Path "$root\module-composition.json"){Copy-Item "$root\module-composition.json" $out}
 if(-not(Test-Path "$root\app\resources\module-registry\index.json")){throw 'Privater Paketkatalog fehlt. tools/modules/registry.py seed ausfuehren.'}

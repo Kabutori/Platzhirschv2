@@ -1,6 +1,6 @@
 # Platzhirsch: Modul-API, Tokens und MCP
 
-Stand: 17.09.2026. **Architekturentwurf zur Umsetzung**, kein Nachweis einer bereits verfügbaren externen Token-API oder eines MCP-Servers. Die heutigen `/api/v1/admin/*`- und `/api/v1/restaurant/*`-Routen sind Sitzungs-APIs der Oberfläche. Widget-Tokens sind eigene, eingeschränkte Zugangsdaten; sie werden keine allgemeinen API-Tokens.
+Stand: 17.09.2026. **Ursprünglicher Architekturentwurf.** Die inzwischen implementierte API und der stdio-MCP-Adapter sind in [API-BETRIEB.md](../API-BETRIEB.md) und [API-ABDECKUNG.md](../API-ABDECKUNG.md) dokumentiert; diese Betriebsdokumentation hat bei Abweichungen Vorrang. Insbesondere liegen API und MCP zunächst im Host-Repository, die Verträge unter `src/api.json`, und OpenAPI-Feldschemas sind noch generisch. Die heutigen `/api/v1/admin/*`- und `/api/v1/restaurant/*`-Routen sind Sitzungs-APIs der Oberfläche. Widget-Tokens sind eigene, eingeschränkte Zugangsdaten; sie werden keine allgemeinen API-Tokens.
 
 ## Entscheidung und Odoo-Vorbild
 

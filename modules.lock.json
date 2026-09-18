@@ -32,17 +32,17 @@
       ]
     },
     {
-      "commit": "4e744560ad0b9d8ec7790e71534e8c06bbd2c1a3",
+      "commit": "32e1bc46fd7a3664e3a0f41d164d7365efab1810",
       "repository": "Kabutori/platzhirsch-module-host",
       "packages": [
         {
           "name": "platzhirsch/module-host",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/module-host",
           "files": {
-            "composer.json": "de3e5d036dea008021415b7dbe6ce1174590c5f5ee0aa97c8cc88d85c637db16",
+            "composer.json": "8643c87cbb0b9b01d2d69756572adcd44f0100c4cd3760d8169fe074098ff852",
             "src/Export/Pdf.php": "782276f06b16c951a9a3259a1b9fa9b44f250e9398ebf8f842d846be4cd4df9b",
             "src/Export/TableExport.php": "ef16b934de08efcabb92261a4adeb4c389d489da9a318f65e06bdd9379f49a4c",
             "src/Module/ModuleRegistry.php": "c848c8c86ccf235daab9fee15b57afce3408588e3f59b2f109089541a81a9d95",
@@ -51,12 +51,12 @@
         },
         {
           "name": "@platzhirsch/module-host",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/module-host",
           "files": {
-            "package.json": "4b3ac8407074aba77bdec5ff21b97d218b2169295faf2ad711d5e09d1cf28440",
+            "package.json": "032aa58ad94b1f5fed9d9ea7c3c83da2a20e08a26aa8c5e19bc3a4490d84f949",
             "src/Catalog.tsx": "24dbfc230021a5a1055e6e13d66cd238f2b105b28d7ea87b8f6e01c73e4689a1",
             "src/registry.ts": "992e79430f0741d5fc480c23f6c4c756060b7e44a5af3519aacc7b6e61051947",
             "src/types.ts": "a48bda22c9bd395d6be42bb8f67a3ebe3f0659b0b1f48b259ce7b8e75a992130"
@@ -64,15 +64,57 @@
         },
         {
           "name": "@platzhirsch/system-guide-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "system-guide",
           "target": "admin-ui/packages/system-guide",
           "files": {
-            "package.json": "5cfd76e73730630223fb7e23822248b54d98e963f612a3a33ccd95d372dfb82d",
+            "package.json": "498ebd366d2bb84a07b853867f9cf010ec59faed01e05de39e7669cc311379af",
             "src/Guide.tsx": "fc0d8b9eebd564fc69c48e696653bc7b8ddb930ae2fd13f8d6d53ce28bbb12d5",
             "src/content.ts": "712cd24bd99fe8fc2f641cdb73aadd2fff8116c37a2c7962dd1e92c44bd53d84",
             "src/guide.css": "d01f9d92373fcd861a05e89b316c3a72dcf24ad05617d12a22f27e0d313efd73"
+          }
+        },
+        {
+          "name": "platzhirsch/api",
+          "version": "0.1.2",
+          "kind": "php",
+          "source": "api",
+          "target": "app/packages/api",
+          "files": {
+            "composer.json": "d2a8a8a1b7da14e20374fb2c53632d9042a42f45901e23b8a2389b724752d2f5",
+            "src/AdminController.php": "3a37c95b84459a5c81d7eafdc75eb04f861995fafbb4e3c633d35c911b833ecb",
+            "src/ApiServiceProvider.php": "f90a79e6ed73cefe2e7fbbb43c3b7ef338bd14392489697e26267d0c8e5e565a",
+            "src/Authenticate.php": "39f942088ec4a2bcdaddaefedd22e30fc4782ed561a529b8a16344eae5edaf52",
+            "src/Catalog.php": "2b25fe3a2ce08be9346239c0288533223176103bd6ac2694c0767bc270382d08",
+            "src/Errors.php": "c9029b2bde2286f7e0d210ba1da3234329e03251d2f135f341bf888ae866a12a",
+            "src/Gateway.php": "9317d915e6a33eec9222b7d05045f4f2dea64e7cd27935704b1049b2a0c84287",
+            "src/api.json": "67f5115d5cb3ba82bdcbc68e074a1b3066453f0dfafaa7edd6bff6b8eddcb131",
+            "src/migrations/2026_09_19_000001_api_access.php": "4c06bf7acc927eedf18d09556f1f482bfe515d904d1f75954642702e31fbb752"
+          }
+        },
+        {
+          "name": "platzhirsch/mcp",
+          "version": "0.1.2",
+          "kind": "php",
+          "source": "mcp",
+          "target": "app/packages/mcp",
+          "files": {
+            "composer.json": "0b020b8824b463c4940a72dc0a5c4e1adcba50c95b679937da0ff7ccc55b41b5",
+            "src/McpServiceProvider.php": "4b073676d975de0111568177e461b823ae5ba8d3ca7c7d8feb3491a31213c09a",
+            "src/api.json": "b6c893c7a6a4e88d616c128c7ea95a3b0abc724f6e577ca46aa57f14aed20a18"
+          }
+        },
+        {
+          "name": "@platzhirsch/mcp",
+          "version": "0.1.2",
+          "kind": "npm",
+          "source": "mcp-ui",
+          "target": "admin-ui/packages/mcp",
+          "files": {
+            "package.json": "4d19a3042fda37a1bc557024fb9c2fbc139b652556fe089386e43e617a5276e8",
+            "src/server.mjs": "4d2715710ae7120d542425776f2fcde19b6e2841de648bc12ea210b082f84fca",
+            "src/server.test.mjs": "19333d131ba7c212d817c333e760815a4f4d3d80aa168be310a1fe7ca1a2d197"
           }
         }
       ]
@@ -139,17 +181,17 @@
       ]
     },
     {
-      "commit": "7faecacba32be6104cad0ede7fee24c0d39370fc",
+      "commit": "1bd87e45b014b89d982ebde4b940d21b77836a39",
       "repository": "Kabutori/platzhirsch-module-identity",
       "packages": [
         {
           "name": "platzhirsch/identity",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/identity",
           "files": {
-            "composer.json": "d36dd1da696abae204f3b1642fa94dcc0765e36f4f0597374831425b65746f74",
+            "composer.json": "8556d7358f257af67d684d14b290676c68db63fbdfc15ef95108d5f76533eb5b",
             "src/Application/AccountProvisioner.php": "12a25a8b6bcefd575a6431f00e206624e6a3379cef0421c62463c6903c4491dc",
             "src/Application/OpenIdProvider.php": "32c95d1686eea0e14363af2c551c1a058ad769aca8e4a7584a296bd268b3dc10",
             "src/Application/Permissions.php": "19cd6055c537e9b79134749676e69c30aac0501439d394c74b7186fc5ae18fcb",
@@ -165,6 +207,7 @@
             "src/Http/UserController.php": "a44598d0a729e6a7053fcccdcf540b693f8ef1e7d6ef0efc90130c080e185c2e",
             "src/IdentityServiceProvider.php": "cf23e7bad069e49d7caf341c10ef0e60bb7808de7227cc34ae93ef7504e789ed",
             "src/PublicApi/RoleDirectory.php": "2f776c89734c2396f33e6e9e298044f2f7170a49612b3a7ce7dca54407d0745a",
+            "src/api.json": "f4199dcc1c32aabaa4345a150de86078308910b32c5fc45ce8543e85d8cb6859",
             "src/migrations/2026_09_06_000002_users.php": "60282687f0315e94a1e07a9c789599a8fce0c98a39f1c8b4632545c1d5e1a0cf",
             "src/migrations/2026_09_07_000003_restaurant_roles.php": "cf6456e7e5a13320c09c237b4f8620c19950f9f0e5722749d5043afda2d82b22",
             "src/migrations/2026_09_08_000001_sso_accounts.php": "b4b5ced3b898f07f5bdd37cbfb80639b018f4ed189def9d0007f2905c00c95da",
@@ -174,12 +217,12 @@
         },
         {
           "name": "@platzhirsch/identity-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/identity",
           "files": {
-            "package.json": "145d05eda17e1393f68a3d06db4be0fd6115f47c3444a2266334ee9f3051866c",
+            "package.json": "f39a014ae13e467088c0edf9e2aa36ae3c8ee7a909b96fcee1c46efd202c072e",
             "src/ProfileMenu.tsx": "cf0b039a8332e6b81df549467180593473eb2534212e416dfee178e0a57d6c6b",
             "src/RestaurantRoles.tsx": "3340f2d788e27a57d16a42712b110af0855575438a46b20d1e1c71f8c90cdd1a",
             "src/RoleRollout.tsx": "145d5810c1b791647e8f15427b94730278c91ac2623f686e51b0c841ec72f844",
@@ -192,22 +235,23 @@
       ]
     },
     {
-      "commit": "4b16271c9aba9a60b95b850378c61a6521c29130",
+      "commit": "d7fa1fb4a44db2fec05b7ce0374cbecebc053130",
       "repository": "Kabutori/platzhirsch-module-customer",
       "packages": [
         {
           "name": "platzhirsch/customer",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/customer",
           "files": {
-            "composer.json": "f18bf3ccf3ac14a38af2ff37a2573a792210eb609f74fa3c84863d237bb40b65",
+            "composer.json": "4b2246a9c8738b4b0c2f5b9a859bc27996cdb109ca78f26409c120213cbf11f0",
             "src/CustomerServiceProvider.php": "b509e0fcab70c96f4aad3514aa9854ea792b89548c88e02d56830063659af908",
             "src/Domain/Tenant.php": "a79fd536989d9a90cab5aaf0f96ade356dff69b2c8f0360ac15b007b50970b17",
             "src/Http/OrganizationController.php": "1278a12f6d447093cf1df3b66a10c975634e37ffd088f5c78ca16482a513351d",
             "src/Http/ProfileController.php": "ed02fd18b8283d90f4297f7d06d57ad2a6a828ba8e69d8ce58920651ec3e38ca",
             "src/Http/TenantController.php": "ef4ed4c24d8317d48afea1049c75d362d9dbf30fab79dc53ff3b342a4c0ff55d",
+            "src/api.json": "a7454647fee78b52cd44659a8b22b6ea8e8421472c3fd1433868d2787a9e0dca",
             "src/migrations/2026_09_06_000001_tenants.php": "67c5454d2aafcb90aea0a29c18f98c96d89eb53d09cc3d83ad016b74771b80b9",
             "src/migrations/2026_09_09_000001_demo_restaurant.php": "002d9f9754c32bb658fff807a5aeb89f659bf983caa7d500b258e6c98ee6d422",
             "src/migrations/2026_09_11_000001_profile_design.php": "2ed4c85cf035c340733f74a56d724f2e925f7f47ba6c8478e794c8ddd5e7d476",
@@ -217,12 +261,12 @@
         },
         {
           "name": "@platzhirsch/customer-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/customer",
           "files": {
-            "package.json": "97bad3497b5a8daac6a094e61293eff3031bf78824e3c1e9d5238b6f258841af",
+            "package.json": "0abeda5e8b3c1779027ddc1e2964f43e631808ca2fb4580893339fa34c65f421",
             "src/Organizations.tsx": "5f2f5bef54357f1e2cd93feefe83d9cf8351e10283d9f233e97f4f2bfa2d345a",
             "src/Screens.tsx": "8f5eb61abb5a73df76942573517d348c605dd50fd88d4207d6e649d22ad6f513",
             "src/manifest.ts": "9b3fe1175f35050bc2994d8f3d9e8d1dd7a4d4e927430f0fe9777c16dc31d8f5"
@@ -231,17 +275,17 @@
       ]
     },
     {
-      "commit": "4a3f66337ff5765bdc6f30526a3d8af9ff46769f",
+      "commit": "fb4fcf668f37578072ff0b3018e711fea9beaf1e",
       "repository": "Kabutori/platzhirsch-module-provisioning",
       "packages": [
         {
           "name": "platzhirsch/provisioning",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/provisioning",
           "files": {
-            "composer.json": "84ef7346e5750e4d5880a74570e5348d0afe89f21ad4c78f56fde584e28ce434",
+            "composer.json": "369d0978103cb19d6eccb0e2cdb46cf529259767fb74d8e489c1e3dad22a7776",
             "src/Application/ServerDirectory.php": "42973e43c33fd167229a5752fe5957c384236f72d1970740b8f8521cbb185012",
             "src/Application/ServerProbe.php": "014b722054c0618684a8a16c6b760b44800f42b5c51c471bd7aa04dd8db624b7",
             "src/Http/DatabaseAccessController.php": "8bf7a94c0e698f4fe7c31b3662ecf26bb8d03fe035629b188c2d22d02cafcdd5",
@@ -249,18 +293,19 @@
             "src/ProvisioningServiceProvider.php": "ee281388fb494d1b20723b5b4df0921e29947484bacdad8f8d4be261f217fce7",
             "src/PublicApi/InstalledDatabaseAccess.php": "8c63635b447edec279e51eea3fe5af97855f950a1c006d696a59a2e373fa8ca5",
             "src/PublicApi/ServerDirectory.php": "d9b3461192df8ece3b77a9e6eee13ba33835cfe2aac97689488cfb2e4dd1b930",
+            "src/api.json": "62937a7715fda961dbba771947ab3014226f9f87391fd132ca627741a402d5fd",
             "src/migrations/2026_09_08_000001_database_servers.php": "5a29011a2d83b0ed62dd25c01b29d055803887d2dc6632324a02635048766a46",
             "src/routes.php": "610924b9fa79ea5e09eef66d5e857504c065b51b98b0a806aef5b463c023e259"
           }
         },
         {
           "name": "@platzhirsch/provisioning-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/provisioning",
           "files": {
-            "package.json": "01c375663e4caffe61aaadd46caf13d253fd7ec6e0c0d463723650bae6bd6bea",
+            "package.json": "3a376151893d6b83659886ff7007ff8fedbf050923ec28edcff9371928701c67",
             "src/BatchMove.tsx": "e0ad95125ff8819419462d42eea411bce1f5d396d53c6e7a474ca7c598df15ee",
             "src/DatabaseAccess.tsx": "d2a3911bb29f33b548f452fd563d17e4a38beda23de5138fd62134a42a88653d",
             "src/Placement.tsx": "e11abf7900d4ae0a450e7f7c4663d330780038cd23601c7a8610ab0367585854",
@@ -271,17 +316,17 @@
       ]
     },
     {
-      "commit": "08399d6bf31e414a3be625712a94f2266718b568",
+      "commit": "2485dda5cba18cb2fb933bce7b15b4b570858b1e",
       "repository": "Kabutori/platzhirsch-module-reservation",
       "packages": [
         {
           "name": "platzhirsch/reservation",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/reservation",
           "files": {
-            "composer.json": "d999913b719bcd10c67ae0ed49afd33965adfd48ce0acb41d6b0e65994b618c6",
+            "composer.json": "7a32f9626ee830a40c29cfc89933d2193900df78f615a0c0016bc4cddbc1d13b",
             "src/Application/ReservationExport.php": "2c91ab90994f3b58a45bf5ec2c9894cef7ee7d86a452f735663fc508d26f006b",
             "src/Application/ReservationReadModel.php": "d9ec32d1aa19e82efd49e824e1d075feade89daaa3cffede1740530ec33f8df2",
             "src/Application/ReservationReports.php": "020f9f31b7b24a6d8727928a1f1a0620e12966e48145ddfde2d9520f77ffaf26",
@@ -292,6 +337,7 @@
             "src/PublicApi/ReservationGateway.php": "f665adca94546a1690b1d38a0233cb036ed6dd3ddb11713bcd2ee0182a9528a0",
             "src/PublicApi/ReservationRules.php": "3df02dec09c27a4c5edcea6b0d5b301388a1f494b39da14ba525418bacca398d",
             "src/ReservationServiceProvider.php": "2bf7712600d2216edb889b2cc781bd96878b72add133f20f6ea89d61edfecb0b",
+            "src/api.json": "91a73dece8cbecb88c290b0c05caf79ae33abc4934dea5b22fc1d11219a43b14",
             "src/migrations/2026_09_07_000001_restaurant.php": "6c5524805b500a335fc9b1799e6d307329aa7a090bc6e3bd0e8f6a40a2b33b3b",
             "src/migrations/2026_09_08_000001_waitlist.php": "6def25a943c804a41159f3beea55844f0dea848339bccbf6f10782fb7d86b84b",
             "src/migrations/2026_09_08_000002_table_combinations.php": "ca31650977a4d3f8f52faffdbe84074510594caf62baa8239ab2f328cf67c6d2",
@@ -304,12 +350,12 @@
         },
         {
           "name": "@platzhirsch/reservation-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/reservation",
           "files": {
-            "package.json": "b291579ef7b180c454518f93fe8ecc579d80924676472c5915ad3f75e26bd237",
+            "package.json": "f233a1015ecafa0c9c87d25ed28a99182664be22945ff61a34f739852efdfa1f",
             "src/Availability.tsx": "276c49ec2665121c36b996f8295d162178230a9fc21b23f6728a0bcea68eb449",
             "src/BookingTools.tsx": "bd2972cf1d74618e354b94aca22d55ec1a3526aee0773baa48eee6c9e4c99efd",
             "src/Calendar.tsx": "15d8f37404846423e1765ba235487518b807cfa147cae0e04dd44c6ef7ff8a25",
@@ -330,19 +376,20 @@
       ]
     },
     {
-      "commit": "b4662acf4d7998f75f460613229730414d237752",
+      "commit": "17e07f521f87a4abb34cc13a4fea6aaf22a6397d",
       "repository": "Kabutori/platzhirsch-module-widget",
       "packages": [
         {
           "name": "platzhirsch/widget",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/widget",
           "files": {
-            "composer.json": "8be14fc46862ede82501f98d930ba806d7f85a3079ae6e64984a7bc17d110204",
+            "composer.json": "c9e8fc34382ffdbc44dcdee498b263c6b0e0a39c92820776dce7e930a415274a",
             "src/Http/WidgetController.php": "0867cac006710b0ac3e36d9ce4894256199738148b1c7d7ea3f2af34ac9243b3",
-            "src/WidgetServiceProvider.php": "efed7f3fe0b1b1b8623437c6a0d7445aae4d0716aa30de563c4d5eaccd95fb71",
+            "src/WidgetServiceProvider.php": "195d73533653f032a0431c5fd13b49514baa7f2f3c035519f8ff15c1de56d324",
+            "src/api.json": "d35508127fcc19614fb3af22a424f66306c824889b90f62065547daea14276d4",
             "src/migrations/2026_09_07_000001_widget.php": "bf73ad4c451d90585194a473051072ed0b3bb342559c8158dacf676753631a33",
             "src/migrations/2026_09_07_000002_widget_options.php": "86cbbaac529b6a36892a4c9c714025f4535782ff0cbe0a08c86a8a77648635d9",
             "src/migrations/2026_09_11_000003_widget_designer.php": "6095345d7bc84f003321bbe60fe43fde3aea43b4b6ab81dc092e9069f4981e83",
@@ -351,12 +398,12 @@
         },
         {
           "name": "@platzhirsch/widget-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/widget",
           "files": {
-            "package.json": "21e92e8de4499e58c6bbb657433a5cae434e635ee698d3a44a3bd4ba6e817b31",
+            "package.json": "6bae78a87499c3c790ce1ced7fcce359b86e048d9de7412c73f3bdcd8c244653",
             "src/Designer.tsx": "8043b10838e8671b0aedaf6725c8ed485164e25146f41d5cbbb5bde04aea13c2",
             "src/Preview.tsx": "ca3aae30651f45bdfcdf252765bb94cdb56b7331132a21722093cd7375f13059",
             "src/Screens.tsx": "888d8a6edf8ac812a7193f21d5fcd1e45851169cd088126118e613a95ce8c860",
@@ -367,17 +414,17 @@
       ]
     },
     {
-      "commit": "df2493b805d2259af666ca6a0763cee6f23c3cfe",
+      "commit": "48f7606ca168da252701ce831e079f7e2655b84d",
       "repository": "Kabutori/platzhirsch-module-billing",
       "packages": [
         {
           "name": "platzhirsch/billing",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/billing",
           "files": {
-            "composer.json": "6526a3b35b165bbb0b2c7c78ce7a58222364792e5f571aed5690294c79952259",
+            "composer.json": "bdf321309f89530039e452b88154863bac0b5e69912ab0b7fa2cb36d3797a187",
             "src/BillingServiceProvider.php": "2914f639eff4c5becdee2d49239c3009a1139ffd2ddb325c5183f078ee4fbca2",
             "src/Http/AutomationController.php": "4cb4f01a841e5e7869bde626a77eb8da013e4a7abea3c4aca749d269c67921d4",
             "src/Http/InvoiceController.php": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f",
@@ -388,6 +435,7 @@
             "src/RunBilling.php": "ddfb6e31b6102f45f40ccf03ce13ebea2d639c997c3b869c43b84c23f6e63e64",
             "src/SendBillingMail.php": "ec22171fa58d81fb512f797aa7223ad769c65389fe09bbc7c04f54ae9e37eb6b",
             "src/StripeGateway.php": "d4c3f8a58379d3c6a8b65fd21dea445c48b9b8f374d8b50e1b2067bcf4e59737",
+            "src/api.json": "0e96694f39bae3cc3a7ab06d053671320431f72930bd3c169286b13bdcc67f8c",
             "src/migrations/2026_09_10_000002_module_orders.php": "4f8138753c12020b93a1e9fa897616c4aee9075cb61afe96591b51c51089c1dc",
             "src/migrations/2026_09_17_000001_billing_documents.php": "5c6c54b560e9382e1c22213b8a143b9678651fb96b9d0e9fdb964182b6ba625e",
             "src/migrations/2026_09_18_000001_billing_automation.php": "01f2e4f968a013e85ff1c0dfe38fe41a067c66856d9cf876c0bf5f659688e227",
@@ -396,12 +444,12 @@
         },
         {
           "name": "@platzhirsch/billing-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/billing",
           "files": {
-            "package.json": "d430bba443c82591c0b5609703ce2f1834e86e2f2b43ea36c28a961067228be5",
+            "package.json": "8c582f0feda7830c0da8d1ba50500cde9b99fedfb9e825c0ec4a65653b50de2e",
             "src/Administration.tsx": "6289d2b6931273bf0e5092e0d8a699bc33412652d9daaf2b25c38a398c0a791a",
             "src/Automation.tsx": "5a099da96920ddaa06e3dc4ef5198e4de063c10cc061a2b64273217af45a8ad2",
             "src/Billing.tsx": "412b0fce324691ec5d3f5539922ee03fe25770251ca9192d5302bce74b398eb9",
@@ -413,31 +461,32 @@
       ]
     },
     {
-      "commit": "7e9c1824d4fc3ff4864af60bd9fd4346d350a495",
+      "commit": "6ac2890175ad40c5710d88d00d4800a8c4f665e2",
       "repository": "Kabutori/platzhirsch-module-support",
       "packages": [
         {
           "name": "platzhirsch/support",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/support",
           "files": {
-            "composer.json": "db9e30fc9a14bfeadcfb4822ac40aa84db263398983d9852d18636449e0f56ad",
+            "composer.json": "e87faf3372ea1b8f222983a1e6a8de0395e8ce7361056b7a5ece9ba168b87a09",
             "src/Http/SupportController.php": "e3f0efd684ef06faca0cf4c4c22594f796fd4492b32060a75c62ce763aa5c0c0",
             "src/SupportServiceProvider.php": "a694ebf4364c18f2dacd8379b8405fec7dd1f6058b1fe314745086f00e7a27c6",
+            "src/api.json": "7bf9b5ae905c9b4f8a605d0875cbe044ef017a7b362c3eba6cc15de067dc6241",
             "src/migrations/2026_09_10_000004_support.php": "bd333320ba634642cc4bd47e8a8de6fdc658f9223ae12b3f0c4ecbd0c62c270f",
             "src/routes.php": "fce05c3ad01f3fa16e9602443344e7ab4c720a51002ebe153f873381b3a96f9f"
           }
         },
         {
           "name": "@platzhirsch/support-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/support",
           "files": {
-            "package.json": "b81b81698359aefd7ec36e02353c4056932fd324f6f41a03d2e977f688147665",
+            "package.json": "a53cdf11930cf1eecdfc6a3501920b17ccf4eb00f34fdd741b6f60ab04354942",
             "src/Support.tsx": "ce7cfd3d4eadb0f29861cd0a342eb2ef0872d5bf2069dbadc650f5a0114f8f35",
             "src/manifest.ts": "2b289d42ab94ecb88510f7f08d28aef487b8dba92113bbe3d1504f26672b8e1b"
           }
@@ -445,31 +494,32 @@
       ]
     },
     {
-      "commit": "3f66627e3ab01ef7df175332311c30671ea504eb",
+      "commit": "903e463248f87b227b15ca48d775242adf60b05c",
       "repository": "Kabutori/platzhirsch-module-reporting",
       "packages": [
         {
           "name": "platzhirsch/reporting",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/reporting",
           "files": {
-            "composer.json": "62e7aec1bce2db570e69b273754ecb4f1e80d24014aaa2197f856c6b6fd23852",
+            "composer.json": "4fd56b5ca4a7a1556fbbadca0e33ce5d200fde277546eaa6de4e27c924297228",
             "src/Http/ReportController.php": "d07daae1e4538ba102f025bab4c7a3fc19b96e6482d479678c201040d3777507",
-            "src/ReportingServiceProvider.php": "a513cd747b7d5256825d909bee62c78b0f49a7c5d5c4af086935ea77081777ed",
+            "src/ReportingServiceProvider.php": "cbeee99f11ed4d03159a5ab46417864422c6ca9b1bf9cfd60ebd8602171eaa25",
+            "src/api.json": "58dae2b6962172e75eb3f97fdfffafd801a41620456716d7dbe9bb76e243d39a",
             "src/migrations/2026_09_10_000003_saved_reports.php": "17453cda455bde48c2602ba1d2e084681f39806f53d40ef639bf188ed8ffcc5c",
             "src/routes.php": "424a950c05a95305bc4512605cd7dd080eb255e25373cf285f187ff235fc8771"
           }
         },
         {
           "name": "@platzhirsch/reporting-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/reporting",
           "files": {
-            "package.json": "4a6e91a9b8faa15f583d09003ce10d0e177332be8cad681c916b12832ada3d37",
+            "package.json": "bca86d4e25b8d49d979c0adea9dafaf984d88428a0ace4153ab4fedf526671bc",
             "src/Reports.tsx": "7027e9dbb07157ef4d7b5e2031e669b8e0d0a8f79586b97acae8c225ad19cf0a",
             "src/manifest.ts": "c448c342f474fd498d6f6a28f8b53aad9118a036e96f422100e78a5f2117553c"
           }
@@ -477,20 +527,21 @@
       ]
     },
     {
-      "commit": "e87a2679a0cc99e9244794da3d3c37fa46f9849e",
+      "commit": "40a33785da78d2f075431f54ff24d57d4d710733",
       "repository": "Kabutori/platzhirsch-module-weather",
       "packages": [
         {
           "name": "platzhirsch/weather",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/weather",
           "files": {
-            "composer.json": "966404c7bb092411fa6da08948070e0ec9075554df95166bbfb5c7c6c073aad9",
+            "composer.json": "c603cab0e9f072874e4f2ffb66ff50b4489aa45259d08da3dbc0fd0366dc9844",
             "src/Forecast.php": "2abffcf3cf9bf127037bb3b2fb9e755cd83583ae7c648e09a16159d835db960c",
             "src/WeatherController.php": "4473bb651904c96e7eccf0b960fafa84f5d711715201cfa98f35b8123628a231",
-            "src/WeatherServiceProvider.php": "88db463443ad42009c54bcc2ba4eb5daba18caaef07de84b06398c6b1c305bcf",
+            "src/WeatherServiceProvider.php": "31ef6f6b8e7c4e34a3681741cd488eaf0e329ffb11dcafc136dd6ddbfae57d65",
+            "src/api.json": "ebfb7e56575d2256253d4817dd840a2b2a2a015ff04f399dde514938e9ba2387",
             "src/config.php": "6efcdfb118d3cb9e9ddd1d078a4e62e97e4c58cb9118a2d634c9d9940771f3da",
             "src/migrations/2026_09_10_000001_weather_settings.php": "ff4b157fc23b465dfd226f4fa9323f1e0be5e153d3228a2be03c8394ab1b2550",
             "src/platform/2026_09_10_000003_weather_product.php": "098c9de5facdde0f5b4387c401517f287e33d979d230a98b05ec1b74bc40db89",
@@ -499,43 +550,44 @@
         },
         {
           "name": "@platzhirsch/weather-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/weather",
           "files": {
-            "package.json": "a8de6d5360f3b5bc97d48a913e2c1477492802dda5e0a7a1de0e32fec3f00dbf",
+            "package.json": "e2f99eb541e6ff076e0c6141ea3cec51536af266c2d780cc738fbb787a4ded24",
             "src/Weather.tsx": "1f9a18957b9a835c43462b6d5268d13504cdc499f5c54d78cf1b7387b595d878"
           }
         }
       ]
     },
     {
-      "commit": "08d48e550d7f37203357b80633365150d471297e",
+      "commit": "e6285e56c06d11688d804b8ec6e096eeb8d7a24e",
       "repository": "Kabutori/platzhirsch-module-audit",
       "packages": [
         {
           "name": "platzhirsch/audit",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/audit",
           "files": {
-            "composer.json": "dbe8f8bfed40263bbf8c1d17a14f2d7f213394daa088b31804d09d68863c4644",
+            "composer.json": "de09a13e4d619f03c4b212ce63fb5121ce39451973574b967bc1edbf2f1a35eb",
             "src/Application/AuditWriter.php": "98e2d440466d8a8cbe7e2b2f19ccad218ad44b4619dff09e33de8ed6ed60fa73",
             "src/AuditServiceProvider.php": "fb28d8e334bff5df112bd7f4d8ca7327f5c1c030b875c1512b6a148457f13566",
             "src/Http/AuditController.php": "5dfb724847e8bf962a817d2afdd3a313700a58978f7c1a09fcc1046638033e71",
+            "src/api.json": "fb6e133c1808ff7f781d8bb08f3f762c93389124f0244aff0072d5ce1efb5ffa",
             "src/routes.php": "aacd588bd57008fca710f67a8e203c87be762b527916ca177bfcf32d36fc5c8f"
           }
         },
         {
           "name": "@platzhirsch/audit-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/audit",
           "files": {
-            "package.json": "57652979bb478eb8a0631ff92dac1510bf75059949dab657d61e3299f86e9b24",
+            "package.json": "da3e9d3d41da81719e72e676387b44a708198c1b52894a5c8d25af65b0712ce9",
             "src/Audit.tsx": "31d357103013f6d4b5e08b719078129271a45be616bc6d5c0862094302b0e571",
             "src/manifest.ts": "ec409073f765c59a86ad926475ab7475ed1e10671f12e895120fbb3d6dc4df48"
           }
@@ -543,31 +595,32 @@
       ]
     },
     {
-      "commit": "af66e2dd71ab6cb2fb3e6448f64418283f1a5aa8",
+      "commit": "073f5f73570d232acdf5b98efa8287ba6aa06f63",
       "repository": "Kabutori/platzhirsch-module-notification",
       "packages": [
         {
           "name": "platzhirsch/notification",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/notification",
           "files": {
-            "composer.json": "cb67e78291ac551ab3f888c4d6dceb4b23576d387349da99a318baf6580f878c",
+            "composer.json": "975ba9177180ae641cf84a37cb1b15644e57465fc016c2393d9681dab1570406",
             "src/Application/ReservationNotifications.php": "e30cc041f424e7cace414a1aebc4a676875fc4efd767c3ed8ef5b89955f90fe7",
             "src/Http/NotificationController.php": "38b6f40b41963fe8692fce690829d22a30b1e08b9a19bd370f78bce6e74495cb",
-            "src/NotificationServiceProvider.php": "1ef65b10925271007722f04365ab9e5a527acf8556348aece80f2fb6fad72822",
+            "src/NotificationServiceProvider.php": "6d476472d41b251f68c0d8359dd49883c82c34227f9014ad65785b5c7d60c082",
+            "src/api.json": "3dd6a79992177e8d94fd1a3c20f982fd215bbca4bf084081ed5967ed40a4f418",
             "src/routes.php": "375d4d9a1a7e1bd187ee390aff113571cdbdec59f00a25e50703c3ee65ba7cf1"
           }
         },
         {
           "name": "@platzhirsch/notification-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/notification",
           "files": {
-            "package.json": "d6317d992d491b142fa26ec6a3210c6687edd0e6bcaa1b456239719fb07a8009",
+            "package.json": "4f50dfd45cfcea77aaa6856a3e2ad42de549b2eb1eeed0921a987b9d2c21260e",
             "src/Notifications.tsx": "4976a75897bf0d1eddd22a71ca6acacf93c0067c39fd8850655ee58e7333ad6c",
             "src/manifest.ts": "7191294672017747e62464d41d2691ae96755079d7fca8fe3731f6003676ee37"
           }
@@ -575,31 +628,32 @@
       ]
     },
     {
-      "commit": "7888ce08a696ef235051b1303c16e32cce319a0f",
+      "commit": "36f84e24d718fe6a14254ebd15496a658d20aacd",
       "repository": "Kabutori/platzhirsch-module-release",
       "packages": [
         {
           "name": "platzhirsch/release",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/release",
           "files": {
-            "composer.json": "de78089732044c96817a335415752248e185c7b26c1e0654c8aebb4bb4188123",
+            "composer.json": "c2cc460cc74f561cc4755ed1675483fb116d2d9869202bfac223186e37af34cb",
             "src/Http/ReleaseController.php": "1cf05a5a269ab726cbba5ae5b115001203852089e74c97f9f37916e4a9e8e579",
             "src/ReleaseServiceProvider.php": "7eb985297c490d75ed8bf10c87f934ab4af7eb2dd82cef623e25417d06aa33f9",
+            "src/api.json": "6f48c8cbf75e0a127b8fc9ca274da8b917eed4e123ecdc8fe131e470c129f8a0",
             "src/migrations/2026_09_13_000001_release_notes.php": "917fa7291b1b8448c9b0d7cb9f6ec7548ce5f2436dabc38aba7fc0dbb59243da",
             "src/routes.php": "e2a0bc1c78bc080f9d69ff971990053dba6c359c1d2a83043a0ba853db8d1a96"
           }
         },
         {
           "name": "@platzhirsch/release-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/release",
           "files": {
-            "package.json": "4fd0d7029094496c6553c5df56e3365c809bf0a9ac0dc81a19438e7587cffca2",
+            "package.json": "781b0cb8211283c8e6816aac80d211fe0fa34f0d03efdb34e6e1ecf961a66766",
             "src/Releases.tsx": "95ac52af15d8177d8db1788e825ffd9caec9ecef505c79b34ba9a3db47f9c85a",
             "src/manifest.ts": "da7d6c1c36ec7c270f07269e7a5e7818b44b7718f7402da2452ede8bba578d8b"
           }
@@ -607,28 +661,30 @@
       ]
     },
     {
-      "commit": "83e06d5a149fe1105c15d9c275c05e5f108d3a21",
+      "commit": "1202060597b5dd9a616ed514adee44f49f27e06d",
       "repository": "Kabutori/platzhirsch-module-integration-odoo",
       "packages": [
         {
           "name": "platzhirsch/integration-odoo",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "php",
           "source": ".",
           "target": "app/packages/integration-odoo",
           "files": {
-            "composer.json": "f1a1c4ba2a6a0bbd17fb80f52ae759823dec17eb8e32140024d2cebefaea148a",
-            "src/IntegrationOdooServiceProvider.php": "e9201e86813950a460eac6383274c58d8a3363ad1806c0f82dd2e3a1314a63a6"
+            "composer.json": "e7e267579d153d1ef4c060a19a531088e05b66addcabbdc2e18b7ec75f786783",
+            "src/IntegrationOdooServiceProvider.php": "2d34dcb80925214ec00eec337fb9d079ff4bfedfa2ec6a40590aa5f2e7aa1c0b",
+            "src/StatusController.php": "3070681a044f1c1eb0cfa5ee6ffda49ac8a463887c93c7440acd5a347ff81b0f",
+            "src/api.json": "f8cdaeed5c34275b03f8e4f3b53e3e97c11fc9800f6bc32d1a20cbf5daeeb0d7"
           }
         },
         {
           "name": "@platzhirsch/integration-odoo-ui",
-          "version": "0.1.1",
+          "version": "0.1.2",
           "kind": "npm",
           "source": "ui",
           "target": "admin-ui/packages/integration-odoo",
           "files": {
-            "package.json": "45ceae31da435ae9b8b514aebb258f9ba3fd83e1fde05e82e7ef0ca2b5bf6311",
+            "package.json": "6927354fca85fc6c51488b6b33a30206874d34e92787b8e2f3766deb99bded4d",
             "src/OdooPlaceholder.tsx": "e9f5b85fba4f1976fbe492ff342ddbc7d55137bb305ec252c54efcd4b18739c1",
             "src/manifest.ts": "8eb7192f016bb18c05c3325ea03cf035694027b1df6674aa41938fb3f676c4ad"
           }

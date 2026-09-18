@@ -1,0 +1,261 @@
+{
+  "schema": 1,
+  "module": "platform",
+  "api_version": "1.0.0",
+  "operations": [
+    {
+      "id": "platform.get.api_module_registry_path",
+      "method": "GET",
+      "uri": "api/module-registry/{path}",
+      "action": "App\\ModuleUpdates\\Distribution@handle",
+      "context": "shared",
+      "exposure": "distribution",
+      "scope": "platform:read",
+      "confirmation": false,
+      "mcp": false,
+      "reason": "Eigener interaktiver, öffentlicher oder Anbieter-Authentifizierungsablauf."
+    },
+    {
+      "id": "platform.get.admin_dashboard",
+      "method": "GET",
+      "uri": "api/v1/admin/dashboard",
+      "action": "App\\Http\\Controllers\\PlatformController@dashboard",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "platform.get.admin_health",
+      "method": "GET",
+      "uri": "api/v1/admin/health",
+      "action": "App\\Http\\Controllers\\PlatformController@health",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "platform.get.admin_mail_settings",
+      "method": "GET",
+      "uri": "api/v1/admin/mail-settings",
+      "action": "App\\MailSettings\\Controller@index",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "platform.put.admin_mail_settings",
+      "method": "PUT",
+      "uri": "api/v1/admin/mail-settings",
+      "action": "App\\MailSettings\\Controller@save",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "platform.post.admin_mail_settings_send_test",
+      "method": "POST",
+      "uri": "api/v1/admin/mail-settings/send-test",
+      "action": "App\\MailSettings\\Controller@sendTest",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "platform.post.admin_mail_settings_test",
+      "method": "POST",
+      "uri": "api/v1/admin/mail-settings/test",
+      "action": "App\\MailSettings\\Controller@test",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "platform.get.admin_module_updates",
+      "method": "GET",
+      "uri": "api/v1/admin/module-updates",
+      "action": "App\\ModuleUpdates\\Controller@index",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "platform.post.admin_module_updates_builds",
+      "method": "POST",
+      "uri": "api/v1/admin/module-updates/builds",
+      "action": "App\\ModuleUpdates\\Controller@build",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "platform.post.admin_module_updates_builds_id_refresh",
+      "method": "POST",
+      "uri": "api/v1/admin/module-updates/builds/{id}/refresh",
+      "action": "App\\ModuleUpdates\\Controller@refresh",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "platform.post.admin_module_updates_builds_id_stage",
+      "method": "POST",
+      "uri": "api/v1/admin/module-updates/builds/{id}/stage",
+      "action": "App\\ModuleUpdates\\Controller@stage",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "platform.post.admin_module_updates_preview",
+      "method": "POST",
+      "uri": "api/v1/admin/module-updates/preview",
+      "action": "App\\ModuleUpdates\\Controller@preview",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "platform.put.admin_module_updates_settings",
+      "method": "PUT",
+      "uri": "api/v1/admin/module-updates/settings",
+      "action": "App\\ModuleUpdates\\Controller@settings",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "platform.post.admin_module_updates_sync",
+      "method": "POST",
+      "uri": "api/v1/admin/module-updates/sync",
+      "action": "App\\ModuleUpdates\\Controller@sync",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "platform.get.admin_modules",
+      "method": "GET",
+      "uri": "api/v1/admin/modules",
+      "action": "Closure",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "platform.get.admin_operations",
+      "method": "GET",
+      "uri": "api/v1/admin/operations",
+      "action": "App\\Http\\Controllers\\TenantOperationController@index",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "platform.get.admin_permissions_families",
+      "method": "GET",
+      "uri": "api/v1/admin/permissions/families",
+      "action": "Closure",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "platform.get.admin_registration_settings",
+      "method": "GET",
+      "uri": "api/v1/admin/registration-settings",
+      "action": "App\\Registration\\Settings@index",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "platform.put.admin_registration_settings",
+      "method": "PUT",
+      "uri": "api/v1/admin/registration-settings",
+      "action": "App\\Registration\\Settings@save",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "platform.get.admin_system_operations",
+      "method": "GET",
+      "uri": "api/v1/admin/system-operations",
+      "action": "App\\Operations\\Controller@index",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "platform.post.admin_system_operations",
+      "method": "POST",
+      "uri": "api/v1/admin/system-operations",
+      "action": "App\\Operations\\Controller@store",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "platform.post.admin_tenant_moves",
+      "method": "POST",
+      "uri": "api/v1/admin/tenant-moves",
+      "action": "App\\Http\\Controllers\\TenantOperationController@moveBatch",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "platform.post.admin_tenants_tenant_move",
+      "method": "POST",
+      "uri": "api/v1/admin/tenants/{tenant}/move",
+      "action": "App\\Http\\Controllers\\TenantOperationController@move",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "platform:write",
+      "confirmation": true,
+      "mcp": true
+    }
+  ]
+}

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "57a6d6d6ec7ca18bfbe106558cedcd9c",
+    "content-hash": "7c246fc0bf35e7000b00e29cb54fe958",
     "packages": [
         {
             "name": "brick/math",
@@ -2716,18 +2716,50 @@
             "time": "2026-08-24T00:54:40+00:00"
         },
         {
-            "name": "platzhirsch/audit",
-            "version": "0.1.1",
+            "name": "platzhirsch/api",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
-                "url": "packages/audit",
-                "reference": "fcff0c71d8df6992a4d748da78330e9e9bd5152f"
+                "url": "packages/api",
+                "reference": "21412feef46b0f57acb38c29eaa731f5508f4466"
             },
             "require": {
                 "laravel/framework": "^13.0",
                 "php": "^8.3",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.1"
+                "platzhirsch/module-host": "0.1.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\Api\\ApiServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Api\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
+            "name": "platzhirsch/audit",
+            "version": "0.1.2",
+            "dist": {
+                "type": "path",
+                "url": "packages/audit",
+                "reference": "56a1f321fa364ca674a6da7c6d3e77b9ffe86dae"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.2"
             },
             "type": "library",
             "extra": {
@@ -2749,17 +2781,17 @@
         },
         {
             "name": "platzhirsch/billing",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "packages/billing",
-                "reference": "3a0c93ef6ba1628ac975d61a2a6d588b86c0a745"
+                "reference": "d51c83d3714d2009c79bd32889955e027eb350d9"
             },
             "require": {
                 "laravel/framework": "^13.0",
                 "php": "^8.3",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.1"
+                "platzhirsch/module-host": "0.1.2"
             },
             "type": "library",
             "extra": {
@@ -2803,17 +2835,17 @@
         },
         {
             "name": "platzhirsch/customer",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "packages/customer",
-                "reference": "7f0a3e8e9a7be1bcae324c2b00e6bdac0d7fccf2"
+                "reference": "b7fa020b7deefb37327e653ef8933793f3e2a8f3"
             },
             "require": {
                 "laravel/framework": "^13.0",
                 "php": "^8.3",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.1"
+                "platzhirsch/module-host": "0.1.2"
             },
             "type": "library",
             "extra": {
@@ -2835,17 +2867,17 @@
         },
         {
             "name": "platzhirsch/identity",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "packages/identity",
-                "reference": "75900810343a9644d6f9c55845cedb99c22c7ea8"
+                "reference": "8463ab0ad1f5a8eb5266a51e757e3423a1b914c5"
             },
             "require": {
                 "laravel/framework": "^13.0",
                 "php": "^8.3",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.1"
+                "platzhirsch/module-host": "0.1.2"
             },
             "type": "library",
             "extra": {
@@ -2867,17 +2899,17 @@
         },
         {
             "name": "platzhirsch/integration-odoo",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "packages/integration-odoo",
-                "reference": "5da630d649426ff23c0260dd101782855bb5e48e"
+                "reference": "28424262310ee4d0ac689d5720e317944facbe1e"
             },
             "require": {
                 "laravel/framework": "^13.0",
                 "php": "^8.3",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.1"
+                "platzhirsch/module-host": "0.1.2"
             },
             "type": "library",
             "extra": {
@@ -2898,12 +2930,45 @@
             }
         },
         {
+            "name": "platzhirsch/mcp",
+            "version": "0.1.2",
+            "dist": {
+                "type": "path",
+                "url": "packages/mcp",
+                "reference": "29722b8c76f710061347b8f8fdb9fcfb96eb7945"
+            },
+            "require": {
+                "laravel/framework": "^13.0",
+                "php": "^8.3",
+                "platzhirsch/api": "0.1.2",
+                "platzhirsch/contracts": "0.1.0",
+                "platzhirsch/module-host": "0.1.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "App\\Modules\\Mcp\\McpServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "App\\Modules\\Mcp\\": "src/"
+                }
+            },
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
+        },
+        {
             "name": "platzhirsch/module-host",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "packages/module-host",
-                "reference": "a43576d0efef82b9cda142862156bec59f7fb0e2"
+                "reference": "3196697f817b35c4e541b7eba4e8c1720c4603cd"
             },
             "require": {
                 "dompdf/dompdf": "^3.1",
@@ -2923,18 +2988,18 @@
         },
         {
             "name": "platzhirsch/notification",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "packages/notification",
-                "reference": "d6c1c2838dca9c520e04fd0900386d1dc694cbe2"
+                "reference": "06007a2737dd096879272c5232d8ca75c06c4a58"
             },
             "require": {
                 "laravel/framework": "^13.0",
                 "php": "^8.3",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.1",
-                "platzhirsch/reservation": "0.1.1"
+                "platzhirsch/module-host": "0.1.2",
+                "platzhirsch/reservation": "0.1.2"
             },
             "type": "library",
             "extra": {
@@ -2956,17 +3021,17 @@
         },
         {
             "name": "platzhirsch/provisioning",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "packages/provisioning",
-                "reference": "8ef0769413d0911b8ea4900c99462492db2f9e30"
+                "reference": "a3392f5d53529bcb313fea8c66ce5f3d8705f7dc"
             },
             "require": {
                 "laravel/framework": "^13.0",
                 "php": "^8.3",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.1"
+                "platzhirsch/module-host": "0.1.2"
             },
             "type": "library",
             "extra": {
@@ -2988,17 +3053,17 @@
         },
         {
             "name": "platzhirsch/release",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "packages/release",
-                "reference": "bc4a69be6449102521d5117d172b66c837f4482b"
+                "reference": "ae47d9b255a55def10b699d556c8187c2e610762"
             },
             "require": {
                 "laravel/framework": "^13.0",
                 "php": "^8.3",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.1"
+                "platzhirsch/module-host": "0.1.2"
             },
             "type": "library",
             "extra": {
@@ -3020,19 +3085,19 @@
         },
         {
             "name": "platzhirsch/reporting",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "packages/reporting",
-                "reference": "548cf772b9b74edf3f61eafaf05482320ed60fba"
+                "reference": "76773609021bd142dad2297541d4e7d88c2e75db"
             },
             "require": {
                 "laravel/framework": "^13.0",
                 "php": "^8.3",
-                "platzhirsch/billing": "0.1.1",
+                "platzhirsch/billing": "0.1.2",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.1",
-                "platzhirsch/reservation": "0.1.1"
+                "platzhirsch/module-host": "0.1.2",
+                "platzhirsch/reservation": "0.1.2"
             },
             "type": "library",
             "extra": {
@@ -3054,17 +3119,17 @@
         },
         {
             "name": "platzhirsch/reservation",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "packages/reservation",
-                "reference": "6209fa7c99a86e90789e984add8ad1b9a5b08c31"
+                "reference": "5b18300d96547e0280c6e2b06ecde0581f3db52c"
             },
             "require": {
                 "laravel/framework": "^13.0",
                 "php": "^8.3",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.1"
+                "platzhirsch/module-host": "0.1.2"
             },
             "type": "library",
             "extra": {
@@ -3086,17 +3151,17 @@
         },
         {
             "name": "platzhirsch/support",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "packages/support",
-                "reference": "9a1b3284ea3f4ac6e80ea7a56435be9e4f8ea346"
+                "reference": "b3cc7f8f1dfb71b4242fb3818d18170663938824"
             },
             "require": {
                 "laravel/framework": "^13.0",
                 "php": "^8.3",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.1"
+                "platzhirsch/module-host": "0.1.2"
             },
             "type": "library",
             "extra": {
@@ -3118,17 +3183,17 @@
         },
         {
             "name": "platzhirsch/weather",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "packages/weather",
-                "reference": "0a3f8813cb43fbe28a5c01cd3d056a5944b379bb"
+                "reference": "46f1ac2c99edb7a2b633dc170a0be30562fa4a83"
             },
             "require": {
                 "laravel/framework": "^13.0",
                 "php": "^8.3",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.1"
+                "platzhirsch/module-host": "0.1.2"
             },
             "type": "library",
             "extra": {
@@ -3150,18 +3215,18 @@
         },
         {
             "name": "platzhirsch/widget",
-            "version": "0.1.1",
+            "version": "0.1.2",
             "dist": {
                 "type": "path",
                 "url": "packages/widget",
-                "reference": "5a0a45b92113fd15b4a3cee74906add07ed4b46e"
+                "reference": "05873b4183111f4b1ec79a551849edcd4a5c5c56"
             },
             "require": {
                 "laravel/framework": "^13.0",
                 "php": "^8.3",
                 "platzhirsch/contracts": "0.1.0",
-                "platzhirsch/module-host": "0.1.1",
-                "platzhirsch/reservation": "0.1.1"
+                "platzhirsch/module-host": "0.1.2",
+                "platzhirsch/reservation": "0.1.2"
             },
             "type": "library",
             "extra": {

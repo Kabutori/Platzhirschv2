@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "module": "reporting",
+  "api_version": "1.0.0",
+  "operations": [
+    {
+      "id": "reporting.get.restaurant_reporting",
+      "method": "GET",
+      "uri": "api/v1/restaurant/reporting",
+      "action": "App\\Modules\\Reporting\\Http\\ReportController@index",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reporting:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reporting.get.restaurant_reporting_export",
+      "method": "GET",
+      "uri": "api/v1/restaurant/reporting/export",
+      "action": "App\\Modules\\Reporting\\Http\\ReportController@export",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reporting:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reporting.post.restaurant_reporting_saved",
+      "method": "POST",
+      "uri": "api/v1/restaurant/reporting/saved",
+      "action": "App\\Modules\\Reporting\\Http\\ReportController@save",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reporting:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "reporting.delete.restaurant_reporting_saved_id",
+      "method": "DELETE",
+      "uri": "api/v1/restaurant/reporting/saved/{id}",
+      "action": "App\\Modules\\Reporting\\Http\\ReportController@delete",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "reporting:write",
+      "confirmation": false,
+      "mcp": true
+    }
+  ]
+}

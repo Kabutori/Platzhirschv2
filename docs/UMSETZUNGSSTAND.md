@@ -6,7 +6,7 @@ Aktualisierung 15. September 2026: 18 Einzel-Repositories mit eigener CI, getren
 
 Aktueller Ausbau: [Updates, koordinierte Sicherung und Wiederherstellung](UPDATES-UND-WIEDERHERSTELLUNG.md). Die folgenden älteren Aussagen zu fehlenden Anwendungsupdates und ausschließlich lokalen Snapshots werden durch diesen Ablauf ergänzt. Grenzen und aktueller CI-Nachweis stehen in der neuen Anleitung.
 
-Nachtrag 10. September 2026: Das optionale Wettermodul enthält jetzt einen Hintergrundabruf über den vorhandenen Scheduler, zusätzlich zur 7-Tage-Vorschau und Regenwarnung. Siehe [Wetterautomatik](WETTERAUTOMATIK.md). Die vollständige visuelle Abnahme aller 183 Vorlagen-Buttons bleibt offen; [aktueller Prüfstand](DESIGN-FORTSCHRITT.md).
+Nachtrag 10. September 2026: Das optionale Wettermodul enthält jetzt einen Hintergrundabruf über den vorhandenen Scheduler, zusätzlich zur 7-Tage-Vorschau und Regenwarnung. Siehe [Wetterautomatik](WETTERAUTOMATIK.md). Die 183 Vorlagen-Buttons sind durch den Auftraggeber vorläufig abgenommen (17. September 2026); [aktueller Prüfstand](DESIGN-FORTSCHRITT.md).
 
 Stand: 2026-09-08. Entwicklungszweig `codex/windows-application`, [Entwurfs-PR #1](https://github.com/Kabutori/Platzhirschv2/pull/1). Keine Produktionsfreigabe sämtlicher Konzeptphasen. Maßgeblich für ein Installationspaket sind der Commit und die erfolgreichen Prüfungen seines Releases.
 
@@ -46,7 +46,7 @@ Diese Änderungen durchlaufen eine neue Anwendungs- und Windows-Prüfung. Die we
 - Neue Restaurantrollen nach Einmalvorschau und Kennwort/TOTP in bis zu 50 ausgewählten Mandanten erstellen. Kein Überschreiben bestehender Rollen oder automatisches Ändern von Benutzerzuordnungen.
 - Buchungsdialog mit Kalender, Viertelstunden-Auswahl und Walk-in. Der Kalender bleibt auf schmalen Bildschirmen innerhalb des sichtbaren Bereichs.
 - Reporting trennt Storno, No-show und eingetroffene/abgeschlossene Buchungen. Gästezahl ohne Storno und No-show; Gruppierung nach lokalem Starttag.
-- Alle 183 Buttons der konkreten Designreferenz sind mit Codebefund, Umsetzungspfad und Restabweichung erfasst. Eine vollständige visuelle Abnahme ist damit ausdrücklich nicht erreicht. Siehe [DESIGN-FORTSCHRITT.md](DESIGN-FORTSCHRITT.md) und [DESIGN-BUTTON-INVENTAR.csv](DESIGN-BUTTON-INVENTAR.csv).
+- Alle 183 Buttons der konkreten Designreferenz sind mit Codebefund, Umsetzungspfad und Restabweichung erfasst. Die Buttons sind durch den Auftraggeber vorläufig abgenommen; die historischen Einzelprüfungen bleiben dokumentiert. Siehe [DESIGN-FORTSCHRITT.md](DESIGN-FORTSCHRITT.md) und [DESIGN-BUTTON-INVENTAR.csv](DESIGN-BUTTON-INVENTAR.csv).
 
 Bedienung, Konfiguration und Grenzen: [RESTAURANT-ABLAEUFE.md](RESTAURANT-ABLAEUFE.md).
 
@@ -94,3 +94,7 @@ Offline-Snapshot und Wiederherstellung sind für dieselbe lokale Maschine, Versi
 - Vollständige visuelle 1:1-Abnahme aller Designansichten sowie durchgängige Tastatur-, Bildschirmleser- und Browser-Ende-zu-Ende-Abnahme.
 
 Ein bestehendes System anderer Version darf nicht durch Löschen seiner Installation oder Daten an der Versionsprüfung vorbeigeführt werden. Für neue Vorschauen bis zur Update-Implementierung eine getrennte Installation verwenden.
+
+## API und MCP, 17. September 2026
+
+Externe Modul-API mit gescopten, widerrufbaren Tokens, Mandantenprüfung, Idempotenz und Portalbestätigungen sowie stdio-MCP-Adapter implementiert. [Betrieb](API-BETRIEB.md), [Abdeckung](API-ABDECKUNG.md). Die Buttons sind vorläufig abgenommen und kein offener Abnahmeblocker.

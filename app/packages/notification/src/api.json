@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "module": "notification",
+  "api_version": "1.0.0",
+  "operations": [
+    {
+      "id": "notification.get.restaurant_notifications",
+      "method": "GET",
+      "uri": "api/v1/restaurant/notifications",
+      "action": "App\\Modules\\Notification\\Http\\NotificationController@index",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "notification:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "notification.patch.restaurant_notifications",
+      "method": "PATCH",
+      "uri": "api/v1/restaurant/notifications",
+      "action": "App\\Modules\\Notification\\Http\\NotificationController@save",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "notification:write",
+      "confirmation": false,
+      "mcp": true
+    }
+  ]
+}

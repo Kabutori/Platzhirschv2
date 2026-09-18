@@ -29,7 +29,7 @@ class WeatherServiceProvider extends ServiceProvider implements Module
     }
     public function dependencies(): array
     {
-        return ['billing' => '0.1.1'];
+        return ['billing' => '0.1.2'];
     }
     public function optionalDependencies(): array
     {
