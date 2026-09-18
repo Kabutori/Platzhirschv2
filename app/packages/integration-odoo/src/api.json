@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "module": "integration-odoo",
+  "api_version": "1.0.0",
+  "operations": [
+    {
+      "id": "integration-odoo.get.admin_integrations_odoo",
+      "method": "GET",
+      "uri": "api/v1/admin/integrations/odoo",
+      "action": "App\\Modules\\IntegrationOdoo\\StatusController@index",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "integration-odoo:read",
+      "confirmation": false,
+      "mcp": true
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "module": "release",
+  "api_version": "1.0.0",
+  "operations": [
+    {
+      "id": "release.get.releases",
+      "method": "GET",
+      "uri": "api/v1/releases",
+      "action": "App\\Modules\\Release\\Http\\ReleaseController@index",
+      "context": "shared",
+      "exposure": "external",
+      "scope": "release:read",
+      "confirmation": false,
+      "mcp": true,
+      "admin_only": false
+    },
+    {
+      "id": "release.post.releases",
+      "method": "POST",
+      "uri": "api/v1/releases",
+      "action": "App\\Modules\\Release\\Http\\ReleaseController@save",
+      "context": "shared",
+      "exposure": "external",
+      "scope": "release:write",
+      "confirmation": true,
+      "mcp": true,
+      "admin_only": true
+    },
+    {
+      "id": "release.patch.releases_id",
+      "method": "PATCH",
+      "uri": "api/v1/releases/{id}",
+      "action": "App\\Modules\\Release\\Http\\ReleaseController@save",
+      "context": "shared",
+      "exposure": "external",
+      "scope": "release:write",
+      "confirmation": true,
+      "mcp": true,
+      "admin_only": true
+    }
+  ]
+}

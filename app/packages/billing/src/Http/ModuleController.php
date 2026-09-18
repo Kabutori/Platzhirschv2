@@ -96,6 +96,16 @@ class ModuleController
                 409,
                 'Preis wurde geändert. Angebot neu laden.',
             );
+            abort_if(
+                $this->db
+                    ->table('billing_subscriptions')
+                    ->where('tenant_id', $tenant)
+                    ->where('module_code', $d['module_code'])
+                    ->whereNotIn('state', ['canceled', 'expired', 'incomplete_expired'])
+                    ->exists(),
+                409,
+                'Für dieses Modul besteht bereits ein Abonnement.',
+            );
             $id = $this->db->table('billing_orders')->insertGetId([
                 'tenant_id' => $tenant,
                 'module_code' => $d['module_code'],
@@ -218,6 +228,15 @@ class ModuleController
                 return ['status' => 'paid'];
             }
             abort_unless($order->status === 'pending', 409);
+            abort_if(
+                $this->db
+                    ->table('billing_invoices')
+                    ->where('order_id', $id)
+                    ->whereNotNull('provider_id')
+                    ->exists(),
+                409,
+                'Anbieterzahlungen werden ausschließlich mit dem Zahlungsanbieter abgeglichen.',
+            );
             abort_if(
                 $this->db
                     ->table('billing_orders')

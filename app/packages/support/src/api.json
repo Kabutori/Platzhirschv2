@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "module": "support",
+  "api_version": "1.0.0",
+  "operations": [
+    {
+      "id": "support.get.support",
+      "method": "GET",
+      "uri": "api/v1/support",
+      "action": "App\\Modules\\Support\\Http\\SupportController@index",
+      "context": "shared",
+      "exposure": "external",
+      "scope": "support:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "support.post.support",
+      "method": "POST",
+      "uri": "api/v1/support",
+      "action": "App\\Modules\\Support\\Http\\SupportController@create",
+      "context": "shared",
+      "exposure": "external",
+      "scope": "support:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "support.get.support_id",
+      "method": "GET",
+      "uri": "api/v1/support/{id}",
+      "action": "App\\Modules\\Support\\Http\\SupportController@show",
+      "context": "shared",
+      "exposure": "external",
+      "scope": "support:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "support.post.support_id_messages",
+      "method": "POST",
+      "uri": "api/v1/support/{id}/messages",
+      "action": "App\\Modules\\Support\\Http\\SupportController@reply",
+      "context": "shared",
+      "exposure": "external",
+      "scope": "support:write",
+      "confirmation": false,
+      "mcp": true
+    }
+  ]
+}

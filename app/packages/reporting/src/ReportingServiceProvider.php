@@ -26,7 +26,7 @@ class ReportingServiceProvider extends ServiceProvider implements Module
     }
     public function dependencies(): array
     {
-        return ['billing' => '0.1.0', 'reservation' => '0.1.0'];
+        return ['billing' => '0.1.2', 'reservation' => '0.1.2'];
     }
     public function optionalDependencies(): array
     {

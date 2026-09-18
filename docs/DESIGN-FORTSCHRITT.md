@@ -1,5 +1,7 @@
 # Design-Abgleich – 8. September 2026
 
+**Aktuell (17. September 2026): Die Buttons sind vom Auftraggeber vorläufig abgenommen. Die folgenden Einzelprüfstände dokumentieren den bisherigen technischen Prüfverlauf und sind kein aktueller Freigabeblocker.**
+
 ## Nachprüfung vom 10. September 2026
 
 Das Inventar wurde mit der unveränderten Referenz erneut erzeugt: **183 Definitionen**, Referenz-Hash siehe unten. Die veralteten Codebefunde für Mehrfachumzüge (B063–B065), Wetterzuordnung (B085) und den ausdrücklich gewünschten Odoo-Platzhalter (B172–B174) wurden korrigiert. Der Wetterabruf läuft jetzt auch ohne geöffneten Bildschirm über den Scheduler; siehe [Wetterautomatik](WETTERAUTOMATIK.md).

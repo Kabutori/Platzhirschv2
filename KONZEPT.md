@@ -835,3 +835,10 @@ Stand 05.08.2026. Diese Festlegungen sind im gesamten Dokument bereits eingearbe
 | E10 | Wird ein Zahlungsanbieter angebunden (Stripe/Mollie), oder werden Rechnungen manuell gestellt? | Für den Start manuell — die Selbstregistrierung startet in der Testphase, Zahlung erst danach. | Vor Phase 3 |
 | E11 | Wo endet die Testphase? Automatische Sperre nach N Tagen oder manuelle Freischaltung? | Automatische Sperre mit Vorwarn-E-Mail. Betrifft `module-billing` und den Aufräumauftrag aus 6.5. | Vor Phase 3 |
 
+
+## Ergänzung vom 17.09.2026: Exporte und externe Schnittstellen
+
+- [API-, Token- und MCP-Konzept mit Odoo-Vergleich](docs/api/KONZEPT.md)
+- [Implementierte Server-PDFs und Übersichtsexporte](docs/EXPORTE.md)
+- [Prüfstand und verbleibende Aufgaben](docs/PRUEFSTAND-2026-09-17.md)
+- [Koordinierte Modul-PRs für 0.1.1](docs/MODULE-RELEASE-0.1.1.json)

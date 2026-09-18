@@ -1,0 +1,23 @@
+{
+  "name": "platzhirsch/api",
+  "version": "0.1.2",
+  "type": "library",
+  "require": {
+    "php": "^8.3",
+    "laravel/framework": "^13.0",
+    "platzhirsch/contracts": "0.1.0",
+    "platzhirsch/module-host": "0.1.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\Modules\\Api\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "App\\Modules\\Api\\ApiServiceProvider"
+      ]
+    }
+  }
+}

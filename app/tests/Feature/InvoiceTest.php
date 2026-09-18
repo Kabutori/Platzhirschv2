@@ -130,6 +130,10 @@ class InvoiceTest extends TestCase
             ->assertOk()
             ->assertJsonCount(0, 'invoices.data');
         $this->get('/api/v1/restaurant/billing/documents/' . $id . '/print')->assertNotFound();
+        $this->get('/api/v1/restaurant/billing/documents/' . $id . '/pdf')->assertNotFound();
+        $this->get('/api/v1/restaurant/billing/export?format=csv')
+            ->assertOk()
+            ->assertDontSee('PH-2026', false);
         $this->postJson('/api/v1/admin/billing/documents/' . $id . '/issue', [
             'confirmed' => true,
         ])->assertForbidden();
@@ -139,12 +143,33 @@ class InvoiceTest extends TestCase
         $this->actingAs($this->owner)
             ->get('/api/v1/restaurant/billing/documents/' . $id . '/print')
             ->assertOk();
+        $pdf = $this->get('/api/v1/restaurant/billing/documents/' . $id . '/pdf')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF-', $pdf->getContent());
+        $this->get('/api/v1/restaurant/billing/export?format=csv')->assertOk()->assertSee('PH-', false);
         DB::table('billing_invoices')
             ->where('id', $id)
             ->update(['tenant_id' => $this->tenant->id + 1]);
         $this->withHeader('X-Tenant-ID', (string) ($this->tenant->id + 1))
             ->get('/api/v1/restaurant/billing/documents/' . $id . '/print')
             ->assertNotFound();
+    }
+    public function test_foreign_document_export_cannot_be_selected_with_tenant_header(): void
+    {
+        $order = $this->prepareInvoice();
+        $id = $this->postJson('/api/v1/admin/billing/orders/' . $order . '/invoice')->json('id');
+        $this->postJson('/api/v1/admin/billing/documents/' . $id . '/issue', [
+            'confirmed' => true,
+        ])->assertOk();
+        $number = DB::table('billing_invoices')->where('id', $id)->value('number');
+        DB::table('billing_invoices')
+            ->where('id', $id)
+            ->update(['tenant_id' => $this->tenant->id + 1]);
+        $this->actingAs($this->owner)->withHeader('X-Tenant-ID', (string) ($this->tenant->id + 1));
+        $this->get('/api/v1/restaurant/billing/documents/' . $id . '/pdf')->assertNotFound();
+        $this->get('/api/v1/restaurant/billing/export?format=csv')->assertOk()->assertDontSee($number, false);
+        $this->get('/api/v1/admin/billing/export?format=csv')->assertForbidden();
     }
     public function test_pending_orders_and_stale_settings_are_rejected(): void
     {

@@ -23,6 +23,8 @@ class ModuleArchitectureTest extends TestCase
         $paths = [];
         foreach (
             [
+                'api',
+                'mcp',
                 'identity',
                 'provisioning',
                 'billing',

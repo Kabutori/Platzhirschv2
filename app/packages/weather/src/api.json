@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "module": "weather",
+  "api_version": "1.0.0",
+  "operations": [
+    {
+      "id": "weather.get.restaurant_weather_settings",
+      "method": "GET",
+      "uri": "api/v1/restaurant/weather/settings",
+      "action": "App\\Modules\\Weather\\WeatherController@settings",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "weather:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "weather.put.restaurant_weather_settings",
+      "method": "PUT",
+      "uri": "api/v1/restaurant/weather/settings",
+      "action": "App\\Modules\\Weather\\WeatherController@save",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "weather:write",
+      "confirmation": false,
+      "mcp": true
+    }
+  ]
+}

@@ -56,6 +56,10 @@ class InvoiceController
                     'tax_cents',
                     'issued_at',
                     'created_at',
+                    'payment_status',
+                    'due_at',
+                    'settled_at',
+                    'provider_id',
                 )
                 ->latest('id')
                 ->paginate(25),
@@ -64,18 +68,13 @@ class InvoiceController
                 ->orderBy('paid_until')
                 ->limit(200)
                 ->get(),
-            'profiles' => $this->db
-                ->table('billing_profiles')
-                ->orderBy('tenant_id')
-                ->limit(200)
-                ->get()
-                ->map(
-                    fn($p) => [
-                        'tenant_id' => $p->tenant_id,
-                        'revision' => $p->revision,
-                        ...$this->decode($p->data),
-                    ],
-                ),
+            'profiles' => $this->db->table('billing_profiles')->orderBy('tenant_id')->limit(200)->get()->map(
+                fn($p) => [
+                    'tenant_id' => $p->tenant_id,
+                    'revision' => $p->revision,
+                    ...$this->decode($p->data),
+                ],
+            ),
         ];
     }
     public function settings(Request $r): array
@@ -133,17 +132,15 @@ class InvoiceController
                 'Rechnungsadresse wurde geändert. Neu laden.',
             );
             unset($d['revision']);
-            $this->db
-                ->table('billing_profiles')
-                ->updateOrInsert(
-                    ['tenant_id' => $tenant],
-                    [
-                        'data' => json_encode($d, JSON_THROW_ON_ERROR),
-                        'revision' => ($p->revision ?? 0) + 1,
-                        'created_at' => $p->created_at ?? now(),
-                        'updated_at' => now(),
-                    ],
-                );
+            $this->db->table('billing_profiles')->updateOrInsert(
+                ['tenant_id' => $tenant],
+                [
+                    'data' => json_encode($d, JSON_THROW_ON_ERROR),
+                    'revision' => ($p->revision ?? 0) + 1,
+                    'created_at' => $p->created_at ?? now(),
+                    'updated_at' => now(),
+                ],
+            );
             $this->audit->record('billing.profile_saved', (string) $tenant);
             return ['status' => 'saved'];
         });
@@ -158,7 +155,18 @@ class InvoiceController
                 ->table('billing_invoices')
                 ->where('tenant_id', $tenant)
                 ->whereNotNull('issued_at')
-                ->select('id', 'kind', 'status', 'number', 'total_cents', 'issued_at', 'original_id')
+                ->select(
+                    'id',
+                    'kind',
+                    'status',
+                    'number',
+                    'total_cents',
+                    'issued_at',
+                    'original_id',
+                    'payment_status',
+                    'due_at',
+                    'settled_at',
+                )
                 ->latest('id')
                 ->paginate(25),
             'subscriptions' => $this->db->table('billing_entitlements')->where('tenant_id', $tenant)->get(),
@@ -219,17 +227,15 @@ class InvoiceController
                 'tax_cents' => $tax,
                 'tax_rate_bps' => $rate,
             ];
-            $id = $this->db
-                ->table('billing_invoices')
-                ->insertGetId([
-                    'tenant_id' => $o->tenant_id,
-                    'order_id' => $o->id,
-                    'total_cents' => $gross,
-                    'tax_cents' => $tax,
-                    'payload' => json_encode($payload, JSON_THROW_ON_ERROR),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+            $id = $this->db->table('billing_invoices')->insertGetId([
+                'tenant_id' => $o->tenant_id,
+                'order_id' => $o->id,
+                'total_cents' => $gross,
+                'tax_cents' => $tax,
+                'payload' => json_encode($payload, JSON_THROW_ON_ERROR),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             $this->audit->record('billing.invoice_drafted', (string) $id);
             return response()->json(['id' => $id], 201);
         });
@@ -290,6 +296,11 @@ class InvoiceController
             $s = $this->db->table('billing_settings')->where('id', 1)->lockForUpdate()->first();
             $i = $this->db->table('billing_invoices')->where('id', $id)->lockForUpdate()->first();
             abort_unless($i && $i->kind === 'invoice', 404);
+            abort_if(
+                $i->provider_id,
+                409,
+                'Anbieterrechnung zuerst beim Zahlungsanbieter klären; kein unabhängiges lokales Storno.',
+            );
             $old = $this->db->table('billing_invoices')->where('original_id', $id)->first();
             if ($old) {
                 return ['id' => $old->id, 'number' => $old->number];
@@ -302,21 +313,19 @@ class InvoiceController
             $p['reason'] = $d['reason'];
             $p['original_number'] = $i->number;
             $number = $this->number($s);
-            $credit = $this->db
-                ->table('billing_invoices')
-                ->insertGetId([
-                    'tenant_id' => $i->tenant_id,
-                    'original_id' => $id,
-                    'kind' => 'credit',
-                    'status' => 'issued',
-                    'number' => $number,
-                    'total_cents' => -$i->total_cents,
-                    'tax_cents' => -$i->tax_cents,
-                    'payload' => json_encode($p, JSON_THROW_ON_ERROR),
-                    'issued_at' => now(),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+            $credit = $this->db->table('billing_invoices')->insertGetId([
+                'tenant_id' => $i->tenant_id,
+                'original_id' => $id,
+                'kind' => 'credit',
+                'status' => 'issued',
+                'number' => $number,
+                'total_cents' => -$i->total_cents,
+                'tax_cents' => -$i->tax_cents,
+                'payload' => json_encode($p, JSON_THROW_ON_ERROR),
+                'issued_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             $this->db
                 ->table('billing_invoices')
                 ->where('id', $id)
@@ -324,6 +333,43 @@ class InvoiceController
             $this->audit->record('billing.invoice_cancelled', (string) $id);
             return ['id' => $credit, 'number' => $number];
         });
+    }
+    public function export(Request $r)
+    {
+        $r->validate(['format' => 'required|in:csv,xlsx,pdf']);
+        $query = $this->db->table('billing_invoices')->orderBy('id');
+        if ($r->attributes->get('tenant')) {
+            $query->where('tenant_id', $this->tenant($r))->whereNotNull('issued_at');
+        } else {
+            $this->admin($r);
+        }
+        $limit = $r->input('format') === 'pdf' ? 500 : 10000;
+        abort_if((clone $query)->count() > $limit, 422, 'Zu viele Belege für einen synchronen Export.');
+        $rows = [['ID', 'Restaurant', 'Nummer', 'Art', 'Status', 'Zahlung', 'Brutto EUR', 'Ausgestellt']];
+        foreach ($query->limit($limit + 1)->get() as $i) {
+            $rows[] = [
+                (int) $i->id,
+                (int) $i->tenant_id,
+                $i->number ?? 'Entwurf',
+                $i->kind,
+                $i->status,
+                $i->payment_status,
+                number_format($i->total_cents / 100, 2, ',', ''),
+                $i->issued_at ?? '',
+            ];
+        }
+        return app(\App\Core\Export\TableExport::class)->response(
+            $rows,
+            $r->input('format'),
+            'rechnungsuebersicht',
+            'Rechnungsübersicht',
+        );
+    }
+    public function pdf(Request $r, int $id)
+    {
+        // Reuse the exact document authorization and immutable billing snapshot of the print view.
+        $html = $this->print($r, $id)->getContent();
+        return app(\App\Core\Export\Pdf::class)->response($html, 'beleg-' . $id);
     }
     public function print(Request $r, int $id)
     {

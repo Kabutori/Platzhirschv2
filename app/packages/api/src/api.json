@@ -1,0 +1,1 @@
+{"schema":1,"module":"api","api_version":"1.0.0","operations":[],"reason":"Token- und Freigabeverwaltung verwendet ausschließlich eine bestätigte Browsersitzung. Externe Gateway-Routen werden aus den Fachverträgen erzeugt."}

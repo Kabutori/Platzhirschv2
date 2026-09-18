@@ -234,6 +234,31 @@ class RestaurantTest extends TestCase
             'request_key' => (string) \Illuminate\Support\Str::uuid(),
         ];
     }
+    public function test_pdf_and_tabular_exports_respect_permissions_and_reporting_entitlement(): void
+    {
+        $date = now()->format('Y-m-d');
+        $pdf = $this->get('/api/v1/restaurant/export?date=' . $date . '&format=pdf')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF-', $pdf->getContent());
+        $path = '/api/v1/restaurant/reporting/export?from=' . $date . '&to=' . $date . '&format=csv';
+        $this->getJson($path)->assertForbidden();
+        DB::table('billing_entitlements')->insert([
+            'tenant_id' => $this->tenant->id,
+            'module_code' => 'reporting',
+            'paid_until' => now()->addMonth(),
+            'status' => 'active',
+        ]);
+        $this->get($path)->assertOk()->assertSee('Reservierungen', false);
+        $this->getJson(
+            '/api/v1/restaurant/reporting/export?from=2026-01-01&to=2026-09-01&format=csv',
+        )->assertUnprocessable();
+        $role = $this->customRole(['reservation.read']);
+        $this->user->update(['role' => 'staff', 'restaurant_role_id' => $role]);
+        $this->actingAs($this->user->fresh())
+            ->getJson('/api/v1/restaurant/export?date=' . $date . '&format=pdf')
+            ->assertForbidden();
+    }
     public function test_reports_separate_no_shows_cancellations_and_arrivals(): void
     {
         foreach (['12:00', '14:00', '16:00'] as $time) {
@@ -852,14 +877,8 @@ class RestaurantTest extends TestCase
             \Illuminate\Contracts\Mail\Mailer::class,
             fn($mailer) => $mailer->shouldReceive('raw')->once()->andReturnNull(),
         );
-        app(\App\Contracts\Module\ReservationNotifier::class)->dispatch(
-            'Restaurant',
-            'Europe/Berlin',
-        );
-        app(\App\Contracts\Module\ReservationNotifier::class)->dispatch(
-            'Restaurant',
-            'Europe/Berlin',
-        );
+        app(\App\Contracts\Module\ReservationNotifier::class)->dispatch('Restaurant', 'Europe/Berlin');
+        app(\App\Contracts\Module\ReservationNotifier::class)->dispatch('Restaurant', 'Europe/Berlin');
         $this->assertSame(1, $db->table('reservation_notifications')->where('status', 'accepted')->count());
     }
     public function test_sms_rejection_is_not_retried_and_credentials_are_not_exposed(): void

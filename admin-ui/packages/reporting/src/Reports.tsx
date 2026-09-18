@@ -1,3 +1,4 @@
+import { ExportButtons } from '@platzhirsch/ui-runtime/exports';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@platzhirsch/ui-runtime/api';
@@ -37,6 +38,12 @@ export default function Reports({ tenant, canManage = false }: { tenant?: string
     <>
       <p className="eyebrow">RESTAURANT · REPORTING</p>
       <h2>Erweiterte Auswertungen</h2>
+      <ExportButtons
+        path={'v1/restaurant/reporting/export?' + new URLSearchParams(range)}
+        filename={'auswertung-' + range.from + '-' + range.to}
+        tenant={tenant}
+        disabled={!q.data || !!q.error}
+      />
       <form
         key={range.from + range.to}
         className="toolbar"

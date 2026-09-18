@@ -437,7 +437,8 @@ export function Reservations({
                 {[
                   [preferences.csvEnabled, 'csv', 'CSV'],
                   [preferences.xlsxEnabled, 'xlsx', 'XLSX'],
-                  [preferences.pdfEnabled, 'print', 'Drucken / PDF'],
+                  [preferences.pdfEnabled, 'pdf', 'PDF herunterladen'],
+                  [true, 'print', 'Drucken'],
                 ]
                   .filter(([enabled]) => enabled)
                   .map(([, format, label]) => (

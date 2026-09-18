@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "module": "widget",
+  "api_version": "1.0.0",
+  "operations": [
+    {
+      "id": "widget.get.restaurant_widget",
+      "method": "GET",
+      "uri": "api/v1/restaurant/widget",
+      "action": "App\\Modules\\Widget\\Http\\WidgetController@list",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "widget:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "widget.post.restaurant_widget",
+      "method": "POST",
+      "uri": "api/v1/restaurant/widget",
+      "action": "App\\Modules\\Widget\\Http\\WidgetController@create",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "widget:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "widget.patch.restaurant_widget_id",
+      "method": "PATCH",
+      "uri": "api/v1/restaurant/widget/{id}",
+      "action": "App\\Modules\\Widget\\Http\\WidgetController@update",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "widget:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "widget.delete.restaurant_widget_id",
+      "method": "DELETE",
+      "uri": "api/v1/restaurant/widget/{id}",
+      "action": "App\\Modules\\Widget\\Http\\WidgetController@revoke",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "widget:write",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "widget.get.api_widget_token",
+      "method": "GET",
+      "uri": "api/widget/{token}",
+      "action": "App\\Modules\\Widget\\Http\\WidgetController@config",
+      "context": "shared",
+      "exposure": "public-widget",
+      "scope": "widget:read",
+      "confirmation": false,
+      "mcp": false,
+      "reason": "Eigener interaktiver, öffentlicher oder Anbieter-Authentifizierungsablauf."
+    },
+    {
+      "id": "widget.post.api_widget_token",
+      "method": "POST",
+      "uri": "api/widget/{token}",
+      "action": "App\\Modules\\Widget\\Http\\WidgetController@book",
+      "context": "shared",
+      "exposure": "public-widget",
+      "scope": "widget:write",
+      "confirmation": false,
+      "mcp": false,
+      "reason": "Eigener interaktiver, öffentlicher oder Anbieter-Authentifizierungsablauf."
+    },
+    {
+      "id": "widget.options.api_widget_token",
+      "method": "OPTIONS",
+      "uri": "api/widget/{token}",
+      "action": "App\\Modules\\Widget\\Http\\WidgetController@options",
+      "context": "shared",
+      "exposure": "public-widget",
+      "scope": "widget:write",
+      "confirmation": false,
+      "mcp": false,
+      "reason": "Eigener interaktiver, öffentlicher oder Anbieter-Authentifizierungsablauf."
+    },
+    {
+      "id": "widget.get.api_widget_token_availability",
+      "method": "GET",
+      "uri": "api/widget/{token}/availability",
+      "action": "App\\Modules\\Widget\\Http\\WidgetController@availability",
+      "context": "shared",
+      "exposure": "public-widget",
+      "scope": "widget:read",
+      "confirmation": false,
+      "mcp": false,
+      "reason": "Eigener interaktiver, öffentlicher oder Anbieter-Authentifizierungsablauf."
+    },
+    {
+      "id": "widget.options.api_widget_token_availability",
+      "method": "OPTIONS",
+      "uri": "api/widget/{token}/availability",
+      "action": "App\\Modules\\Widget\\Http\\WidgetController@options",
+      "context": "shared",
+      "exposure": "public-widget",
+      "scope": "widget:write",
+      "confirmation": false,
+      "mcp": false,
+      "reason": "Eigener interaktiver, öffentlicher oder Anbieter-Authentifizierungsablauf."
+    }
+  ]
+}

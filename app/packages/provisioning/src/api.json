@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "module": "provisioning",
+  "api_version": "1.0.0",
+  "operations": [
+    {
+      "id": "provisioning.get.admin_database_access",
+      "method": "GET",
+      "uri": "api/v1/admin/database-access",
+      "action": "App\\Modules\\Provisioning\\Http\\DatabaseAccessController@index",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "provisioning:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "provisioning.post.admin_database_access_connection_reveal",
+      "method": "POST",
+      "uri": "api/v1/admin/database-access/{connection}/reveal",
+      "action": "App\\Modules\\Provisioning\\Http\\DatabaseAccessController@reveal",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "provisioning:write",
+      "confirmation": true,
+      "mcp": false
+    },
+    {
+      "id": "provisioning.get.admin_database_servers",
+      "method": "GET",
+      "uri": "api/v1/admin/database-servers",
+      "action": "App\\Modules\\Provisioning\\Http\\ServerController@index",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "provisioning:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "provisioning.post.admin_database_servers",
+      "method": "POST",
+      "uri": "api/v1/admin/database-servers",
+      "action": "App\\Modules\\Provisioning\\Http\\ServerController@save",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "provisioning:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "provisioning.patch.admin_database_servers_id",
+      "method": "PATCH",
+      "uri": "api/v1/admin/database-servers/{id}",
+      "action": "App\\Modules\\Provisioning\\Http\\ServerController@save",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "provisioning:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "provisioning.post.admin_database_servers_id_test",
+      "method": "POST",
+      "uri": "api/v1/admin/database-servers/{id}/test",
+      "action": "App\\Modules\\Provisioning\\Http\\ServerController@test",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "provisioning:write",
+      "confirmation": true,
+      "mcp": true
+    }
+  ]
+}

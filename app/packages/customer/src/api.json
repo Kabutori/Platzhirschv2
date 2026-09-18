@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "module": "customer",
+  "api_version": "1.0.0",
+  "operations": [
+    {
+      "id": "customer.get.admin_organizations",
+      "method": "GET",
+      "uri": "api/v1/admin/organizations",
+      "action": "App\\Modules\\Customer\\Http\\OrganizationController@index",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "customer:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "customer.post.admin_organizations",
+      "method": "POST",
+      "uri": "api/v1/admin/organizations",
+      "action": "App\\Modules\\Customer\\Http\\OrganizationController@save",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "customer:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "customer.patch.admin_organizations_id",
+      "method": "PATCH",
+      "uri": "api/v1/admin/organizations/{id}",
+      "action": "App\\Modules\\Customer\\Http\\OrganizationController@save",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "customer:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "customer.delete.admin_organizations_id",
+      "method": "DELETE",
+      "uri": "api/v1/admin/organizations/{id}",
+      "action": "App\\Modules\\Customer\\Http\\OrganizationController@delete",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "customer:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "customer.get.admin_tenants",
+      "method": "GET",
+      "uri": "api/v1/admin/tenants",
+      "action": "App\\Modules\\Customer\\Http\\TenantController@tenants",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "customer:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "customer.post.admin_tenants",
+      "method": "POST",
+      "uri": "api/v1/admin/tenants",
+      "action": "App\\Modules\\Customer\\Http\\TenantController@createTenant",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "customer:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "customer.patch.admin_tenants_id_organization",
+      "method": "PATCH",
+      "uri": "api/v1/admin/tenants/{id}/organization",
+      "action": "App\\Modules\\Customer\\Http\\OrganizationController@assign",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "customer:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "customer.patch.admin_tenants_tenant",
+      "method": "PATCH",
+      "uri": "api/v1/admin/tenants/{tenant}",
+      "action": "App\\Modules\\Customer\\Http\\TenantController@updateTenant",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "customer:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "customer.post.admin_tenants_tenant_retry",
+      "method": "POST",
+      "uri": "api/v1/admin/tenants/{tenant}/retry",
+      "action": "App\\Modules\\Customer\\Http\\TenantController@retryTenant",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "customer:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "customer.post.admin_test_restaurant",
+      "method": "POST",
+      "uri": "api/v1/admin/test-restaurant",
+      "action": "App\\Modules\\Customer\\Http\\TenantController@demoTenant",
+      "context": "admin",
+      "exposure": "external",
+      "scope": "customer:write",
+      "confirmation": true,
+      "mcp": true
+    },
+    {
+      "id": "customer.get.restaurant_profile",
+      "method": "GET",
+      "uri": "api/v1/restaurant/profile",
+      "action": "App\\Modules\\Customer\\Http\\ProfileController@profile",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "customer:read",
+      "confirmation": false,
+      "mcp": true
+    },
+    {
+      "id": "customer.patch.restaurant_profile",
+      "method": "PATCH",
+      "uri": "api/v1/restaurant/profile",
+      "action": "App\\Modules\\Customer\\Http\\ProfileController@updateProfile",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "customer:write",
+      "confirmation": true,
+      "mcp": true
+    }
+  ]
+}
