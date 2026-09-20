@@ -933,4 +933,113 @@ class RestaurantTest extends TestCase
         $this->assertSame('2027-03-28 02:30:00', $r->json('ends_at'));
         $this->travelBack();
     }
+    public function test_delivery_signatures_monotonic_status_and_controlled_retry(): void
+    {
+        config([
+            'app.url' => 'https://platzhirsch.example.test',
+            'reservation_notifications.sms.sid' => 'AC' . str_repeat('a', 32),
+            'reservation_notifications.sms.token' => 'unit-test-only',
+            'reservation_notifications.sms.from' => '+491701234567',
+        ]);
+        $this->patchJson('/api/v1/restaurant/notifications', [
+            'email_enabled' => false,
+            'sms_enabled' => true,
+            'reminder_minutes' => 0,
+        ])->assertOk();
+        \Illuminate\Support\Facades\Http::fake([
+            'api.twilio.com/*' => \Illuminate\Support\Facades\Http::response(
+                ['sid' => 'SM' . str_repeat('b', 32)],
+                201,
+            ),
+        ]);
+        $this->postJson('/api/v1/restaurant/reservations', [
+            ...$this->payload(),
+            'phone' => '+491709876543',
+        ])->assertCreated();
+        app(\App\Contracts\Module\ReservationNotifier::class)->dispatch(
+            'Restaurant',
+            'Europe/Berlin',
+            20,
+            $this->tenant->id,
+        );
+        $attempt = DB::table('notification_attempts')->first();
+        $db = DB::connection('tenant');
+        $this->assertSame('accepted', $attempt->status);
+        \Illuminate\Support\Facades\Http::assertSent(
+            fn($r) => $r['StatusCallback'] ===
+                'https://platzhirsch.example.test/api/notification/status/' . $attempt->public_id,
+        );
+        $this->mock(
+            \App\Contracts\Module\TenantRuntime::class,
+            fn($m) => $m
+                ->shouldReceive('withTenant')
+                ->with($this->tenant->id, \Mockery::type('Closure'))
+                ->andReturnUsing(fn($id, $callback) => $callback()),
+        );
+        $callback = function (string $status, bool $valid = true) use ($attempt) {
+            $data = [
+                'AccountSid' => 'AC' . str_repeat('a', 32),
+                'MessageSid' => 'SM' . str_repeat('b', 32),
+                'MessageStatus' => $status,
+                'ExtraField' => '  preserve whitespace  ',
+            ];
+            ksort($data);
+            $url = 'https://platzhirsch.example.test/api/notification/status/' . $attempt->public_id;
+            $signed = $url;
+            foreach ($data as $k => $v) {
+                $signed .= $k . $v;
+            }
+            return $this->call(
+                'POST',
+                $url,
+                [],
+                [],
+                [],
+                [
+                    'CONTENT_TYPE' => 'application/x-www-form-urlencoded',
+                    'HTTP_ACCEPT' => 'application/json',
+                    'HTTP_X_TWILIO_SIGNATURE' => $valid
+                        ? base64_encode(hash_hmac('sha1', $signed, 'unit-test-only', true))
+                        : 'bad',
+                ],
+                http_build_query($data),
+            );
+        };
+        $callback('delivered', false)->assertForbidden();
+        $callback('undelivered')->assertNoContent();
+        $callback('sent')->assertNoContent();
+        $this->assertSame(
+            'undelivered',
+            $db->table('reservation_notifications')->find($attempt->event_id)->status,
+        );
+        $url = '/api/v1/restaurant/notifications/' . $attempt->event_id . '/retry';
+        $proof = [
+            'password' => 'Strong-test-password-2026',
+            'confirmed' => true,
+            'acknowledge_duplicate' => true,
+            'expected_status' => 'undelivered',
+            'expected_attempt_id' => $attempt->id,
+        ];
+        $this->postJson($url, [...$proof, 'acknowledge_duplicate' => false])->assertUnprocessable();
+        $this->postJson($url, [...$proof, 'expected_attempt_id' => null])->assertConflict();
+        $this->postJson($url, $proof)->assertOk();
+        $this->postJson($url, $proof)->assertConflict();
+        $callback('delivered')->assertNoContent();
+        $this->assertSame(
+            'pending',
+            $db->table('reservation_notifications')->find($attempt->event_id)->status,
+        );
+        app(\App\Contracts\Module\ReservationNotifier::class)->dispatch(
+            'Restaurant',
+            'Europe/Berlin',
+            20,
+            $this->tenant->id,
+        );
+        $this->assertSame(2, DB::table('notification_attempts')->count());
+        $callback('delivered')->assertNoContent();
+        $this->assertSame(
+            'accepted',
+            $db->table('reservation_notifications')->find($attempt->event_id)->status,
+        );
+    }
 }

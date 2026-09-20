@@ -1,3 +1,4 @@
+import { ExportButtons } from '@platzhirsch/ui-runtime/exports';
 import Releases from '@platzhirsch/release-ui/Releases.tsx';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -41,6 +42,7 @@ export default function Support({ tenant, user }: { tenant?: string; user?: Row 
       )}
       <div className="toolbar">
         <div>
+          <ExportButtons path="v1/support/exports" filename="support" background />
           {selected ? (
             <button onClick={() => setSelected(null)}>
               <ArrowLeft size={16} />

@@ -106,5 +106,7 @@
       "branch": "codex/exports-api-0.1.1",
       "version": "0.1.1"
     }
-  ]
+  ],
+  "historical_snapshot": true,
+  "current_status": "RESTPUNKTE.md"
 }

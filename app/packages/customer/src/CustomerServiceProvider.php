@@ -7,6 +7,7 @@ class CustomerServiceProvider extends ServiceProvider implements Module
 {
     public function register(): void
     {
+        $this->app->tag([Export\Customers::class], 'platzhirsch.export_sources');
         if (!$this->app->bound(ModuleRegistry::class)) {
             $this->app->singleton(ModuleRegistry::class);
         }

@@ -15,12 +15,38 @@ class ApiServiceProvider extends ServiceProvider implements Module
     }
     public function boot(): void
     {
+        $this->app['events']->listen('platzhirsch.export.authorize', function ($job, $user) {
+            $token = app(\Illuminate\Database\DatabaseManager::class)
+                ->table('api_tokens')
+                ->find($job->token_id);
+            if (
+                !$token ||
+                $token->revoked_at ||
+                $token->expires_at <= now()->toDateTimeString() ||
+                (int) $token->user_id !== (int) $user->id ||
+                (string) $token->tenant_id !== (string) $user->tenant_id
+            ) {
+                return false;
+            }
+            $catalog = app(Catalog::class);
+            $op = $catalog->all()[$job->operation] ?? null;
+            return $op && $catalog->allowed($op, $token, $user);
+        });
         $this->loadMigrationsFrom(__DIR__ . '/migrations');
         $r = $this->app['router'];
         $r->middleware(['web', 'auth', Errors::class])
             ->prefix('api/v1/access')
             ->group(function ($r) {
                 $r->get('/', [AdminController::class, 'index']);
+                $r->post('/service-accounts', [AdminController::class, 'createService'])->middleware(
+                    'throttle:5,1',
+                );
+                $r->put('/service-accounts/{id}', [AdminController::class, 'updateService'])
+                    ->whereUuid('id')
+                    ->middleware('throttle:10,1');
+                $r->post('/tokens/{id}/rotate', [AdminController::class, 'rotate'])
+                    ->whereUuid('id')
+                    ->middleware('throttle:5,1');
                 $r->post('/tokens', [AdminController::class, 'create'])->middleware('throttle:5,1');
                 $r->post('/tokens/{id}/revoke', [AdminController::class, 'revoke'])
                     ->whereUuid('id')

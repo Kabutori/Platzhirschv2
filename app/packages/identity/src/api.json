@@ -228,7 +228,128 @@
       "exposure": "external",
       "scope": "identity:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "families": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "scope": {
+                            "type": "string"
+                          },
+                          "module": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "tenant_id": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "integer"
+                          },
+                          "locked": {
+                            "type": [
+                              "boolean",
+                              "integer"
+                            ]
+                          },
+                          "permissions": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "draft_permissions": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "families",
+                    "roles"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "families": [],
+                  "roles": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "5f507e05bc50ed8c08da63ef6827816e99ec5023aebfac22f5bddf1239000a23"
+      }
     },
     {
       "id": "identity.post.admin_platform_roles",
@@ -239,7 +360,91 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:120"
+              ],
+              "maxLength": 120
+            },
+            "permissions": {
+              "type": "array",
+              "x-validation": [
+                "present",
+                "array"
+              ],
+              "items": {
+                "type": "string",
+                "x-validation": [
+                  "string",
+                  "distinct"
+                ],
+                "x-distinct": true
+              }
+            },
+            "version": {
+              "not": {}
+            }
+          },
+          "required": [
+            "name",
+            "permissions"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "name": "Beispiel",
+            "permissions": []
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": 1
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "5f507e05bc50ed8c08da63ef6827816e99ec5023aebfac22f5bddf1239000a23"
+      }
     },
     {
       "id": "identity.delete.admin_platform_roles_id",
@@ -250,7 +455,61 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [
+            "version"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "version": 1
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Erfolgreich; kein Antwortkörper."
+          }
+        },
+        "source_sha256": "5f507e05bc50ed8c08da63ef6827816e99ec5023aebfac22f5bddf1239000a23"
+      }
     },
     {
       "id": "identity.patch.admin_platform_roles_id",
@@ -261,7 +520,108 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:120"
+              ],
+              "maxLength": 120
+            },
+            "permissions": {
+              "type": "array",
+              "x-validation": [
+                "present",
+                "array"
+              ],
+              "items": {
+                "type": "string",
+                "x-validation": [
+                  "string",
+                  "distinct"
+                ],
+                "x-distinct": true
+              }
+            },
+            "version": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [
+            "name",
+            "permissions",
+            "version"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "name": "Beispiel",
+            "permissions": [],
+            "version": 1
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": 1
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "5f507e05bc50ed8c08da63ef6827816e99ec5023aebfac22f5bddf1239000a23"
+      }
     },
     {
       "id": "identity.post.admin_platform_roles_id_activate",
@@ -272,7 +632,90 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [
+            "version"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "version": 1
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "integer"
+                    },
+                    "check": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "version",
+                    "check"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel",
+                  "version": 1,
+                  "check": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "5f507e05bc50ed8c08da63ef6827816e99ec5023aebfac22f5bddf1239000a23"
+      }
     },
     {
       "id": "identity.post.admin_platform_roles_id_check",
@@ -283,7 +726,90 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [
+            "version"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "version": 1
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "integer"
+                    },
+                    "check": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "version",
+                    "check"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel",
+                  "version": 1,
+                  "check": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "5f507e05bc50ed8c08da63ef6827816e99ec5023aebfac22f5bddf1239000a23"
+      }
     },
     {
       "id": "identity.get.admin_role_rollout",
@@ -294,7 +820,60 @@
       "exposure": "external",
       "scope": "identity:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "permissions": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "permissions"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "permissions": {}
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "4b37be2b18acba5f269ea0fdfdfc6639a1619d550551cad9230bf99265eb5992"
+      }
     },
     {
       "id": "identity.post.admin_role_rollout_apply",
@@ -305,7 +884,113 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "token": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string"
+              ]
+            },
+            "password": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string"
+              ],
+              "writeOnly": true
+            },
+            "mfa_code": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string"
+              ]
+            }
+          },
+          "required": [
+            "token",
+            "password",
+            "mfa_code"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "token": "Beispiel",
+            "password": "Beispiel",
+            "mfa_code": "Beispiel"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "created": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "tenant_id": {
+                            "type": "integer"
+                          },
+                          "role_id": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "synchronized": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "tenant_id": {
+                            "type": "integer"
+                          },
+                          "role_id": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "4b37be2b18acba5f269ea0fdfdfc6639a1619d550551cad9230bf99265eb5992"
+      }
     },
     {
       "id": "identity.post.admin_role_rollout_preview",
@@ -316,7 +1001,142 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:120"
+              ],
+              "maxLength": 120
+            },
+            "mode": {
+              "type": "string",
+              "x-validation": [
+                "sometimes",
+                "in:create,sync"
+              ],
+              "enum": [
+                "create",
+                "sync"
+              ]
+            },
+            "permissions": {
+              "type": "array",
+              "x-validation": [
+                "present",
+                "array"
+              ],
+              "items": {
+                "type": "string",
+                "x-validation": [
+                  "string",
+                  "distinct"
+                ],
+                "x-distinct": true
+              }
+            },
+            "tenant_ids": {
+              "type": "array",
+              "x-validation": [
+                "required",
+                "array",
+                "min:1",
+                "max:50"
+              ],
+              "items": {
+                "type": "integer",
+                "x-validation": [
+                  "integer",
+                  "distinct"
+                ],
+                "x-distinct": true
+              },
+              "minItems": 1,
+              "maxItems": 50
+            }
+          },
+          "required": [
+            "name",
+            "permissions",
+            "tenant_ids"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "name": "Beispiel",
+            "permissions": [],
+            "tenant_ids": [
+              1
+            ]
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    },
+                    "preview": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "mode": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": true
+                    },
+                    "expires_in": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "token",
+                    "preview",
+                    "expires_in"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "token": "Beispiel",
+                  "preview": {},
+                  "expires_in": 1
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "4b37be2b18acba5f269ea0fdfdfc6639a1619d550551cad9230bf99265eb5992"
+      }
     },
     {
       "id": "identity.get.admin_roles",
@@ -327,7 +1147,73 @@
       "exposure": "external",
       "scope": "identity:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "locked": {
+                        "type": "boolean"
+                      },
+                      "permissions": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "required": [
+                      "code",
+                      "name",
+                      "locked",
+                      "permissions"
+                    ],
+                    "additionalProperties": true
+                  }
+                },
+                "example": []
+              }
+            }
+          }
+        },
+        "source_sha256": "a44598d0a729e6a7053fcccdcf540b693f8ef1e7d6ef0efc90130c080e185c2e"
+      }
     },
     {
       "id": "identity.get.admin_users",
@@ -338,7 +1224,114 @@
       "exposure": "external",
       "scope": "identity:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "role": {
+                        "type": "string"
+                      },
+                      "tenant_id": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "active": {
+                        "type": "boolean"
+                      },
+                      "platform_role_id": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "restaurant_role_id": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "email_verified_at": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  }
+                },
+                "example": []
+              }
+            }
+          }
+        },
+        "source_sha256": "a44598d0a729e6a7053fcccdcf540b693f8ef1e7d6ef0efc90130c080e185c2e"
+      }
     },
     {
       "id": "identity.post.admin_users",
@@ -349,7 +1342,264 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:120"
+              ],
+              "maxLength": 120
+            },
+            "email": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "email",
+                "max:254",
+                "unique:users,email"
+              ],
+              "format": "email",
+              "maxLength": 254,
+              "description": "Zusätzliche Fachvalidierung: required, email, max:254, unique:users,email"
+            },
+            "role": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:system_admin,platform_staff,restaurant_admin,staff"
+              ],
+              "enum": [
+                "system_admin",
+                "platform_staff",
+                "restaurant_admin",
+                "staff"
+              ]
+            },
+            "tenant_id": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "integer"
+              ]
+            },
+            "platform_role_id": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "integer"
+              ]
+            },
+            "password": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "min:12",
+                "max:128"
+              ],
+              "minLength": 12,
+              "maxLength": 128,
+              "writeOnly": true
+            }
+          },
+          "required": [
+            "name",
+            "email",
+            "role",
+            "password"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "name": "Beispiel",
+            "email": "kontakt@example.test",
+            "role": "system_admin",
+            "password": "Beispielxxxx"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "tenant_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "active": {
+                      "type": "boolean"
+                    },
+                    "platform_role_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "restaurant_role_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "email_verified_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          },
+          "201": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "tenant_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "active": {
+                      "type": "boolean"
+                    },
+                    "platform_role_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "restaurant_role_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "email_verified_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "a44598d0a729e6a7053fcccdcf540b693f8ef1e7d6ef0efc90130c080e185c2e"
+      }
     },
     {
       "id": "identity.patch.admin_users_user",
@@ -360,7 +1610,153 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "user": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "user"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-validation": [
+                "sometimes",
+                "required",
+                "string",
+                "max:120"
+              ],
+              "maxLength": 120
+            },
+            "active": {
+              "type": "boolean",
+              "x-validation": [
+                "sometimes",
+                "boolean"
+              ]
+            },
+            "platform_role_id": {
+              "type": "integer",
+              "x-validation": [
+                "sometimes",
+                "integer"
+              ]
+            },
+            "expected_platform_role_id": {
+              "type": "integer",
+              "x-validation": [
+                "required_with:platform_role_id",
+                "integer"
+              ],
+              "description": "Zusätzliche Fachvalidierung: required_with:platform_role_id, integer"
+            }
+          },
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "user": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "tenant_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "active": {
+                      "type": "boolean"
+                    },
+                    "platform_role_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "restaurant_role_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "email_verified_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "a44598d0a729e6a7053fcccdcf540b693f8ef1e7d6ef0efc90130c080e185c2e"
+      }
     },
     {
       "id": "identity.post.admin_users_user_invite",
@@ -371,7 +1767,66 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "user": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "user"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "user": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "message": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "a44598d0a729e6a7053fcccdcf540b693f8ef1e7d6ef0efc90130c080e185c2e"
+      }
     },
     {
       "id": "identity.get.restaurant_roles",
@@ -382,7 +1837,136 @@
       "exposure": "external",
       "scope": "identity:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "catalog": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    "families": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "scope": {
+                            "type": "string"
+                          },
+                          "module": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "tenant_id": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "integer"
+                          },
+                          "locked": {
+                            "type": [
+                              "boolean",
+                              "integer"
+                            ]
+                          },
+                          "permissions": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "draft_permissions": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "catalog",
+                    "families",
+                    "roles"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "catalog": {},
+                  "families": [],
+                  "roles": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "b4575261cbb16657aacc961e62d091516fd32abd33d4a5e3c4a74ca0984503b3"
+      }
     },
     {
       "id": "identity.post.restaurant_roles",
@@ -393,7 +1977,95 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:120"
+              ],
+              "maxLength": 120
+            },
+            "permissions": {
+              "type": "array",
+              "x-validation": [
+                "present",
+                "array"
+              ],
+              "items": {
+                "type": "string",
+                "x-validation": [
+                  "string",
+                  "distinct"
+                ],
+                "x-distinct": true
+              }
+            },
+            "version": {
+              "type": "integer",
+              "x-validation": [
+                "sometimes",
+                "integer"
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "permissions"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "name": "Beispiel",
+            "permissions": []
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": 1
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "b4575261cbb16657aacc961e62d091516fd32abd33d4a5e3c4a74ca0984503b3"
+      }
     },
     {
       "id": "identity.patch.restaurant_roles_id",
@@ -404,7 +2076,108 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:120"
+              ],
+              "maxLength": 120
+            },
+            "permissions": {
+              "type": "array",
+              "x-validation": [
+                "present",
+                "array"
+              ],
+              "items": {
+                "type": "string",
+                "x-validation": [
+                  "string",
+                  "distinct"
+                ],
+                "x-distinct": true
+              }
+            },
+            "version": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [
+            "name",
+            "permissions",
+            "version"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "name": "Beispiel",
+            "permissions": [],
+            "version": 1
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": 1
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "b4575261cbb16657aacc961e62d091516fd32abd33d4a5e3c4a74ca0984503b3"
+      }
     },
     {
       "id": "identity.delete.restaurant_roles_id",
@@ -415,7 +2188,47 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "204": {
+            "description": "Erfolgreich; kein Antwortkörper."
+          }
+        },
+        "source_sha256": "b4575261cbb16657aacc961e62d091516fd32abd33d4a5e3c4a74ca0984503b3"
+      }
     },
     {
       "id": "identity.get.restaurant_team",
@@ -426,7 +2239,114 @@
       "exposure": "external",
       "scope": "identity:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "role": {
+                        "type": "string"
+                      },
+                      "tenant_id": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "active": {
+                        "type": "boolean"
+                      },
+                      "platform_role_id": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "restaurant_role_id": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "email_verified_at": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  }
+                },
+                "example": []
+              }
+            }
+          }
+        },
+        "source_sha256": "a2cd79148ded03cda89f747a71b0605c40e6c925de06301e5e46500b32110584"
+      }
     },
     {
       "id": "identity.post.restaurant_team",
@@ -437,7 +2357,252 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:120"
+              ],
+              "maxLength": 120
+            },
+            "email": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "email",
+                "max:254",
+                "unique:users,email"
+              ],
+              "format": "email",
+              "maxLength": 254,
+              "description": "Zusätzliche Fachvalidierung: required, email, max:254, unique:users,email"
+            },
+            "password": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "min:12",
+                "max:128"
+              ],
+              "minLength": 12,
+              "maxLength": 128,
+              "writeOnly": true
+            },
+            "role": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:restaurant_admin,staff"
+              ],
+              "enum": [
+                "restaurant_admin",
+                "staff"
+              ]
+            },
+            "restaurant_role_id": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "integer"
+              ]
+            }
+          },
+          "required": [
+            "name",
+            "email",
+            "password",
+            "role"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "name": "Beispiel",
+            "email": "kontakt@example.test",
+            "password": "Beispielxxxx",
+            "role": "restaurant_admin"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "tenant_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "active": {
+                      "type": "boolean"
+                    },
+                    "platform_role_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "restaurant_role_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "email_verified_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          },
+          "201": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "tenant_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "active": {
+                      "type": "boolean"
+                    },
+                    "platform_role_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "restaurant_role_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "email_verified_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "a2cd79148ded03cda89f747a71b0605c40e6c925de06301e5e46500b32110584"
+      }
     },
     {
       "id": "identity.patch.restaurant_team_id",
@@ -448,7 +2613,163 @@
       "exposure": "external",
       "scope": "identity:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-validation": [
+                "sometimes",
+                "required",
+                "string",
+                "max:120"
+              ],
+              "maxLength": 120
+            },
+            "active": {
+              "type": "boolean",
+              "x-validation": [
+                "sometimes",
+                "boolean"
+              ]
+            },
+            "role": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:restaurant_admin,staff"
+              ],
+              "enum": [
+                "restaurant_admin",
+                "staff"
+              ]
+            },
+            "restaurant_role_id": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "integer"
+              ]
+            }
+          },
+          "required": [
+            "role"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "role": "restaurant_admin"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    },
+                    "tenant_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "active": {
+                      "type": "boolean"
+                    },
+                    "platform_role_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "restaurant_role_id": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "email_verified_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "a2cd79148ded03cda89f747a71b0605c40e6c925de06301e5e46500b32110584"
+      }
     }
   ]
 }

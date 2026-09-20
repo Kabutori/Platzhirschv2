@@ -62,6 +62,8 @@ export default function ApiAccess({ system = false }: { system?: boolean }) {
               .split(/[,\s]+/)
               .filter(Boolean),
             scopes,
+            service_account_id: f.get('service_account_id') || null,
+            ...(f.has('restrict_operations') ? { operations: f.getAll('operations') } : {}),
           });
           if (r) {
             setSecret(r.token);
@@ -71,6 +73,33 @@ export default function ApiAccess({ system = false }: { system?: boolean }) {
         }}
       >
         <h3>Neuen Zugang erstellen</h3>
+        <label>
+          Identität
+          <select name="service_account_id">
+            <option value="">Persönlicher Zugang</option>
+            {q.data?.service_accounts
+              ?.filter((a: any) => a.active)
+              .map((a: any) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
+              ))}
+          </select>
+        </label>
+        <details>
+          <summary>Einzelne Aktionen zusätzlich begrenzen</summary>
+          <label>
+            <input name="restrict_operations" type="checkbox" /> Nur ausgewählte Aktionen erlauben (leere
+            Auswahl sperrt alle)
+          </label>
+          <select name="operations" aria-label="Token-Aktionen" multiple size={8}>
+            {q.data?.operations?.map((o: any) => (
+              <option key={o.id} value={o.id}>
+                {o.method} {o.path}
+              </option>
+            ))}
+          </select>
+        </details>
         <label>
           Name
           <input name="name" maxLength={100} required />
@@ -108,10 +137,83 @@ export default function ApiAccess({ system = false }: { system?: boolean }) {
         {approvalFields}
         <button disabled={busy || !scopes.length}>Token erstellen</button>
       </form>
+      <h3>Technische Konten</h3>
+      <p>
+        Eigene Dienstidentitäten ohne Login. Sie bleiben an Sie als verantwortlichen Administrator und diesen
+        Mandanten gebunden. Einzelaktionen und Sperren gelten sofort für alle zugehörigen Tokens.
+      </p>
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          const form = e.currentTarget,
+            f = new FormData(form);
+          if (
+            await send('/service-accounts', 'POST', {
+              ...formAuth(f),
+              name: f.get('name'),
+              operations: f.getAll('operations'),
+            })
+          )
+            form.reset();
+        }}
+      >
+        <label>
+          Kontoname
+          <input name="name" required maxLength={100} />
+        </label>
+        <label>
+          Erlaubte Konto-Aktionen
+          <select name="operations" multiple required size={8}>
+            {q.data?.operations?.map((o: any) => (
+              <option key={o.id} value={o.id}>
+                {o.method} {o.path}
+              </option>
+            ))}
+          </select>
+        </label>
+        {approvalFields}
+        <button disabled={busy}>Technisches Konto erstellen</button>
+      </form>
+      {q.data?.service_accounts?.map((a: any) => (
+        <form
+          key={a.id + ':' + a.revision}
+          onSubmit={(e) => {
+            e.preventDefault();
+            const f = new FormData(e.currentTarget);
+            void send('/service-accounts/' + a.id, 'PUT', {
+              ...formAuth(f),
+              name: f.get('name'),
+              active: f.has('active'),
+              revision: a.revision,
+              operations: f.getAll('operations'),
+            });
+          }}
+        >
+          <label>
+            Kontoname
+            <input name="name" required defaultValue={a.name} />
+          </label>
+          <label>
+            <input name="active" type="checkbox" defaultChecked={!!a.active} /> Technisches Konto aktiv
+          </label>
+          <label>
+            Konto-Aktionen
+            <select name="operations" multiple size={5} defaultValue={JSON.parse(a.operations)}>
+              {q.data?.operations?.map((o: any) => (
+                <option key={o.id} value={o.id}>
+                  {o.method} {o.path}
+                </option>
+              ))}
+            </select>
+          </label>
+          {approvalFields}
+          <button disabled={busy}>Konto speichern</button>
+        </form>
+      ))}
       <h3>Bestehende Zugänge</h3>
       <p>
-        Rotation: Ersatz mit gleichen oder weniger Rechten erstellen, Anwendung umstellen, bisherigen Zugang
-        widerrufen.
+        Rotation: Übergangszeit wählen, Ersatz einmalig speichern und im Client hinterlegen. Der bisherige
+        Zugang endet automatisch spätestens nach 24 Stunden.
       </p>
       {q.data?.tokens.map((t: any) => (
         <article className="panel padded" key={t.id}>
@@ -126,6 +228,50 @@ export default function ApiAccess({ system = false }: { system?: boolean }) {
             · letzte Nutzung {t.last_used_at || 'noch keine'}
           </p>
           <p>{JSON.parse(t.scopes).join(', ')}</p>
+          <p>
+            {t.service_account_id
+              ? 'Technisches Konto: ' +
+                (q.data?.service_accounts?.find((a: any) => a.id === t.service_account_id)?.name ||
+                  t.service_account_id)
+              : 'Persönlicher Zugang'}{' '}
+            ·{' '}
+            {t.operations === null
+              ? 'Alle Aktionen innerhalb der Modulrechte'
+              : JSON.parse(t.operations || '[]').length + ' ausgewählte Aktionen'}
+          </p>
+          {!t.revoked_at && !t.rotated_to && (
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const form = e.currentTarget,
+                  f = new FormData(form);
+                const r = await send('/tokens/' + t.id + '/rotate', 'POST', {
+                  ...formAuth(f),
+                  days: Number(f.get('days')),
+                  overlap_hours: Number(f.get('overlap_hours')),
+                });
+                if (r) {
+                  setSecret(r.token);
+                  form.reset();
+                }
+              }}
+            >
+              <label>
+                Neue Gültigkeit in Tagen
+                <input name="days" type="number" min={1} max={90} defaultValue={30} required />
+              </label>
+              <label>
+                Übergangszeit in Stunden
+                <input name="overlap_hours" type="number" min={0} max={24} defaultValue={0} required />
+              </label>
+              <p>
+                0 sperrt den bisherigen Token sofort; maximal 24 Stunden für die Umstellung. Rechte und
+                IP-Grenzen werden übernommen.
+              </p>
+              {approvalFields}
+              <button disabled={busy}>Token rotieren</button>
+            </form>
+          )}
           {!t.revoked_at && (
             <form
               onSubmit={(e) => {

@@ -1,0 +1,13 @@
+# Modulverträge und Kompatibilität
+
+Jede externe Operation in `src/api.json` besitzt `contract.parameters`, `query`, `body`, Beispiele und nach HTTP-Status/MIME getrennte `responses`. Plattformaktionen liegen in `app/app/Api/platform.json`. OpenAPI 3.1 und MCP verwenden diese Felder unmittelbar. Die Fachcontroller bleiben für Laufzeitvalidierung, Konflikte und Rechte verbindlich; `x-validation` beschreibt zusätzliche Laravel-/Fachregeln, beispielsweise existierende Datensätze und Zeitzonen.
+
+Antwortobjekte sind additiv erweiterbar. Dokumentierte Felder sind typisiert; `required` kennzeichnet garantierte Felder. Optionale Datenbank-/Konfigurationsfelder sind keine Zusage, dass jeder Zustand sie liefert. Ressourcen mit mehreren Formen beschreiben diese mit `anyOf` und dem zugehörigen Pfadparameter. Beispiele sind syntaktische Musterdaten, keine existierenden IDs oder ausführbaren Zahlungsaufträge. Kennwörter und Schlüssel werden als `writeOnly` markiert.
+
+Bei Änderungen: `php tools/api/extract.php > /tmp/api-methods.json`, anschließend `python tools/api/generate.py /tmp/api-methods.json`. Eingaberegeln werden aus Controller und Validierungshelfern extrahiert; Antwortformen werden in `tools/api/schemas.py` gepflegt und müssen fachlich geprüft werden. Der Controller-Fingerabdruck erzwingt eine erneute Vertragsprüfung nach Codeänderungen. Eine komplexe neue Validierung benötigt gegebenenfalls eine explizite Anpassung des Generators.
+
+`python tools/api/check.py --base <vorheriger-commit>` validiert JSON Schemas und Beispiele und vergleicht den veröffentlichten Stand: entfernte Operationen/Felder, neue Eingabepflichten, engere Grenzen/Enums, veränderte Typen, Antwortgarantien und Zugangsvoraussetzungen werden abgewiesen. Die CI verwendet bei PRs den Basiscommit, bei Pushes den vorherigen Commit. Brechende Änderungen benötigen parallele versionierte Routen; ein geänderter Versionsstring allein hebt diese Schranke nicht auf. `test_contracts.py` prüft diese Regeln mit gezielt inkompatiblen Gegenbeispielen.
+
+Fehler umfassen unter anderem 401 (Token), 403 (Rechte), 409 (Version/Idempotenz), 410 (Ablauf), 422 (Felder/Fachprüfung), 428 (Portalbestätigung) und 429 (Limit). Problemantworten enthalten Request-ID; bereits von Fachcontrollern gelieferte Fehler können deren JSON-Nachrichtenform besitzen.
+
+Die Integrations-CI prüft zusätzlich aufgezeichnete Antworten beider Portale gegen dieselben Schemas, einschließlich der tatsächlich ausgelieferten OpenAPI-Dokumente und ihrer Beispiele. MCP veröffentlicht typisierte `outputSchema`-Antworten unter `structuredContent.data`; die lesbare Textantwort bleibt erhalten.

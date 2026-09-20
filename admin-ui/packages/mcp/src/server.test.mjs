@@ -71,3 +71,59 @@ test('transport refuses insecure destinations, API-only credentials and malforme
   assert.ok(r.error);
   assert.equal((await s.handle([])).error.code, -32600);
 });
+test('MCP advertises module fields and canonicalizes query values for approval', async () => {
+  const contract = {
+    parameters: { type: 'object', properties: {}, required: [], additionalProperties: false },
+    query: { type: 'object', properties: { page: { type: 'integer', minimum: 1 } }, required: ['page'] },
+    body: {
+      type: 'object',
+      properties: { subject: { type: 'string', maxLength: 200 } },
+      required: ['subject'],
+    },
+  };
+  let prepared;
+  const write = { ...operation, id: 'support.post.support', method: 'POST', contract };
+  const s = await ready(async (url, o) => {
+    if (url.endsWith('/confirmations')) {
+      prepared = JSON.parse(o.body);
+      return Response.json({ id: 'approval' });
+    }
+    return Response.json({ audience: 'mcp', operations: [write] });
+  });
+  const list = await s.handle({ jsonrpc: '2.0', id: 2, method: 'tools/list' });
+  assert.deepEqual(list.result.tools[0].inputSchema.properties.body, contract.body);
+  assert.ok(list.result.tools[0].inputSchema.required.includes('query'));
+  await s.handle({
+    jsonrpc: '2.0',
+    id: 3,
+    method: 'tools/call',
+    params: {
+      name: 'platzhirsch_prepare',
+      arguments: { operation: write.id, parameters: {}, query: { page: 2 }, body: { subject: 'Test' } },
+    },
+  });
+  assert.deepEqual(prepared.query, { page: '2' });
+});
+
+test('MCP exposes typed structured JSON output', async () => {
+  const responseSchema = {
+    type: 'array',
+    items: { type: 'object', properties: { id: { type: 'integer' } }, required: ['id'] },
+  };
+  const op = {
+    ...operation,
+    contract: { responses: { 200: { content: { 'application/json': { schema: responseSchema } } } } },
+  };
+  const server = await ready(async (url) =>
+    Response.json(url.endsWith('/catalog') ? { audience: 'mcp', operations: [op] } : [{ id: 7 }]),
+  );
+  const list = await server.handle({ jsonrpc: '2.0', id: 2, method: 'tools/list' });
+  assert.deepEqual(list.result.tools[0].outputSchema.properties.data.anyOf, [responseSchema]);
+  const result = await server.handle({
+    jsonrpc: '2.0',
+    id: 3,
+    method: 'tools/call',
+    params: { name: 'support_get_support', arguments: { parameters: {} } },
+  });
+  assert.deepEqual(result.result.structuredContent, { data: [{ id: 7 }] });
+});

@@ -12,7 +12,134 @@
       "exposure": "external",
       "scope": "reporting:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "date_format:Y-m-d"
+              ],
+              "format": "date"
+            },
+            "to": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "date_format:Y-m-d",
+                "after_or_equal:from"
+              ],
+              "format": "date",
+              "description": "Zusätzliche Fachvalidierung: required, date_format:Y-m-d, after_or_equal:from"
+            }
+          },
+          "required": [
+            "from",
+            "to"
+          ],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {
+            "from": "2026-10-01",
+            "to": "2026-10-01"
+          },
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "days": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "date": {
+                            "type": "string"
+                          },
+                          "reservations": {
+                            "type": "integer"
+                          },
+                          "guests": {
+                            "type": "integer"
+                          },
+                          "cancelled": {
+                            "type": "integer"
+                          },
+                          "no_show": {
+                            "type": "integer"
+                          },
+                          "arrived": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "saved": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "from": {
+                            "type": "string"
+                          },
+                          "to": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "days",
+                    "saved"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "days": [],
+                  "saved": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "d07daae1e4538ba102f025bab4c7a3fc19b96e6482d479678c201040d3777507"
+      }
     },
     {
       "id": "reporting.get.restaurant_reporting_export",
@@ -23,7 +150,97 @@
       "exposure": "external",
       "scope": "reporting:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "date_format:Y-m-d"
+              ],
+              "format": "date"
+            },
+            "to": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "date_format:Y-m-d",
+                "after_or_equal:from"
+              ],
+              "format": "date",
+              "description": "Zusätzliche Fachvalidierung: required, date_format:Y-m-d, after_or_equal:from"
+            },
+            "format": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:csv,xlsx,pdf"
+              ],
+              "enum": [
+                "csv",
+                "xlsx",
+                "pdf"
+              ]
+            }
+          },
+          "required": [
+            "from",
+            "to",
+            "format"
+          ],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {
+            "from": "2026-10-01",
+            "to": "2026-10-01",
+            "format": "csv"
+          },
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Datei im angeforderten Format; PDF bis 500, direkte Tabellen bis 10.000 Datensätze.",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "d07daae1e4538ba102f025bab4c7a3fc19b96e6482d479678c201040d3777507"
+      }
     },
     {
       "id": "reporting.post.restaurant_reporting_saved",
@@ -34,7 +251,115 @@
       "exposure": "external",
       "scope": "reporting:write",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "date_format:Y-m-d"
+              ],
+              "format": "date"
+            },
+            "to": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "date_format:Y-m-d",
+                "after_or_equal:from"
+              ],
+              "format": "date",
+              "description": "Zusätzliche Fachvalidierung: required, date_format:Y-m-d, after_or_equal:from"
+            },
+            "name": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:120"
+              ],
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "from",
+            "to",
+            "name"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "from": "2026-10-01",
+            "to": "2026-10-01",
+            "name": "Beispiel"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": 1
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": 1
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "d07daae1e4538ba102f025bab4c7a3fc19b96e6482d479678c201040d3777507"
+      }
     },
     {
       "id": "reporting.delete.restaurant_reporting_saved_id",
@@ -45,7 +370,47 @@
       "exposure": "external",
       "scope": "reporting:write",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "204": {
+            "description": "Erfolgreich; kein Antwortkörper."
+          }
+        },
+        "source_sha256": "d07daae1e4538ba102f025bab4c7a3fc19b96e6482d479678c201040d3777507"
+      }
     }
   ]
 }

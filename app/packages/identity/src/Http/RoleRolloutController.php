@@ -86,13 +86,29 @@ class RoleRolloutController
             )
             ->all();
         $token = bin2hex(random_bytes(24));
-        $r->session()->put('restaurant_role_rollout', [
+        $preview = [
             'token' => $token,
             'data' => $d,
             'expires' => time() + 300,
             'user' => $r->user()->id,
-        ]);
+        ];
+        if ($r->attributes->get('api.token')) {
+            $cache = app(\Illuminate\Contracts\Cache\Factory::class)->store();
+            $key = $this->previewKey($r);
+            $saved = $cache->lock($key . ':lock', 10)->get(function () use ($cache, $key, $preview) {
+                $cache->put($key, $preview, 300);
+                return true;
+            });
+            abort_unless($saved, 409, 'Vorschau wird gerade bearbeitet.');
+        } else {
+            $r->session()->put('restaurant_role_rollout', $preview);
+        }
         return ['token' => $token, 'preview' => $d, 'expires_in' => 300];
+    }
+    private function previewKey(Request $r): string
+    {
+        // Machine previews never use a browser cookie and cannot cross token owners.
+        return 'identity:rollout:' . $r->user()->id . ':' . $r->attributes->get('api.token')->id;
     }
     public function apply(Request $r, AuditSink $audit)
     {
@@ -102,7 +118,13 @@ class RoleRolloutController
             'password' => 'required|string',
             'mfa_code' => 'required|string',
         ]);
-        $preview = $r->session()->pull('restaurant_role_rollout');
+        if ($r->attributes->get('api.token')) {
+            $cache = app(\Illuminate\Contracts\Cache\Factory::class)->store();
+            $key = $this->previewKey($r);
+            $preview = $cache->lock($key . ':lock', 10)->get(fn() => $cache->pull($key));
+        } else {
+            $preview = $r->session()->pull('restaurant_role_rollout');
+        }
         abort_unless(
             $preview &&
                 $preview['expires'] >= time() &&

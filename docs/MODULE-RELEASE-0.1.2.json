@@ -85,5 +85,7 @@
       "version": "0.1.2",
       "pr": "https://github.com/Kabutori/platzhirsch-module-integration-odoo/pull/1"
     }
-  ]
+  ],
+  "historical_snapshot": true,
+  "current_status": "RESTPUNKTE.md"
 }

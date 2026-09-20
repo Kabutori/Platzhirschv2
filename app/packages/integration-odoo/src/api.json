@@ -12,7 +12,77 @@
       "exposure": "external",
       "scope": "integration-odoo:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "module": {
+                      "type": "string"
+                    },
+                    "state": {
+                      "type": "string"
+                    },
+                    "configured": {
+                      "type": "boolean"
+                    },
+                    "synchronization_available": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "module",
+                    "state",
+                    "configured",
+                    "synchronization_available",
+                    "message"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "module": "Beispiel",
+                  "state": "Beispiel",
+                  "configured": true,
+                  "synchronization_available": true,
+                  "message": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "3070681a044f1c1eb0cfa5ee6ffda49ac8a463887c93c7440acd5a347ff81b0f"
+      }
     }
   ]
 }

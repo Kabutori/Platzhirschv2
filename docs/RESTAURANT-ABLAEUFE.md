@@ -14,13 +14,13 @@ Die Rechte `waitlist.read` und `waitlist.write` kommen aus dem Reservierungsmodu
 
 ## Export
 
-CSV, Excel-Arbeitsmappe und eine druckbare Tagesliste stehen separat in den persönlichen Einstellungen. Alle exportieren den ausgewählten Tag; Suchfilter sind keine Exportfilter. Excel und Druckansicht verwenden die Restaurant-Zeitzone; der vorhandene CSV-Vertrag benennt UTC explizit. PDF: im Browser-Druckdialog „Als PDF speichern“ wählen. XLSX benötigt die im Windows-Paket enthaltene PHP-ZIP-Erweiterung. Gasttexte werden als Inline-Strings statt Formeln geschrieben und für HTML/XML maskiert.
+CSV, Excel-Arbeitsmappe und eine druckbare Tagesliste stehen separat in den persönlichen Einstellungen. Alle exportieren den ausgewählten Tag; Suchfilter sind keine Exportfilter. Excel und Druckansicht verwenden die Restaurant-Zeitzone; der vorhandene CSV-Vertrag benennt UTC explizit. PDF steht als direkter serverseitiger Download bereit; Browserdruck bleibt zusätzlich möglich. XLSX benötigt die im Windows-Paket enthaltene PHP-ZIP-Erweiterung. Gasttexte werden als Inline-Strings statt Formeln geschrieben und für HTML/XML maskiert.
 
 Formatgrundlage: [Microsoft SpreadsheetML](https://learn.microsoft.com/en-us/office/open-xml/spreadsheet/structure-of-a-spreadsheetml-document) und [PHP ZipArchive](https://www.php.net/manual/en/ziparchive.addfromstring.php).
 
 ## Nachrichten
 
-Unter Restaurant → Buchungsnachrichten werden E-Mail, SMS und der Erinnerungsvorlauf konfiguriert. Standardmäßig sind beide Kanäle aus. SMTP wird in der vorhandenen Serverkonfiguration eingerichtet. Für SMS werden zusätzlich in der geschützten Anwendungskonfiguration benötigt:
+Unter Restaurant → Buchungsnachrichten werden E-Mail, SMS und der Erinnerungsvorlauf konfiguriert. Standardmäßig sind beide Kanäle aus. SMTP wird in der Administrationsoberfläche eingerichtet. Für SMS werden zusätzlich in der geschützten Anwendungskonfiguration benötigt:
 
 ```dotenv
 TWILIO_ACCOUNT_SID=AC...
@@ -32,8 +32,10 @@ Nach lokaler Änderung Konfigurationscache erneuern. Zugangsdaten gehören niema
 
 Der vorhandene Scheduler führt jede Minute `reservation:notifications` aus. Pro Restaurant und Lauf werden höchstens 20 fällige Ereignisse verarbeitet. Bestätigung/Änderung/Storno und Erinnerungen werden bei Buchungsereignissen in derselben Mandantendatenbank vorgemerkt. Veraltete Versionen, stornierte Erinnerungen und deaktivierte Kanäle werden verworfen. Aktivierung erzeugt keinen rückwirkenden Versand für Altbuchungen. Status „An Versanddienst übergeben“ ist kein Zustellnachweis.
 
-Ein Versandauftrag wird vor dem Netzwerkaufruf beansprucht. Nach Absturz oder unklarem Netzwerkfehler wird er nicht automatisch erneut gesendet; im Status bleibt „sending“ beziehungsweise „unknown“ zur manuellen Prüfung. Ein Zustell-Webhook, Wiederholungsassistent und ein Live-Test mit Kundenzugangsdaten stehen aus. Automatische Tests verwenden simulierte Versanddienste, keine echten Empfänger.
+Ein Versandauftrag wird vor dem Netzwerkaufruf beansprucht. Nach Absturz oder unklarem Netzwerkfehler wird er nicht automatisch erneut gesendet; im Status bleibt „sending“ beziehungsweise „unknown“ zur manuellen Prüfung. Signierte SMS-Zustellrückmeldungen und eine kontrollierte Wiederholung sind umgesetzt; siehe [Nachrichten](NACHRICHTEN.md). Der Live-Test mit Betreiberzugängen steht weiterhin aus. Automatische Tests verwenden simulierte Anbieter und einen lokalen SMTP-Testserver.
 
 ## Restaurantrollen über mehrere Mandanten verteilen
 
 Administration → Rollen & Rechte → Restaurantrollen verteilen erstellt eine neue Rolle mit denselben registrierten Restaurantrechten in bis zu 50 ausdrücklich ausgewählten Restaurants. Zunächst wird eine fünf Minuten gültige Einmal-Vorschau erzeugt. Die Erstellung verlangt Systemadministrator, Kennwort und frischen TOTP-Code. Alle Rollen entstehen gemeinsam in einer Plattform-Datenbanktransaktion. Gleichnamige Rollen führen zum Abbruch; bestehende Rechte und Benutzerzuordnungen werden nicht überschrieben. Die Restaurantleitung weist die neue Rolle anschließend ihrem Team zu. Der separate Modus „Bestehende Rollen synchronisieren“ ersetzt die Rechte gleichnamiger Rollen nach Vorschau der hinzugefügten/entfernten Rechte und betroffenen Benutzer. Versionskonflikte brechen die gesamte Anwendung ab. Organisationen und Unterorganisationen verwalten die Restaurantzuordnung getrennt von den Zugriffsrechten. Details: [Ausbaustufe](DESIGN-UND-RESTAURANT-AUSBAU.md).
+
+Aktuelle Downloadverfahren: [Server-PDF und Exporte](EXPORTE.md). Die verbindliche offene Liste steht in [RESTPUNKTE.md](RESTPUNKTE.md).

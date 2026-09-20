@@ -24,7 +24,141 @@
       "exposure": "external",
       "scope": "platform:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tenants_total": {
+                      "type": "integer"
+                    },
+                    "tenants_active": {
+                      "type": "integer"
+                    },
+                    "tenants_pending": {
+                      "type": "integer"
+                    },
+                    "users_total": {
+                      "type": "integer"
+                    },
+                    "open_tickets": {
+                      "type": "integer"
+                    },
+                    "recent_audit": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "tenant_id": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "user_id": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "event": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "target": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "ip": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "created_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "tenants_total",
+                    "tenants_active",
+                    "tenants_pending",
+                    "users_total",
+                    "open_tickets",
+                    "recent_audit"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "tenants_total": 1,
+                  "tenants_active": 1,
+                  "tenants_pending": 1,
+                  "users_total": 1,
+                  "open_tickets": 1,
+                  "recent_audit": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "5aa901fd2fa16bd9e5c39436791e38d22a4820e4972e5075b844a7b5e4c86801"
+      }
     },
     {
       "id": "platform.get.admin_health",
@@ -35,7 +169,117 @@
       "exposure": "external",
       "scope": "platform:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "version": {
+                      "type": "string"
+                    },
+                    "php": {
+                      "type": "string"
+                    },
+                    "database": {
+                      "type": "string"
+                    },
+                    "latency_ms": {
+                      "type": "number"
+                    },
+                    "queued_jobs": {
+                      "type": "integer"
+                    },
+                    "failed_jobs": {
+                      "type": "integer"
+                    },
+                    "mail_configured": {
+                      "type": "boolean"
+                    },
+                    "scheduler_last_seen": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "migrations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "migration": {
+                            "type": "string"
+                          },
+                          "batch": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "version",
+                    "php",
+                    "database",
+                    "latency_ms",
+                    "queued_jobs",
+                    "failed_jobs",
+                    "mail_configured",
+                    "scheduler_last_seen",
+                    "migrations"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "version": "Beispiel",
+                  "php": "Beispiel",
+                  "database": "Beispiel",
+                  "latency_ms": 1,
+                  "queued_jobs": 1,
+                  "failed_jobs": 1,
+                  "mail_configured": true,
+                  "scheduler_last_seen": "Beispiel",
+                  "migrations": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "5aa901fd2fa16bd9e5c39436791e38d22a4820e4972e5075b844a7b5e4c86801"
+      }
     },
     {
       "id": "platform.get.admin_mail_settings",
@@ -46,7 +290,81 @@
       "exposure": "external",
       "scope": "platform:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "host": {
+                      "type": "string"
+                    },
+                    "port": {
+                      "type": "integer"
+                    },
+                    "security": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "password_set": {
+                      "type": "boolean"
+                    },
+                    "from_address": {
+                      "type": "string"
+                    },
+                    "from_name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "676bc9ac87372693d7ad4af80df8f3899b3564906f1a5a76ba40791bbaa4f0ba"
+      }
     },
     {
       "id": "platform.put.admin_mail_settings",
@@ -57,7 +375,186 @@
       "exposure": "external",
       "scope": "platform:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            },
+            "host": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:253",
+                "regex:/^[a-zA-Z0-9][a-zA-Z0-9.\\-]*$/D"
+              ],
+              "maxLength": 253
+            },
+            "port": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "between:1,65535"
+              ],
+              "minimum": 1,
+              "maximum": 65535
+            },
+            "security": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:starttls,tls,wpoven-test"
+              ],
+              "enum": [
+                "starttls",
+                "tls",
+                "wpoven-test"
+              ]
+            },
+            "username": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "string",
+                "max:254"
+              ],
+              "maxLength": 254
+            },
+            "password": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "string",
+                "max:1024"
+              ],
+              "maxLength": 1024,
+              "writeOnly": true
+            },
+            "clear_password": {
+              "type": "boolean",
+              "x-validation": [
+                "sometimes",
+                "boolean"
+              ]
+            },
+            "from_address": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "email",
+                "max:254"
+              ],
+              "format": "email",
+              "maxLength": 254
+            },
+            "from_name": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:120"
+              ],
+              "maxLength": 120
+            }
+          },
+          "required": [
+            "enabled",
+            "host",
+            "port",
+            "security",
+            "from_address",
+            "from_name"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "enabled": true,
+            "host": "Beispiel",
+            "port": 1,
+            "security": "starttls",
+            "from_address": "kontakt@example.test",
+            "from_name": "Beispiel"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "host": {
+                      "type": "string"
+                    },
+                    "port": {
+                      "type": "integer"
+                    },
+                    "security": {
+                      "type": "string"
+                    },
+                    "username": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "password_set": {
+                      "type": "boolean"
+                    },
+                    "from_address": {
+                      "type": "string"
+                    },
+                    "from_name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "676bc9ac87372693d7ad4af80df8f3899b3564906f1a5a76ba40791bbaa4f0ba"
+      }
     },
     {
       "id": "platform.post.admin_mail_settings_send_test",
@@ -68,7 +565,76 @@
       "exposure": "external",
       "scope": "platform:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            }
+          },
+          "required": [
+            "confirmed"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "confirmed": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "message": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "676bc9ac87372693d7ad4af80df8f3899b3564906f1a5a76ba40791bbaa4f0ba"
+      }
     },
     {
       "id": "platform.post.admin_mail_settings_test",
@@ -79,7 +645,57 @@
       "exposure": "external",
       "scope": "platform:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "message": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "676bc9ac87372693d7ad4af80df8f3899b3564906f1a5a76ba40791bbaa4f0ba"
+      }
     },
     {
       "id": "platform.get.admin_module_updates",
@@ -90,7 +706,190 @@
       "exposure": "external",
       "scope": "platform:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "repositories": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                              "installed": {
+                                "type": "string"
+                              },
+                              "versions": {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                      "type": "object",
+                                      "properties": {
+                                        "commit": {
+                                          "type": "string"
+                                        },
+                                        "packages": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "object",
+                                            "properties": {
+                                              "name": {
+                                                "type": "string"
+                                              },
+                                              "version": {
+                                                "type": "string"
+                                              },
+                                              "kind": {
+                                                "type": "string"
+                                              },
+                                              "source": {
+                                                "type": "string"
+                                              },
+                                              "target": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [],
+                                            "additionalProperties": true
+                                          }
+                                        }
+                                      },
+                                      "required": [
+                                        "commit",
+                                        "packages"
+                                      ],
+                                      "additionalProperties": true
+                                    }
+                                  },
+                                  {
+                                    "type": "array",
+                                    "maxItems": 0,
+                                    "items": {}
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [],
+                            "additionalProperties": true
+                          }
+                        },
+                        {
+                          "type": "array",
+                          "maxItems": 0,
+                          "items": {}
+                        }
+                      ]
+                    },
+                    "github_configured": {
+                      "type": "boolean"
+                    },
+                    "reader_configured": {
+                      "type": "boolean"
+                    },
+                    "pipeline_configured": {
+                      "type": "boolean"
+                    },
+                    "registry_url": {
+                      "type": "string"
+                    },
+                    "builds": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "run_id": {
+                            "anyOf": [
+                              {
+                                "type": [
+                                  "string",
+                                  "integer"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "release_tag": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "created_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "repositories",
+                    "github_configured",
+                    "reader_configured",
+                    "pipeline_configured",
+                    "registry_url",
+                    "builds"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "repositories": {},
+                  "github_configured": true,
+                  "reader_configured": true,
+                  "pipeline_configured": true,
+                  "registry_url": "Beispiel",
+                  "builds": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "152f775b738347ead401fa55274668c9c51ad001905476e119bca15e52438a36"
+      }
     },
     {
       "id": "platform.post.admin_module_updates_builds",
@@ -101,7 +900,140 @@
       "exposure": "external",
       "scope": "platform:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "password": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string"
+              ],
+              "writeOnly": true
+            },
+            "confirmation": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            },
+            "selection": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "maxLength": 30
+              },
+              "minProperties": 1
+            },
+            "request_id": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "uuid"
+              ],
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "password",
+            "confirmation",
+            "selection",
+            "request_id"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "password": "Beispiel",
+            "confirmation": true,
+            "selection": {
+              "platzhirsch-module-host": "0.1.3"
+            },
+            "request_id": "00000000-0000-4000-8000-000000000001"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": "Beispiel",
+                  "status": "Beispiel"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": "Beispiel",
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "152f775b738347ead401fa55274668c9c51ad001905476e119bca15e52438a36"
+      }
     },
     {
       "id": "platform.post.admin_module_updates_builds_id_refresh",
@@ -112,7 +1044,91 @@
       "exposure": "external",
       "scope": "platform:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "run_id": {
+                      "anyOf": [
+                        {
+                          "type": [
+                            "string",
+                            "integer"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "release_tag": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "152f775b738347ead401fa55274668c9c51ad001905476e119bca15e52438a36"
+      }
     },
     {
       "id": "platform.post.admin_module_updates_builds_id_stage",
@@ -123,7 +1139,127 @@
       "exposure": "external",
       "scope": "platform:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "password": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string"
+              ],
+              "writeOnly": true
+            },
+            "confirmation": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            }
+          },
+          "required": [
+            "password",
+            "confirmation"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "password": "Beispiel",
+            "confirmation": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": "Beispiel",
+                  "status": "Beispiel"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": "Beispiel",
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "152f775b738347ead401fa55274668c9c51ad001905476e119bca15e52438a36"
+      }
     },
     {
       "id": "platform.post.admin_module_updates_preview",
@@ -134,7 +1270,128 @@
       "exposure": "external",
       "scope": "platform:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "selection": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "maxLength": 30
+              },
+              "minProperties": 1
+            }
+          },
+          "required": [
+            "selection"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "selection": {
+              "platzhirsch-module-host": "0.1.3"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "compatible": {
+                      "type": "boolean"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "selection": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "version": {
+                            "type": "string"
+                          },
+                          "commit": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "version",
+                          "commit"
+                        ],
+                        "additionalProperties": true
+                      }
+                    },
+                    "packages": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "target": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "compatible",
+                    "errors",
+                    "selection",
+                    "packages"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "compatible": true,
+                  "errors": [],
+                  "selection": {},
+                  "packages": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "152f775b738347ead401fa55274668c9c51ad001905476e119bca15e52438a36"
+      }
     },
     {
       "id": "platform.put.admin_module_updates_settings",
@@ -145,7 +1402,132 @@
       "exposure": "external",
       "scope": "platform:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "password": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string"
+              ],
+              "writeOnly": true
+            },
+            "confirmation": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            },
+            "github_token": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "string",
+                "max:1024"
+              ],
+              "maxLength": 1024,
+              "writeOnly": true
+            },
+            "clear_token": {
+              "type": "boolean",
+              "x-validation": [
+                "sometimes",
+                "boolean"
+              ]
+            },
+            "configure_pipeline": {
+              "type": "boolean",
+              "x-validation": [
+                "sometimes",
+                "boolean"
+              ]
+            },
+            "rotate_reader": {
+              "type": "boolean",
+              "x-validation": [
+                "sometimes",
+                "boolean"
+              ]
+            }
+          },
+          "required": [
+            "password",
+            "confirmation"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "password": "Beispiel",
+            "confirmation": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "saved": {
+                      "type": "boolean"
+                    },
+                    "reader_token": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "saved",
+                    "reader_token"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "saved": true,
+                  "reader_token": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "152f775b738347ead401fa55274668c9c51ad001905476e119bca15e52438a36"
+      }
     },
     {
       "id": "platform.post.admin_module_updates_sync",
@@ -156,7 +1538,70 @@
       "exposure": "external",
       "scope": "platform:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "repository": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:100"
+              ],
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "repository"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "repository": "Beispiel"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "repository": {
+                      "type": "string"
+                    },
+                    "added": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "152f775b738347ead401fa55274668c9c51ad001905476e119bca15e52438a36"
+      }
     },
     {
       "id": "platform.get.admin_modules",
@@ -167,7 +1612,76 @@
       "exposure": "external",
       "scope": "platform:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "string"
+                      },
+                      "prefix": {
+                        "type": "string"
+                      },
+                      "dependencies": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "string"
+                            }
+                          },
+                          {
+                            "type": "array",
+                            "maxItems": 0,
+                            "items": {}
+                          }
+                        ]
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  }
+                },
+                "example": []
+              }
+            }
+          }
+        }
+      }
     },
     {
       "id": "platform.get.admin_operations",
@@ -178,7 +1692,101 @@
       "exposure": "external",
       "scope": "platform:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "tenant_id": {
+                        "type": "integer"
+                      },
+                      "kind": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "target_server_id": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "module_code": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "error_code": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  }
+                },
+                "example": []
+              }
+            }
+          }
+        },
+        "source_sha256": "7dbce988eda4f83cebf206aa517821de21cbce35c4a92a1bd9474f2a94e66a65"
+      }
     },
     {
       "id": "platform.get.admin_permissions_families",
@@ -189,7 +1797,67 @@
       "exposure": "external",
       "scope": "platform:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "scope": {
+                        "type": "string"
+                      },
+                      "module": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  }
+                },
+                "example": []
+              }
+            }
+          }
+        }
+      }
     },
     {
       "id": "platform.get.admin_registration_settings",
@@ -200,7 +1868,74 @@
       "exposure": "external",
       "scope": "platform:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "privacy_url": {
+                      "type": "string"
+                    },
+                    "imprint_url": {
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "https_ready": {
+                      "type": "boolean"
+                    },
+                    "smtp_ready": {
+                      "type": "boolean"
+                    },
+                    "public_url": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "f90de6ab03dacd4da9831d2e2143aaeb09bf5b8d30243b80b6ffbcf1dd42877b"
+      }
     },
     {
       "id": "platform.put.admin_registration_settings",
@@ -211,7 +1946,121 @@
       "exposure": "external",
       "scope": "platform:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            },
+            "privacy_url": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "url:https",
+                "max:1000"
+              ],
+              "format": "uri",
+              "maxLength": 1000
+            },
+            "imprint_url": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "url:https",
+                "max:1000"
+              ],
+              "format": "uri",
+              "maxLength": 1000
+            },
+            "revision": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:0"
+              ],
+              "minimum": 0
+            }
+          },
+          "required": [
+            "enabled",
+            "privacy_url",
+            "imprint_url",
+            "revision"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "enabled": true,
+            "privacy_url": "https://example.test",
+            "imprint_url": "https://example.test",
+            "revision": 1
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "privacy_url": {
+                      "type": "string"
+                    },
+                    "imprint_url": {
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "https_ready": {
+                      "type": "boolean"
+                    },
+                    "smtp_ready": {
+                      "type": "boolean"
+                    },
+                    "public_url": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "f90de6ab03dacd4da9831d2e2143aaeb09bf5b8d30243b80b6ffbcf1dd42877b"
+      }
     },
     {
       "id": "platform.get.admin_system_operations",
@@ -222,7 +2071,110 @@
       "exposure": "external",
       "scope": "platform:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "backups": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "path": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "packages": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "jobs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "57a86bc598656e7cf917541999d13d37d8fb3626fdcfe3a2adb9b0770ed7441e"
+      }
     },
     {
       "id": "platform.post.admin_system_operations",
@@ -233,7 +2185,155 @@
       "exposure": "external",
       "scope": "platform:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:backup,verify,restore,rollback,update,check"
+              ],
+              "enum": [
+                "backup",
+                "verify",
+                "restore",
+                "rollback",
+                "update",
+                "check"
+              ]
+            },
+            "target": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "regex:/\\A[a-zA-Z0-9][a-zA-Z0-9_.-]{0,99}\\z/"
+              ]
+            },
+            "password": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string"
+              ],
+              "writeOnly": true
+            },
+            "confirmation": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            },
+            "request_id": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "uuid"
+              ],
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "action",
+            "password",
+            "confirmation",
+            "request_id"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "action": "backup",
+            "password": "Beispiel",
+            "confirmation": true,
+            "request_id": "00000000-0000-4000-8000-000000000001"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": "Beispiel",
+                  "status": "Beispiel"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": "Beispiel",
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "57a86bc598656e7cf917541999d13d37d8fb3626fdcfe3a2adb9b0770ed7441e"
+      }
     },
     {
       "id": "platform.post.admin_tenant_moves",
@@ -244,7 +2344,219 @@
       "exposure": "external",
       "scope": "platform:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "tenants": {
+              "type": "array",
+              "x-validation": [
+                "required",
+                "array",
+                "min:1",
+                "max:50"
+              ],
+              "items": {
+                "type": "object",
+                "x-validation": [
+                  "array:id,placement_version"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "x-validation": [
+                      "required",
+                      "integer",
+                      "distinct",
+                      "min:1"
+                    ],
+                    "x-distinct": true,
+                    "minimum": 1
+                  },
+                  "placement_version": {
+                    "type": "integer",
+                    "x-validation": [
+                      "required",
+                      "integer",
+                      "min:1"
+                    ],
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "id",
+                  "placement_version"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 50
+            },
+            "target_server_id": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            },
+            "password": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string"
+              ],
+              "writeOnly": true
+            },
+            "code": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "digits:6"
+              ],
+              "pattern": "^[0-9]{6}$"
+            },
+            "backup_confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "accepted"
+              ]
+            },
+            "downtime_confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "accepted"
+              ]
+            }
+          },
+          "required": [
+            "tenants",
+            "password",
+            "code",
+            "backup_confirmed",
+            "downtime_confirmed"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "tenants": [
+              {
+                "id": 1,
+                "placement_version": 1
+              }
+            ],
+            "password": "Beispiel",
+            "code": "123456",
+            "backup_confirmed": true,
+            "downtime_confirmed": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "operations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "tenant_id": {
+                            "type": "integer"
+                          },
+                          "operation_id": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          },
+          "202": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "operations": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "tenant_id": {
+                            "type": "integer"
+                          },
+                          "operation_id": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "7dbce988eda4f83cebf206aa517821de21cbce35c4a92a1bd9474f2a94e66a65"
+      }
     },
     {
       "id": "platform.post.admin_tenants_tenant_move",
@@ -255,7 +2567,170 @@
       "exposure": "external",
       "scope": "platform:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "tenant": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "tenant"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "target_server_id": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "integer"
+              ]
+            },
+            "placement_version": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer"
+              ]
+            },
+            "password": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string"
+              ],
+              "writeOnly": true
+            },
+            "code": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "digits:6"
+              ],
+              "pattern": "^[0-9]{6}$"
+            },
+            "backup_confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "accepted"
+              ]
+            },
+            "downtime_confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "accepted"
+              ]
+            }
+          },
+          "required": [
+            "placement_version",
+            "password",
+            "code",
+            "backup_confirmed",
+            "downtime_confirmed"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "tenant": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "placement_version": 1,
+            "password": "Beispiel",
+            "code": "123456",
+            "backup_confirmed": true,
+            "downtime_confirmed": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "operation_id": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "operation_id",
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "operation_id": 1,
+                  "status": "Beispiel"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "operation_id": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "operation_id",
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "operation_id": 1,
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "7dbce988eda4f83cebf206aa517821de21cbce35c4a92a1bd9474f2a94e66a65"
+      }
     }
   ]
 }

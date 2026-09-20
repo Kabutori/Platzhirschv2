@@ -1,3 +1,4 @@
+import { ExportButtons } from '@platzhirsch/ui-runtime/exports';
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search } from 'lucide-react';
@@ -90,6 +91,7 @@ export function Tenants({ user }: { user: Row }) {
           Testrestaurant einrichten
         </button>
       </div>
+      <ExportButtons path="v1/admin/customer-exports" filename="kunden" background />
       <ErrorBox error={error} />
       {demoNotice && (
         <p className="notice">
