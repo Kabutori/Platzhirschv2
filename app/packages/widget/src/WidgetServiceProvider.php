@@ -27,7 +27,7 @@ class WidgetServiceProvider extends ServiceProvider implements Module
     }
     public function dependencies(): array
     {
-        return ['reservation' => '0.1.2'];
+        return ['reservation' => '0.1.3'];
     }
     public function optionalDependencies(): array
     {

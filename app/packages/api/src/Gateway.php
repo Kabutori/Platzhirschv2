@@ -38,7 +38,7 @@ class Gateway
     public function catalog(Request $r): array
     {
         return [
-            'version' => '1.0.0',
+            'version' => '1.1.0',
             'audience' => $r->attributes->get('api.token')->audience,
             'operations' => $this->catalog->visible($r->attributes->get('api.token'), $r->user()),
         ];
@@ -69,19 +69,17 @@ class Gateway
             }
             return $value;
         };
-        $this->db
-            ->table('api_confirmations')
-            ->insert([
-                'id' => $id,
-                'token_id' => $token->id,
-                'user_id' => $r->user()->id,
-                'operation' => $op['id'],
-                'request_hash' => $hash,
-                'preview' => json_encode($redact($d), JSON_THROW_ON_ERROR),
-                'expires_at' => now()->addMinutes(10),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+        $this->db->table('api_confirmations')->insert([
+            'id' => $id,
+            'token_id' => $token->id,
+            'user_id' => $r->user()->id,
+            'operation' => $op['id'],
+            'request_hash' => $hash,
+            'preview' => json_encode($redact($d), JSON_THROW_ON_ERROR),
+            'expires_at' => now()->addMinutes(10),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
         return [
             'id' => $id,
             'status' => 'pending',
@@ -173,17 +171,15 @@ class Gateway
                         ->update(['used_at' => now()]);
                 }
                 // Unique DB constraint claims the request before any tenant/provider side effect.
-                $inserted = $this->db
-                    ->table('api_requests')
-                    ->insertOrIgnore([
-                        'token_id' => $token->id,
-                        'request_key' => $key,
-                        'request_hash' => $hash,
-                        'status' => 'processing',
-                        'expires_at' => now()->addDay(),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+                $inserted = $this->db->table('api_requests')->insertOrIgnore([
+                    'token_id' => $token->id,
+                    'request_key' => $key,
+                    'request_hash' => $hash,
+                    'status' => 'processing',
+                    'expires_at' => now()->addDay(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
                 abort_unless($inserted, 409, 'Anfrage wird bereits verarbeitet.');
                 return $this->db
                     ->table('api_requests')
@@ -268,6 +264,64 @@ class Gateway
             $r->setRouteResolver($oldRoute);
         }
     }
+    private function errorResponses(): array
+    {
+        $schema = [
+            'type' => 'object',
+            'properties' => [
+                'type' => ['type' => 'string'],
+                'title' => ['type' => 'string'],
+                'status' => ['type' => 'integer'],
+                'request_id' => ['type' => 'string', 'format' => 'uuid'],
+                'errors' => [
+                    'type' => 'object',
+                    'additionalProperties' => ['type' => 'array', 'items' => ['type' => 'string']],
+                ],
+            ],
+            'required' => ['type', 'title', 'status', 'request_id'],
+        ];
+        $responses = [];
+        foreach (
+            [
+                400 => 'Ungültige Anfrage / HTTPS erforderlich',
+                401 => 'Token ungültig, gesperrt oder abgelaufen',
+                403 => 'Aktion, Konto, Mandant oder Modul nicht berechtigt',
+                404 => 'Ressource nicht vorhanden oder nicht sichtbar',
+                409 => 'Versionskonflikt, Idempotenzkonflikt oder laufender Auftrag',
+                410 => 'Export oder Idempotenzfenster abgelaufen',
+                415 => 'JSON erforderlich',
+                422 => 'Feld- oder Fachvalidierung fehlgeschlagen',
+                428 => 'Einmalige Freigabe fehlt',
+                429 => 'Anfragelimit erreicht',
+                500 => 'Interner Fehler',
+                503 => 'Dienst nicht verfügbar',
+            ]
+            as $code => $description
+        ) {
+            $responses[(string) $code] = [
+                'description' => $description,
+                'content' => [
+                    'application/problem+json' => [
+                        'schema' => $schema,
+                        'example' => [
+                            'type' => 'about:blank',
+                            'title' => $description,
+                            'status' => $code,
+                            'request_id' => '00000000-0000-4000-8000-000000000001',
+                        ],
+                    ],
+                    'application/json' => [
+                        'schema' => [
+                            'type' => 'object',
+                            'properties' => ['message' => ['type' => 'string']],
+                            'additionalProperties' => true,
+                        ],
+                    ],
+                ],
+            ];
+        }
+        return $responses;
+    }
     public function openapi(Request $r): array
     {
         $paths = [];
@@ -277,10 +331,18 @@ class Gateway
                     'name' => $name,
                     'in' => 'path',
                     'required' => true,
-                    'schema' => ['type' => 'string'],
+                    'schema' => $op['contract']['parameters']['properties'][$name],
                 ],
                 $op['parameters'],
             );
+            foreach ($op['contract']['query']['properties'] ?? [] as $name => $schema) {
+                $parameters[] = [
+                    'name' => $name,
+                    'in' => 'query',
+                    'required' => in_array($name, $op['contract']['query']['required'] ?? [], true),
+                    'schema' => $schema,
+                ];
+            }
             if ($op['method'] !== 'GET') {
                 $parameters[] = [
                     'name' => 'Idempotency-Key',
@@ -310,17 +372,15 @@ class Gateway
                     $op['uri'] .
                     '.',
                 'parameters' => $parameters,
-                'responses' => [
-                    '200' => ['description' => 'Fachantwort (JSON oder Download entsprechend Operation)'],
-                    'default' => ['description' => 'Validierungs-, Berechtigungs- oder Fachfehler'],
-                ],
+                'responses' => $op['contract']['responses'] + $this->errorResponses(),
                 ...$op['method'] !== 'GET'
                     ? [
                         'requestBody' => [
                             'required' => true,
                             'content' => [
                                 'application/json' => [
-                                    'schema' => ['type' => 'object', 'additionalProperties' => true],
+                                    'schema' => $op['contract']['body'],
+                                    'example' => $op['contract']['example']['body'] ?: (object) [],
                                 ],
                             ],
                         ],
@@ -330,7 +390,7 @@ class Gateway
         }
         return [
             'openapi' => '3.1.0',
-            'info' => ['title' => 'Platzhirsch Modul-API', 'version' => '1.0.0'],
+            'info' => ['title' => 'Platzhirsch Modul-API', 'version' => '1.1.0'],
             'security' => [['bearerToken' => []]],
             'paths' => $paths,
             'components' => [

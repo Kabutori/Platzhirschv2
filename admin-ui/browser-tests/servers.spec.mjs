@@ -56,3 +56,42 @@ test('server checks report failure and editing never preloads a password', async
   expect(requests[1].password).toBe('');
   expect(requests[1].version).toBe(1);
 });
+test('large server export runs in the background and offers the private download', async ({ page }) => {
+  await mock(page);
+  let submitted;
+  await page.route('**/api/v1/admin/server-exports**', async (route) => {
+    const request = route.request(),
+      path = new URL(request.url()).pathname;
+    if (request.method() === 'POST') {
+      submitted = request.postDataJSON();
+      await route.fulfill({
+        status: 202,
+        contentType: 'application/json',
+        body: JSON.stringify({ id: 'export-1', status: 'queued', format: 'csv' }),
+      });
+    } else if (path.endsWith('/download'))
+      await route.fulfill({ contentType: 'text/csv', body: 'ID;Name\n1;EU Test\n' });
+    else
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ id: 'export-1', status: 'completed', rows: 1, format: 'csv' }),
+      });
+  });
+  await page.goto('/administration/login');
+  await page.getByRole('button', { name: 'System-Einstellungen', exact: true }).click();
+  await page.getByRole('button', { name: 'Datenbankserver', exact: true }).click();
+  await page.getByRole('button', { name: 'Großen CSV-Export im Hintergrund erstellen' }).click();
+  await expect(page.getByRole('button', { name: 'Fertigen Export herunterladen' })).toBeVisible({
+    timeout: 10000,
+  });
+  expect(submitted).toEqual({ format: 'csv' });
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Fertigen Export herunterladen' }).click();
+  expect((await download).suggestedFilename()).toBe('server.csv');
+  await page.reload();
+  await page.getByRole('button', { name: 'System-Einstellungen', exact: true }).click();
+  await page.getByRole('button', { name: 'Datenbankserver', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Fertigen Export herunterladen' })).toBeVisible({
+    timeout: 10000,
+  });
+});

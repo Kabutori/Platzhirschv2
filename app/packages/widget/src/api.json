@@ -12,7 +12,93 @@
       "exposure": "external",
       "scope": "widget:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "origins": {
+                        "type": "string"
+                      },
+                      "expires_at": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "duration_minutes": {
+                        "type": "integer"
+                      },
+                      "accent": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "language": {
+                        "type": "string"
+                      },
+                      "position": {
+                        "type": "string"
+                      },
+                      "max_party_size": {
+                        "type": "integer"
+                      },
+                      "show_brand": {
+                        "type": [
+                          "boolean",
+                          "integer"
+                        ]
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  }
+                },
+                "example": []
+              }
+            }
+          }
+        },
+        "source_sha256": "0867cac006710b0ac3e36d9ce4894256199738148b1c7d7ea3f2af34ac9243b3"
+      }
     },
     {
       "id": "widget.post.restaurant_widget",
@@ -23,7 +109,214 @@
       "exposure": "external",
       "scope": "widget:write",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "origins": {
+              "type": "array",
+              "x-validation": [
+                "required",
+                "array",
+                "min:1",
+                "max:10"
+              ],
+              "items": {
+                "type": "string",
+                "x-validation": [
+                  "required",
+                  "url:http,https",
+                  "max:250"
+                ],
+                "format": "uri",
+                "maxLength": 250
+              },
+              "minItems": 1,
+              "maxItems": 10
+            },
+            "months": {
+              "type": "integer",
+              "x-validation": [
+                "sometimes",
+                "integer",
+                "min:1",
+                "max:12"
+              ],
+              "minimum": 1,
+              "maximum": 12
+            },
+            "language": {
+              "type": "string",
+              "x-validation": [
+                "sometimes",
+                "in:de,en"
+              ],
+              "enum": [
+                "de",
+                "en"
+              ]
+            },
+            "position": {
+              "type": "string",
+              "x-validation": [
+                "sometimes",
+                "in:inline,bottom-right,bottom-left,top-right,top-left"
+              ],
+              "enum": [
+                "inline",
+                "bottom-right",
+                "bottom-left",
+                "top-right",
+                "top-left"
+              ]
+            },
+            "max_party_size": {
+              "type": "integer",
+              "x-validation": [
+                "sometimes",
+                "integer",
+                "min:1",
+                "max:50"
+              ],
+              "minimum": 1,
+              "maximum": 50
+            },
+            "show_brand": {
+              "type": "boolean",
+              "x-validation": [
+                "sometimes",
+                "boolean"
+              ]
+            },
+            "duration_minutes": {
+              "type": "integer",
+              "x-validation": [
+                "sometimes",
+                "integer",
+                "min:30",
+                "max:240",
+                "multiple_of:15"
+              ],
+              "minimum": 30,
+              "maximum": 240,
+              "multipleOf": 15
+            },
+            "accent": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "regex:/^#[a-fA-F0-9]{6}$/D"
+              ]
+            }
+          },
+          "required": [
+            "origins"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "origins": [
+              "https://example.test"
+            ]
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "embed": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "token",
+                    "url",
+                    "embed"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": "Beispiel",
+                  "token": "Beispiel",
+                  "url": "Beispiel",
+                  "embed": "Beispiel"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "embed": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "token",
+                    "url",
+                    "embed"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": "Beispiel",
+                  "token": "Beispiel",
+                  "url": "Beispiel",
+                  "embed": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "0867cac006710b0ac3e36d9ce4894256199738148b1c7d7ea3f2af34ac9243b3"
+      }
     },
     {
       "id": "widget.patch.restaurant_widget_id",
@@ -34,7 +327,150 @@
       "exposure": "external",
       "scope": "widget:write",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "duration_minutes": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:30",
+                "max:240",
+                "multiple_of:15"
+              ],
+              "minimum": 30,
+              "maximum": 240,
+              "multipleOf": 15
+            },
+            "accent": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "regex:/^#[a-fA-F0-9]{6}$/D"
+              ]
+            },
+            "language": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:de,en"
+              ],
+              "enum": [
+                "de",
+                "en"
+              ]
+            },
+            "position": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:inline,bottom-right,bottom-left,top-right,top-left"
+              ],
+              "enum": [
+                "inline",
+                "bottom-right",
+                "bottom-left",
+                "top-right",
+                "top-left"
+              ]
+            },
+            "max_party_size": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:1",
+                "max:50"
+              ],
+              "minimum": 1,
+              "maximum": 50
+            },
+            "show_brand": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            }
+          },
+          "required": [
+            "duration_minutes",
+            "language",
+            "position",
+            "max_party_size",
+            "show_brand"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "duration_minutes": 30,
+            "language": "de",
+            "position": "inline",
+            "max_party_size": 1,
+            "show_brand": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "updated": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "updated"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": "Beispiel",
+                  "updated": true
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "0867cac006710b0ac3e36d9ce4894256199738148b1c7d7ea3f2af34ac9243b3"
+      }
     },
     {
       "id": "widget.delete.restaurant_widget_id",
@@ -45,7 +481,47 @@
       "exposure": "external",
       "scope": "widget:write",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "204": {
+            "description": "Erfolgreich; kein Antwortkörper."
+          }
+        },
+        "source_sha256": "0867cac006710b0ac3e36d9ce4894256199738148b1c7d7ea3f2af34ac9243b3"
+      }
     },
     {
       "id": "widget.get.api_widget_token",

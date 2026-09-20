@@ -12,7 +12,164 @@
       "exposure": "external",
       "scope": "billing:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "products": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "module_code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "amount_cents": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "currency": {
+                            "type": "string"
+                          },
+                          "available": {
+                            "type": [
+                              "boolean",
+                              "integer"
+                            ]
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "orders": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "tenant_id": {
+                            "type": "integer"
+                          },
+                          "module_code": {
+                            "type": "string"
+                          },
+                          "amount_cents": {
+                            "type": "integer"
+                          },
+                          "currency": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "request_key": {
+                            "type": "string"
+                          },
+                          "payment_reference": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "period_start": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "period_end": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "products",
+                    "orders"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "products": [],
+                  "orders": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "03562fb6ada079b675dc780ccd197d5f8b561e4a4101025e414693f673c3ea73"
+      }
     },
     {
       "id": "billing.get.admin_billing_automation",
@@ -23,7 +180,362 @@
       "exposure": "external",
       "scope": "billing:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "page": {
+              "type": "integer",
+              "x-validation": [
+                "sometimes",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "settings": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "live": {
+                          "type": "boolean"
+                        },
+                        "send_invoices": {
+                          "type": "boolean"
+                        },
+                        "send_reminders": {
+                          "type": "boolean"
+                        },
+                        "reminder_days": {
+                          "type": "integer"
+                        },
+                        "revision": {
+                          "type": "integer"
+                        },
+                        "configured": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": true
+                    },
+                    "subscriptions": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "tenant_id": {
+                                "type": "integer"
+                              },
+                              "module_code": {
+                                "type": "string"
+                              },
+                              "amount_cents": {
+                                "type": "integer"
+                              },
+                              "state": {
+                                "type": "string"
+                              },
+                              "live": {
+                                "type": [
+                                  "boolean",
+                                  "integer"
+                                ]
+                              },
+                              "cancel_at_period_end": {
+                                "type": [
+                                  "boolean",
+                                  "integer"
+                                ]
+                              },
+                              "period_end": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "synced_at": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "sync_error": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [],
+                            "additionalProperties": true
+                          }
+                        },
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        },
+                        "per_page": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "to": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "first_page_url": {
+                          "type": "string"
+                        },
+                        "last_page_url": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "prev_page_url": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [],
+                            "additionalProperties": true
+                          }
+                        }
+                      },
+                      "required": [
+                        "data",
+                        "current_page",
+                        "last_page",
+                        "per_page",
+                        "total",
+                        "from",
+                        "to",
+                        "first_page_url",
+                        "last_page_url",
+                        "next_page_url",
+                        "prev_page_url",
+                        "path",
+                        "links"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "deliveries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "invoice_id": {
+                            "type": "integer"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "recipient": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "attempts": {
+                            "type": "integer"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "products": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "module_code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "amount_cents": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "currency": {
+                            "type": "string"
+                          },
+                          "available": {
+                            "type": [
+                              "boolean",
+                              "integer"
+                            ]
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "settings",
+                    "subscriptions",
+                    "deliveries",
+                    "products"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "settings": {},
+                  "subscriptions": {
+                    "data": [],
+                    "current_page": 1,
+                    "last_page": 1,
+                    "per_page": 1,
+                    "total": 1,
+                    "from": 1,
+                    "to": 1,
+                    "first_page_url": "Beispiel",
+                    "last_page_url": "Beispiel",
+                    "next_page_url": "Beispiel",
+                    "prev_page_url": "Beispiel",
+                    "path": "Beispiel",
+                    "links": []
+                  },
+                  "deliveries": [],
+                  "products": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "4cb4f01a841e5e7869bde626a77eb8da013e4a7abea3c4aca749d269c67921d4"
+      }
     },
     {
       "id": "billing.put.admin_billing_automation",
@@ -34,7 +546,172 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            },
+            "live": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            },
+            "send_invoices": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            },
+            "send_reminders": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            },
+            "reminder_days": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:3",
+                "max:60"
+              ],
+              "minimum": 3,
+              "maximum": 60
+            },
+            "revision": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:0"
+              ],
+              "minimum": 0
+            },
+            "api_key": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "string",
+                "max:250"
+              ],
+              "maxLength": 250,
+              "writeOnly": true
+            },
+            "webhook_secret": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "string",
+                "max:250"
+              ],
+              "maxLength": 250,
+              "writeOnly": true
+            },
+            "password": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string"
+              ],
+              "writeOnly": true
+            },
+            "confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            }
+          },
+          "required": [
+            "enabled",
+            "live",
+            "send_invoices",
+            "send_reminders",
+            "reminder_days",
+            "revision",
+            "password",
+            "confirmed"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "enabled": true,
+            "live": true,
+            "send_invoices": true,
+            "send_reminders": true,
+            "reminder_days": 3,
+            "revision": 1,
+            "password": "Beispiel",
+            "confirmed": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "4cb4f01a841e5e7869bde626a77eb8da013e4a7abea3c4aca749d269c67921d4"
+      }
     },
     {
       "id": "billing.post.admin_billing_automation_deliveries_id_retry",
@@ -45,7 +722,85 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            }
+          },
+          "required": [
+            "confirmed"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "confirmed": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "4cb4f01a841e5e7869bde626a77eb8da013e4a7abea3c4aca749d269c67921d4"
+      }
     },
     {
       "id": "billing.post.admin_billing_automation_documents_id_send",
@@ -56,7 +811,85 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            }
+          },
+          "required": [
+            "confirmed"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "confirmed": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "4cb4f01a841e5e7869bde626a77eb8da013e4a7abea3c4aca749d269c67921d4"
+      }
     },
     {
       "id": "billing.post.admin_billing_automation_run",
@@ -67,7 +900,57 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "4cb4f01a841e5e7869bde626a77eb8da013e4a7abea3c4aca749d269c67921d4"
+      }
     },
     {
       "id": "billing.get.admin_billing_documents",
@@ -78,7 +961,452 @@
       "exposure": "external",
       "scope": "billing:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "page": {
+              "type": "integer",
+              "x-validation": [
+                "sometimes",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "settings": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "street": {
+                          "type": "string"
+                        },
+                        "postal_code": {
+                          "type": "string"
+                        },
+                        "city": {
+                          "type": "string"
+                        },
+                        "country": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "tax_id": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "revision": {
+                          "type": "integer"
+                        },
+                        "tax_rate_bps": {
+                          "type": "integer"
+                        },
+                        "tax_note": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "payment_note": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": true
+                    },
+                    "invoices": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "tenant_id": {
+                                "type": "integer"
+                              },
+                              "order_id": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "original_id": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "number": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "total_cents": {
+                                "type": "integer"
+                              },
+                              "tax_cents": {
+                                "type": "integer"
+                              },
+                              "issued_at": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "created_at": {
+                                "type": "string"
+                              },
+                              "payment_status": {
+                                "type": "string"
+                              },
+                              "due_at": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "settled_at": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "provider_id": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [],
+                            "additionalProperties": true
+                          }
+                        },
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        },
+                        "per_page": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "to": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "first_page_url": {
+                          "type": "string"
+                        },
+                        "last_page_url": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "prev_page_url": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [],
+                            "additionalProperties": true
+                          }
+                        }
+                      },
+                      "required": [
+                        "data",
+                        "current_page",
+                        "last_page",
+                        "per_page",
+                        "total",
+                        "from",
+                        "to",
+                        "first_page_url",
+                        "last_page_url",
+                        "next_page_url",
+                        "prev_page_url",
+                        "path",
+                        "links"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "subscriptions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "tenant_id": {
+                            "type": "integer"
+                          },
+                          "module_code": {
+                            "type": "string"
+                          },
+                          "paid_until": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "profiles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "street": {
+                            "type": "string"
+                          },
+                          "postal_code": {
+                            "type": "string"
+                          },
+                          "city": {
+                            "type": "string"
+                          },
+                          "country": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          },
+                          "tax_id": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "revision": {
+                            "type": "integer"
+                          },
+                          "tax_rate_bps": {
+                            "type": "integer"
+                          },
+                          "tax_note": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "payment_note": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "settings",
+                    "invoices",
+                    "subscriptions",
+                    "profiles"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "settings": {},
+                  "invoices": {
+                    "data": [],
+                    "current_page": 1,
+                    "last_page": 1,
+                    "per_page": 1,
+                    "total": 1,
+                    "from": 1,
+                    "to": 1,
+                    "first_page_url": "Beispiel",
+                    "last_page_url": "Beispiel",
+                    "next_page_url": "Beispiel",
+                    "prev_page_url": "Beispiel",
+                    "path": "Beispiel",
+                    "links": []
+                  },
+                  "subscriptions": [],
+                  "profiles": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.delete.admin_billing_documents_id",
@@ -89,7 +1417,66 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.post.admin_billing_documents_id_cancel",
@@ -100,7 +1487,101 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "reason": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:500"
+              ],
+              "maxLength": 500
+            },
+            "confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            }
+          },
+          "required": [
+            "reason",
+            "confirmed"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "reason": "Beispiel",
+            "confirmed": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "number": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "number"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": 1,
+                  "number": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.post.admin_billing_documents_id_issue",
@@ -111,7 +1592,85 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            }
+          },
+          "required": [
+            "confirmed"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "confirmed": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "number"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "number": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.get.admin_billing_documents_id_pdf",
@@ -122,7 +1681,55 @@
       "exposure": "external",
       "scope": "billing:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Privater Download",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.get.admin_billing_documents_id_print",
@@ -133,7 +1740,55 @@
       "exposure": "external",
       "scope": "billing:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Privater Download",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.get.admin_billing_export",
@@ -144,7 +1799,75 @@
       "exposure": "external",
       "scope": "billing:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:csv,xlsx,pdf"
+              ],
+              "enum": [
+                "csv",
+                "xlsx",
+                "pdf"
+              ]
+            }
+          },
+          "required": [
+            "format"
+          ],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {
+            "format": "csv"
+          },
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Datei im angeforderten Format; PDF bis 500, direkte Tabellen bis 10.000 Datensätze.",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.post.admin_billing_orders_id_confirm",
@@ -155,7 +1878,95 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "payment_reference": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:120"
+              ],
+              "maxLength": 120
+            },
+            "payment_confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "accepted"
+              ]
+            }
+          },
+          "required": [
+            "payment_reference",
+            "payment_confirmed"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "payment_reference": "Beispiel",
+            "payment_confirmed": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "03562fb6ada079b675dc780ccd197d5f8b561e4a4101025e414693f673c3ea73"
+      }
     },
     {
       "id": "billing.post.admin_billing_orders_order_invoice",
@@ -166,7 +1977,113 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "order": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "order"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "service_start": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "date_format:Y-m-d"
+              ],
+              "format": "date"
+            },
+            "service_end": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "date_format:Y-m-d",
+                "after:service_start"
+              ],
+              "format": "date",
+              "description": "Zusätzliche Fachvalidierung: nullable, date_format:Y-m-d, after:service_start"
+            }
+          },
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "order": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": 1
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": 1
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.patch.admin_billing_products_code",
@@ -177,7 +2094,91 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "code"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "amount_cents": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:0",
+                "max:1000000"
+              ],
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "available": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            }
+          },
+          "required": [
+            "amount_cents",
+            "available"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "code": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "amount_cents": 1,
+            "available": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "03562fb6ada079b675dc780ccd197d5f8b561e4a4101025e414693f673c3ea73"
+      }
     },
     {
       "id": "billing.put.admin_billing_profiles_tenant",
@@ -188,7 +2189,160 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "tenant": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "tenant"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:160"
+              ],
+              "maxLength": 160
+            },
+            "street": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:160"
+              ],
+              "maxLength": 160
+            },
+            "postal_code": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:20"
+              ],
+              "maxLength": 20
+            },
+            "city": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:100"
+              ],
+              "maxLength": 100
+            },
+            "country": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:DE"
+              ],
+              "enum": [
+                "DE"
+              ]
+            },
+            "email": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "email",
+                "max:190"
+              ],
+              "format": "email",
+              "maxLength": 190
+            },
+            "tax_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "string",
+                "max:80"
+              ],
+              "maxLength": 80
+            },
+            "revision": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:0"
+              ],
+              "minimum": 0
+            }
+          },
+          "required": [
+            "name",
+            "street",
+            "postal_code",
+            "city",
+            "country",
+            "email",
+            "revision"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "tenant": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "name": "Beispiel",
+            "street": "Beispiel",
+            "postal_code": "Beispiel",
+            "city": "Beispiel",
+            "country": "DE",
+            "email": "kontakt@example.test",
+            "revision": 1
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.put.admin_billing_settings",
@@ -199,7 +2353,189 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:160"
+              ],
+              "maxLength": 160
+            },
+            "street": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:160"
+              ],
+              "maxLength": 160
+            },
+            "postal_code": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:20"
+              ],
+              "maxLength": 20
+            },
+            "city": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:100"
+              ],
+              "maxLength": 100
+            },
+            "country": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:DE"
+              ],
+              "enum": [
+                "DE"
+              ]
+            },
+            "email": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "email",
+                "max:190"
+              ],
+              "format": "email",
+              "maxLength": 190
+            },
+            "tax_id": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:80"
+              ],
+              "maxLength": 80
+            },
+            "tax_rate_bps": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "in:0,700,1900"
+              ],
+              "enum": [
+                0,
+                700,
+                1900
+              ]
+            },
+            "tax_note": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "string",
+                "max:250"
+              ],
+              "maxLength": 250
+            },
+            "payment_note": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "string",
+                "max:500"
+              ],
+              "maxLength": 500
+            },
+            "revision": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:0"
+              ],
+              "minimum": 0
+            }
+          },
+          "required": [
+            "name",
+            "street",
+            "postal_code",
+            "city",
+            "country",
+            "email",
+            "tax_id",
+            "tax_rate_bps",
+            "revision"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "name": "Beispiel",
+            "street": "Beispiel",
+            "postal_code": "Beispiel",
+            "city": "Beispiel",
+            "country": "DE",
+            "email": "kontakt@example.test",
+            "tax_id": "Beispiel",
+            "tax_rate_bps": 0,
+            "revision": 1
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.post.billing_stripe_webhook",
@@ -222,7 +2558,386 @@
       "exposure": "external",
       "scope": "billing:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "page": {
+              "type": "integer",
+              "x-validation": [
+                "sometimes",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "profile": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "street": {
+                          "type": "string"
+                        },
+                        "postal_code": {
+                          "type": "string"
+                        },
+                        "city": {
+                          "type": "string"
+                        },
+                        "country": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "tax_id": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "revision": {
+                          "type": "integer"
+                        },
+                        "tax_rate_bps": {
+                          "type": "integer"
+                        },
+                        "tax_note": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "payment_note": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": true
+                    },
+                    "invoices": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "tenant_id": {
+                                "type": "integer"
+                              },
+                              "order_id": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "original_id": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "number": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "total_cents": {
+                                "type": "integer"
+                              },
+                              "tax_cents": {
+                                "type": "integer"
+                              },
+                              "issued_at": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "created_at": {
+                                "type": "string"
+                              },
+                              "payment_status": {
+                                "type": "string"
+                              },
+                              "due_at": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "settled_at": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "provider_id": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [],
+                            "additionalProperties": true
+                          }
+                        },
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        },
+                        "per_page": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "to": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "first_page_url": {
+                          "type": "string"
+                        },
+                        "last_page_url": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "prev_page_url": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [],
+                            "additionalProperties": true
+                          }
+                        }
+                      },
+                      "required": [
+                        "data",
+                        "current_page",
+                        "last_page",
+                        "per_page",
+                        "total",
+                        "from",
+                        "to",
+                        "first_page_url",
+                        "last_page_url",
+                        "next_page_url",
+                        "prev_page_url",
+                        "path",
+                        "links"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "subscriptions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "tenant_id": {
+                            "type": "integer"
+                          },
+                          "module_code": {
+                            "type": "string"
+                          },
+                          "paid_until": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "profile",
+                    "invoices",
+                    "subscriptions"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "profile": {},
+                  "invoices": {
+                    "data": [],
+                    "current_page": 1,
+                    "last_page": 1,
+                    "per_page": 1,
+                    "total": 1,
+                    "from": 1,
+                    "to": 1,
+                    "first_page_url": "Beispiel",
+                    "last_page_url": "Beispiel",
+                    "next_page_url": "Beispiel",
+                    "prev_page_url": "Beispiel",
+                    "path": "Beispiel",
+                    "links": []
+                  },
+                  "subscriptions": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.get.restaurant_billing_automation",
@@ -233,7 +2948,362 @@
       "exposure": "external",
       "scope": "billing:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "page": {
+              "type": "integer",
+              "x-validation": [
+                "sometimes",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "settings": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "live": {
+                          "type": "boolean"
+                        },
+                        "send_invoices": {
+                          "type": "boolean"
+                        },
+                        "send_reminders": {
+                          "type": "boolean"
+                        },
+                        "reminder_days": {
+                          "type": "integer"
+                        },
+                        "revision": {
+                          "type": "integer"
+                        },
+                        "configured": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": true
+                    },
+                    "subscriptions": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "tenant_id": {
+                                "type": "integer"
+                              },
+                              "module_code": {
+                                "type": "string"
+                              },
+                              "amount_cents": {
+                                "type": "integer"
+                              },
+                              "state": {
+                                "type": "string"
+                              },
+                              "live": {
+                                "type": [
+                                  "boolean",
+                                  "integer"
+                                ]
+                              },
+                              "cancel_at_period_end": {
+                                "type": [
+                                  "boolean",
+                                  "integer"
+                                ]
+                              },
+                              "period_end": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "synced_at": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "sync_error": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [],
+                            "additionalProperties": true
+                          }
+                        },
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        },
+                        "per_page": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "to": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "first_page_url": {
+                          "type": "string"
+                        },
+                        "last_page_url": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "prev_page_url": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "active": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [],
+                            "additionalProperties": true
+                          }
+                        }
+                      },
+                      "required": [
+                        "data",
+                        "current_page",
+                        "last_page",
+                        "per_page",
+                        "total",
+                        "from",
+                        "to",
+                        "first_page_url",
+                        "last_page_url",
+                        "next_page_url",
+                        "prev_page_url",
+                        "path",
+                        "links"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "deliveries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "invoice_id": {
+                            "type": "integer"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "recipient": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "attempts": {
+                            "type": "integer"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "products": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "module_code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "amount_cents": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "currency": {
+                            "type": "string"
+                          },
+                          "available": {
+                            "type": [
+                              "boolean",
+                              "integer"
+                            ]
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "settings",
+                    "subscriptions",
+                    "deliveries",
+                    "products"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "settings": {},
+                  "subscriptions": {
+                    "data": [],
+                    "current_page": 1,
+                    "last_page": 1,
+                    "per_page": 1,
+                    "total": 1,
+                    "from": 1,
+                    "to": 1,
+                    "first_page_url": "Beispiel",
+                    "last_page_url": "Beispiel",
+                    "next_page_url": "Beispiel",
+                    "prev_page_url": "Beispiel",
+                    "path": "Beispiel",
+                    "links": []
+                  },
+                  "deliveries": [],
+                  "products": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "4cb4f01a841e5e7869bde626a77eb8da013e4a7abea3c4aca749d269c67921d4"
+      }
     },
     {
       "id": "billing.post.restaurant_billing_automation_checkout",
@@ -244,7 +3314,98 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "module_code": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:60"
+              ],
+              "maxLength": 60
+            },
+            "expected_amount_cents": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            },
+            "confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            }
+          },
+          "required": [
+            "module_code",
+            "expected_amount_cents",
+            "confirmed"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "module_code": "Beispiel",
+            "expected_amount_cents": 1,
+            "confirmed": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "url"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "url": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "4cb4f01a841e5e7869bde626a77eb8da013e4a7abea3c4aca749d269c67921d4"
+      }
     },
     {
       "id": "billing.post.restaurant_billing_automation_subscriptions_id_cancel",
@@ -255,7 +3416,85 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            }
+          },
+          "required": [
+            "confirmed"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "confirmed": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "4cb4f01a841e5e7869bde626a77eb8da013e4a7abea3c4aca749d269c67921d4"
+      }
     },
     {
       "id": "billing.post.restaurant_billing_automation_subscriptions_id_portal",
@@ -266,7 +3505,66 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "url"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "url": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "4cb4f01a841e5e7869bde626a77eb8da013e4a7abea3c4aca749d269c67921d4"
+      }
     },
     {
       "id": "billing.get.restaurant_billing_documents_id_pdf",
@@ -277,7 +3575,55 @@
       "exposure": "external",
       "scope": "billing:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Privater Download",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.get.restaurant_billing_documents_id_print",
@@ -288,7 +3634,55 @@
       "exposure": "external",
       "scope": "billing:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Privater Download",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.get.restaurant_billing_export",
@@ -299,7 +3693,75 @@
       "exposure": "external",
       "scope": "billing:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:csv,xlsx,pdf"
+              ],
+              "enum": [
+                "csv",
+                "xlsx",
+                "pdf"
+              ]
+            }
+          },
+          "required": [
+            "format"
+          ],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {
+            "format": "csv"
+          },
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Datei im angeforderten Format; PDF bis 500, direkte Tabellen bis 10.000 Datensätze.",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.put.restaurant_billing_profile",
@@ -310,7 +3772,151 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:160"
+              ],
+              "maxLength": 160
+            },
+            "street": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:160"
+              ],
+              "maxLength": 160
+            },
+            "postal_code": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:20"
+              ],
+              "maxLength": 20
+            },
+            "city": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:100"
+              ],
+              "maxLength": 100
+            },
+            "country": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:DE"
+              ],
+              "enum": [
+                "DE"
+              ]
+            },
+            "email": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "email",
+                "max:190"
+              ],
+              "format": "email",
+              "maxLength": 190
+            },
+            "tax_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "string",
+                "max:80"
+              ],
+              "maxLength": 80
+            },
+            "revision": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:0"
+              ],
+              "minimum": 0
+            }
+          },
+          "required": [
+            "name",
+            "street",
+            "postal_code",
+            "city",
+            "country",
+            "email",
+            "revision"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "name": "Beispiel",
+            "street": "Beispiel",
+            "postal_code": "Beispiel",
+            "city": "Beispiel",
+            "country": "DE",
+            "email": "kontakt@example.test",
+            "revision": 1
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c8d17489a61282151734898bdb915e68a4e13067f1684081cd157cc82629526f"
+      }
     },
     {
       "id": "billing.get.restaurant_modules",
@@ -321,7 +3927,210 @@
       "exposure": "external",
       "scope": "billing:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "products": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "module_code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "amount_cents": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "currency": {
+                            "type": "string"
+                          },
+                          "available": {
+                            "type": [
+                              "boolean",
+                              "integer"
+                            ]
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "orders": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "tenant_id": {
+                            "type": "integer"
+                          },
+                          "module_code": {
+                            "type": "string"
+                          },
+                          "amount_cents": {
+                            "type": "integer"
+                          },
+                          "currency": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "request_key": {
+                            "type": "string"
+                          },
+                          "payment_reference": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "period_start": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "period_end": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "entitlements": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "tenant_id": {
+                            "type": "integer"
+                          },
+                          "module_code": {
+                            "type": "string"
+                          },
+                          "paid_until": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "core_modules": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "payment_mode": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "products",
+                    "orders",
+                    "entitlements",
+                    "core_modules",
+                    "payment_mode"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "products": [],
+                  "orders": [],
+                  "entitlements": [],
+                  "core_modules": [],
+                  "payment_mode": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "03562fb6ada079b675dc780ccd197d5f8b561e4a4101025e414693f673c3ea73"
+      }
     },
     {
       "id": "billing.post.restaurant_modules_orders",
@@ -332,7 +4141,214 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "module_code": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:60"
+              ],
+              "maxLength": 60
+            },
+            "request_key": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "uuid"
+              ],
+              "format": "uuid"
+            },
+            "expected_amount_cents": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:0"
+              ],
+              "minimum": 0
+            }
+          },
+          "required": [
+            "module_code",
+            "request_key",
+            "expected_amount_cents"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "module_code": "Beispiel",
+            "request_key": "00000000-0000-4000-8000-000000000001",
+            "expected_amount_cents": 1
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "tenant_id": {
+                      "type": "integer"
+                    },
+                    "module_code": {
+                      "type": "string"
+                    },
+                    "amount_cents": {
+                      "type": "integer"
+                    },
+                    "currency": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "request_key": {
+                      "type": "string"
+                    },
+                    "payment_reference": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "period_start": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "period_end": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          },
+          "201": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "tenant_id": {
+                      "type": "integer"
+                    },
+                    "module_code": {
+                      "type": "string"
+                    },
+                    "amount_cents": {
+                      "type": "integer"
+                    },
+                    "currency": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "request_key": {
+                      "type": "string"
+                    },
+                    "payment_reference": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "period_start": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "period_end": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "03562fb6ada079b675dc780ccd197d5f8b561e4a4101025e414693f673c3ea73"
+      }
     },
     {
       "id": "billing.post.restaurant_modules_code_activation",
@@ -343,7 +4359,106 @@
       "exposure": "external",
       "scope": "billing:write",
       "confirmation": true,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "code"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            }
+          },
+          "required": [
+            "enabled"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "code": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "enabled": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "operation_id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "operation_id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "03562fb6ada079b675dc780ccd197d5f8b561e4a4101025e414693f673c3ea73"
+      }
     }
   ]
 }

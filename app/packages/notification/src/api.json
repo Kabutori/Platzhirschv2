@@ -12,7 +12,180 @@
       "exposure": "external",
       "scope": "notification:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "settings": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "email_enabled": {
+                              "type": [
+                                "boolean",
+                                "integer"
+                              ]
+                            },
+                            "sms_enabled": {
+                              "type": [
+                                "boolean",
+                                "integer"
+                              ]
+                            },
+                            "reminder_minutes": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [],
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "ready": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "boolean"
+                        },
+                        "sms": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "email",
+                        "sms"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "recent": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "reservation_id": {
+                            "type": "integer"
+                          },
+                          "version": {
+                            "type": "integer"
+                          },
+                          "channel": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "due_at": {
+                            "type": "string"
+                          },
+                          "processed_at": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "attempts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "event_id": {
+                            "type": "integer"
+                          },
+                          "channel": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "settings",
+                    "ready",
+                    "recent",
+                    "attempts"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "settings": {},
+                  "ready": {
+                    "email": true,
+                    "sms": true
+                  },
+                  "recent": [],
+                  "attempts": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "1afbc215e5b7edb1294ca11ae4ff652647c2e21552e470809a176439c520d86e"
+      }
     },
     {
       "id": "notification.patch.restaurant_notifications",
@@ -23,7 +196,361 @@
       "exposure": "external",
       "scope": "notification:write",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "email_enabled": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            },
+            "sms_enabled": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            },
+            "reminder_minutes": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:0",
+                "max:10080"
+              ],
+              "minimum": 0,
+              "maximum": 10080
+            }
+          },
+          "required": [
+            "email_enabled",
+            "sms_enabled",
+            "reminder_minutes"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "email_enabled": true,
+            "sms_enabled": true,
+            "reminder_minutes": 1
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "settings": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "email_enabled": {
+                              "type": [
+                                "boolean",
+                                "integer"
+                              ]
+                            },
+                            "sms_enabled": {
+                              "type": [
+                                "boolean",
+                                "integer"
+                              ]
+                            },
+                            "reminder_minutes": {
+                              "type": "integer"
+                            }
+                          },
+                          "required": [],
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "ready": {
+                      "type": "object",
+                      "properties": {
+                        "email": {
+                          "type": "boolean"
+                        },
+                        "sms": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "email",
+                        "sms"
+                      ],
+                      "additionalProperties": true
+                    },
+                    "recent": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "reservation_id": {
+                            "type": "integer"
+                          },
+                          "version": {
+                            "type": "integer"
+                          },
+                          "channel": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "due_at": {
+                            "type": "string"
+                          },
+                          "processed_at": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "attempts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "event_id": {
+                            "type": "integer"
+                          },
+                          "channel": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "settings",
+                    "ready",
+                    "recent",
+                    "attempts"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "settings": {},
+                  "ready": {
+                    "email": true,
+                    "sms": true
+                  },
+                  "recent": [],
+                  "attempts": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "1afbc215e5b7edb1294ca11ae4ff652647c2e21552e470809a176439c520d86e"
+      }
+    },
+    {
+      "id": "notification.post.restaurant_notifications_id_retry",
+      "method": "POST",
+      "uri": "api/v1/restaurant/notifications/{id}/retry",
+      "action": "App\\Modules\\Notification\\Http\\NotificationController@retry",
+      "context": "restaurant",
+      "exposure": "external",
+      "scope": "notification:write",
+      "confirmation": true,
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "password": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string"
+              ],
+              "writeOnly": true
+            },
+            "confirmed": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            },
+            "expected_attempt_id": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "x-validation": [
+                "present",
+                "nullable",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            },
+            "expected_status": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string"
+              ]
+            },
+            "acknowledge_duplicate": {
+              "enum": [
+                true,
+                1,
+                "1",
+                "yes",
+                "on",
+                "true"
+              ],
+              "x-validation": [
+                "required",
+                "accepted"
+              ]
+            }
+          },
+          "required": [
+            "password",
+            "confirmed",
+            "expected_attempt_id",
+            "expected_status",
+            "acknowledge_duplicate"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "password": "Beispiel",
+            "confirmed": true,
+            "expected_attempt_id": 1,
+            "expected_status": "Beispiel",
+            "acknowledge_duplicate": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "status": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "1afbc215e5b7edb1294ca11ae4ff652647c2e21552e470809a176439c520d86e"
+      }
+    },
+    {
+      "id": "notification.post.delivery_status",
+      "method": "POST",
+      "uri": "api/notification/status/{id}",
+      "action": "App\\Modules\\Notification\\Http\\DeliveryController@status",
+      "exposure": "provider_signature",
+      "reason": "Twilio HMAC signature; callback correlation and account verification; no bearer operation."
     }
   ]
 }

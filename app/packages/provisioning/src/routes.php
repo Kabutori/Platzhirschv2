@@ -26,3 +26,14 @@ $router
             ])
             ->middleware('throttle:5,1');
     });
+
+app('router')
+    ->middleware(['web', 'auth', 'system'])
+    ->prefix('api/v1/admin/server-exports')
+    ->group(function ($r) {
+        $c = \App\Modules\Provisioning\Http\ExportController::class;
+        $r->get('/', [$c, 'direct']);
+        $r->post('/', [$c, 'start'])->middleware('throttle:5,1');
+        $r->get('/{id}', [$c, 'status'])->whereUuid('id');
+        $r->get('/{id}/download', [$c, 'download'])->whereUuid('id');
+    });

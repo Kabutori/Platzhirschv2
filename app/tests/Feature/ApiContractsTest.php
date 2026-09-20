@@ -37,11 +37,54 @@ class ApiContractsTest extends TestCase
             if ($op['exposure'] === 'external') {
                 $this->assertContains('auth', $route->middleware());
                 $this->assertStringNotContainsString('/auth/', $op['uri']);
+                foreach (['parameters', 'query', 'body', 'responses', 'example'] as $section) {
+                    $this->assertArrayHasKey($section, $op['contract']);
+                }
+                if ($op['action'] !== 'Closure') {
+                    $class = explode('@', $op['action'])[0];
+                    $file = (new \ReflectionClass($class))->getFileName();
+                    $this->assertSame(
+                        hash('sha256', str_replace("\r\n", "\n", file_get_contents($file))),
+                        $op['contract']['source_sha256'],
+                        'Changed controller needs contract review: ' . $op['id'],
+                    );
+                }
                 $this->assertNotEmpty($op['scope']);
             } else {
                 $this->assertNotEmpty($op['reason']);
             }
         }
         $this->assertGreaterThan(90, count(app(\App\Modules\Api\Catalog::class)->all()));
+    }
+    public function test_nested_input_fields_and_conditional_resources_are_concrete(): void
+    {
+        $ops = app(\App\Modules\Api\Catalog::class)->all();
+        $this->assertContains(
+            'guest_name',
+            $ops['reservation.post.restaurant_reservations']['contract']['body']['required'],
+        );
+        $this->assertSame(
+            50,
+            $ops['reservation.post.restaurant_reservations']['contract']['body']['properties']['party_size'][
+                'maximum'
+            ],
+        );
+        $this->assertSame(
+            'integer',
+            $ops['reservation.put.restaurant_hours_week']['contract']['body']['properties']['rows']['items'][
+                'properties'
+            ]['weekday']['type'],
+        );
+        $this->assertCount(4, $ops['reservation.post.restaurant_resource']['contract']['body']['anyOf']);
+        $this->assertSame(
+            'csv',
+            $ops['customer.post.admin_customer-exports']['contract']['body']['properties']['format'][
+                'enum'
+            ][0],
+        );
+        $this->assertArrayHasKey(
+            '202',
+            $ops['customer.post.admin_customer-exports']['contract']['responses'],
+        );
     }
 }

@@ -28,3 +28,14 @@ app('router')
         $r->delete('organizations/{id}', [$c, 'delete'])->whereNumber('id');
         $r->patch('tenants/{id}/organization', [$c, 'assign'])->whereNumber('id');
     });
+
+app('router')
+    ->middleware(['web', 'auth', 'system'])
+    ->prefix('api/v1/admin/customer-exports')
+    ->group(function ($r) {
+        $c = \App\Modules\Customer\Http\ExportController::class;
+        $r->get('/', [$c, 'direct']);
+        $r->post('/', [$c, 'start'])->middleware('throttle:5,1');
+        $r->get('/{id}', [$c, 'status'])->whereUuid('id');
+        $r->get('/{id}/download', [$c, 'download'])->whereUuid('id');
+    });

@@ -12,7 +12,103 @@
       "exposure": "external",
       "scope": "weather:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "settings": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "enabled": {
+                              "type": [
+                                "boolean",
+                                "integer"
+                              ]
+                            },
+                            "latitude": {
+                              "type": "number"
+                            },
+                            "longitude": {
+                              "type": "number"
+                            },
+                            "mode": {
+                              "type": "string"
+                            },
+                            "rain_threshold": {
+                              "type": "integer"
+                            },
+                            "version": {
+                              "type": "integer"
+                            },
+                            "created_at": {
+                              "type": "string"
+                            },
+                            "updated_at": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [],
+                          "additionalProperties": true
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "commercial_key_configured": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "settings",
+                    "commercial_key_configured"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "settings": {},
+                  "commercial_key_configured": true
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "4473bb651904c96e7eccf0b960fafa84f5d711715201cfa98f35b8123628a231"
+      }
     },
     {
       "id": "weather.put.restaurant_weather_settings",
@@ -23,7 +119,129 @@
       "exposure": "external",
       "scope": "weather:write",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            },
+            "latitude": {
+              "type": "number",
+              "x-validation": [
+                "required",
+                "numeric",
+                "between:-90,90"
+              ],
+              "minimum": -90,
+              "maximum": 90
+            },
+            "longitude": {
+              "type": "number",
+              "x-validation": [
+                "required",
+                "numeric",
+                "between:-180,180"
+              ],
+              "minimum": -180,
+              "maximum": 180
+            },
+            "mode": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:commercial,evaluation"
+              ],
+              "enum": [
+                "commercial",
+                "evaluation"
+              ]
+            },
+            "rain_threshold": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "between:1,100"
+              ],
+              "minimum": 1,
+              "maximum": 100
+            },
+            "version": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:0"
+              ],
+              "minimum": 0
+            }
+          },
+          "required": [
+            "enabled",
+            "latitude",
+            "longitude",
+            "mode",
+            "rain_threshold",
+            "version"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "enabled": true,
+            "latitude": 1,
+            "longitude": 1,
+            "mode": "commercial",
+            "rain_threshold": 1,
+            "version": 1
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "saved": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "saved"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "saved": true
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "4473bb651904c96e7eccf0b960fafa84f5d711715201cfa98f35b8123628a231"
+      }
     }
   ]
 }

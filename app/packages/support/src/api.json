@@ -12,7 +12,209 @@
       "exposure": "external",
       "scope": "support:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "page": {
+              "type": "integer",
+              "x-validation": [
+                "sometimes",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "tenant_id": {
+                            "type": "integer"
+                          },
+                          "user_id": {
+                            "type": "integer"
+                          },
+                          "subject": {
+                            "type": "string"
+                          },
+                          "priority": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "current_page": {
+                      "type": "integer"
+                    },
+                    "last_page": {
+                      "type": "integer"
+                    },
+                    "per_page": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "from": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "to": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "first_page_url": {
+                      "type": "string"
+                    },
+                    "last_page_url": {
+                      "type": "string"
+                    },
+                    "next_page_url": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "prev_page_url": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "active": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "current_page",
+                    "last_page",
+                    "per_page",
+                    "total",
+                    "from",
+                    "to",
+                    "first_page_url",
+                    "last_page_url",
+                    "next_page_url",
+                    "prev_page_url",
+                    "path",
+                    "links"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "data": [],
+                  "current_page": 1,
+                  "last_page": 1,
+                  "per_page": 1,
+                  "total": 1,
+                  "from": 1,
+                  "to": 1,
+                  "first_page_url": "Beispiel",
+                  "last_page_url": "Beispiel",
+                  "next_page_url": "Beispiel",
+                  "prev_page_url": "Beispiel",
+                  "path": "Beispiel",
+                  "links": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "e3f0efd684ef06faca0cf4c4c22594f796fd4492b32060a75c62ce763aa5c0c0"
+      }
     },
     {
       "id": "support.post.support",
@@ -23,7 +225,128 @@
       "exposure": "external",
       "scope": "support:write",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:200"
+              ],
+              "maxLength": 200
+            },
+            "body": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:10000"
+              ],
+              "maxLength": 10000
+            },
+            "tenant_id": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "integer"
+              ]
+            },
+            "priority": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:low,normal,high"
+              ],
+              "enum": [
+                "low",
+                "normal",
+                "high"
+              ]
+            }
+          },
+          "required": [
+            "subject",
+            "body",
+            "priority"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "subject": "Beispiel",
+            "body": "Beispiel",
+            "priority": "low"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": 1
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": 1
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "e3f0efd684ef06faca0cf4c4c22594f796fd4492b32060a75c62ce763aa5c0c0"
+      }
     },
     {
       "id": "support.get.support_id",
@@ -34,7 +357,130 @@
       "exposure": "external",
       "scope": "support:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ticket": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "tenant_id": {
+                          "type": "integer"
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "priority": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": true
+                    },
+                    "messages": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "ticket_id": {
+                            "type": "integer"
+                          },
+                          "user_id": {
+                            "type": "integer"
+                          },
+                          "body": {
+                            "type": "string"
+                          },
+                          "internal": {
+                            "type": [
+                              "boolean",
+                              "integer"
+                            ]
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "author": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "ticket",
+                    "messages"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "ticket": {},
+                  "messages": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "e3f0efd684ef06faca0cf4c4c22594f796fd4492b32060a75c62ce763aa5c0c0"
+      }
     },
     {
       "id": "support.post.support_id_messages",
@@ -45,7 +491,519 @@
       "exposure": "external",
       "scope": "support:write",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:10000"
+              ],
+              "maxLength": 10000
+            },
+            "internal": {
+              "type": "boolean",
+              "x-validation": [
+                "sometimes",
+                "boolean"
+              ]
+            },
+            "status": {
+              "type": "string",
+              "x-validation": [
+                "sometimes",
+                "in:open,in_progress,closed"
+              ],
+              "enum": [
+                "open",
+                "in_progress",
+                "closed"
+              ]
+            }
+          },
+          "required": [
+            "body"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "body": "Beispiel"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ticket": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "tenant_id": {
+                          "type": "integer"
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "priority": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": true
+                    },
+                    "messages": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "ticket_id": {
+                            "type": "integer"
+                          },
+                          "user_id": {
+                            "type": "integer"
+                          },
+                          "body": {
+                            "type": "string"
+                          },
+                          "internal": {
+                            "type": [
+                              "boolean",
+                              "integer"
+                            ]
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "author": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "ticket",
+                    "messages"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "ticket": {},
+                  "messages": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "e3f0efd684ef06faca0cf4c4c22594f796fd4492b32060a75c62ce763aa5c0c0"
+      }
+    },
+    {
+      "id": "support.get.support_exports",
+      "method": "GET",
+      "uri": "api/v1/support/exports",
+      "action": "App\\Modules\\Support\\Http\\ExportController@direct",
+      "context": "shared",
+      "exposure": "external",
+      "scope": "support:read",
+      "confirmation": false,
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:csv,xlsx,pdf"
+              ],
+              "enum": [
+                "csv",
+                "xlsx",
+                "pdf"
+              ]
+            }
+          },
+          "required": [
+            "format"
+          ],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {
+            "format": "csv"
+          },
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Datei im angeforderten Format; PDF bis 500, direkte Tabellen bis 10.000 Datensätze.",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c08db1feef34eb6efe3266d69d81201bc186fc6316e83f684e4e3c51171f51e7"
+      }
+    },
+    {
+      "id": "support.post.support_exports",
+      "method": "POST",
+      "uri": "api/v1/support/exports",
+      "action": "App\\Modules\\Support\\Http\\ExportController@start",
+      "context": "shared",
+      "exposure": "external",
+      "scope": "support:write",
+      "confirmation": false,
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:csv"
+              ],
+              "enum": [
+                "csv"
+              ]
+            }
+          },
+          "required": [
+            "format"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "format": "csv"
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "expires_in": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status",
+                    "format",
+                    "expires_in"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": "Beispiel",
+                  "status": "Beispiel",
+                  "format": "Beispiel",
+                  "expires_in": 1
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    },
+                    "expires_in": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status",
+                    "format",
+                    "expires_in"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": "Beispiel",
+                  "status": "Beispiel",
+                  "format": "Beispiel",
+                  "expires_in": 1
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c08db1feef34eb6efe3266d69d81201bc186fc6316e83f684e4e3c51171f51e7"
+      }
+    },
+    {
+      "id": "support.get.support_exports_id",
+      "method": "GET",
+      "uri": "api/v1/support/exports/{id}",
+      "action": "App\\Modules\\Support\\Http\\ExportController@status",
+      "context": "shared",
+      "exposure": "external",
+      "scope": "support:read",
+      "confirmation": false,
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "rows": {
+                      "type": "integer"
+                    },
+                    "expires_at": {
+                      "type": "string"
+                    },
+                    "format": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status",
+                    "rows",
+                    "expires_at",
+                    "format"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "id": "Beispiel",
+                  "status": "Beispiel",
+                  "rows": 1,
+                  "expires_at": "Beispiel",
+                  "format": "Beispiel"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c08db1feef34eb6efe3266d69d81201bc186fc6316e83f684e4e3c51171f51e7"
+      }
+    },
+    {
+      "id": "support.get.support_exports_id_download",
+      "method": "GET",
+      "uri": "api/v1/support/exports/{id}/download",
+      "action": "App\\Modules\\Support\\Http\\ExportController@download",
+      "context": "shared",
+      "exposure": "external",
+      "scope": "support:read",
+      "confirmation": false,
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Privater Download",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "c08db1feef34eb6efe3266d69d81201bc186fc6316e83f684e4e3c51171f51e7"
+      }
     }
   ]
 }

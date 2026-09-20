@@ -13,7 +13,229 @@
       "scope": "release:read",
       "confirmation": false,
       "mcp": true,
-      "admin_only": false
+      "admin_only": false,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "page": {
+              "type": "integer",
+              "x-validation": [
+                "sometimes",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "module": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "notes": {
+                            "type": "string"
+                          },
+                          "git_url": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "published_at": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "revision": {
+                            "type": "integer"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "current_page": {
+                      "type": "integer"
+                    },
+                    "last_page": {
+                      "type": "integer"
+                    },
+                    "per_page": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "from": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "to": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "first_page_url": {
+                      "type": "string"
+                    },
+                    "last_page_url": {
+                      "type": "string"
+                    },
+                    "next_page_url": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "prev_page_url": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "active": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "current_page",
+                    "last_page",
+                    "per_page",
+                    "total",
+                    "from",
+                    "to",
+                    "first_page_url",
+                    "last_page_url",
+                    "next_page_url",
+                    "prev_page_url",
+                    "path",
+                    "links"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "data": [],
+                  "current_page": 1,
+                  "last_page": 1,
+                  "per_page": 1,
+                  "total": 1,
+                  "from": 1,
+                  "to": 1,
+                  "first_page_url": "Beispiel",
+                  "last_page_url": "Beispiel",
+                  "next_page_url": "Beispiel",
+                  "prev_page_url": "Beispiel",
+                  "path": "Beispiel",
+                  "links": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "1cf05a5a269ab726cbba5ae5b115001203852089e74c97f9f37916e4a9e8e579"
+      }
     },
     {
       "id": "release.post.releases",
@@ -25,7 +247,179 @@
       "scope": "release:write",
       "confirmation": true,
       "mcp": true,
-      "admin_only": true
+      "admin_only": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "module": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:80"
+              ],
+              "maxLength": 80
+            },
+            "version": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:80"
+              ],
+              "maxLength": 80
+            },
+            "category": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:feature,improvement,fix,security"
+              ],
+              "enum": [
+                "feature",
+                "improvement",
+                "fix",
+                "security"
+              ]
+            },
+            "notes": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:10000"
+              ],
+              "maxLength": 10000
+            },
+            "git_url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "url:https",
+                "max:500"
+              ],
+              "format": "uri",
+              "maxLength": 500
+            },
+            "publish": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            },
+            "revision": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [
+            "module",
+            "version",
+            "category",
+            "notes",
+            "publish"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {
+            "module": "Beispiel",
+            "version": "Beispiel",
+            "category": "feature",
+            "notes": "Beispiel",
+            "publish": true
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "module": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "category": {
+                      "type": "string"
+                    },
+                    "notes": {
+                      "type": "string"
+                    },
+                    "git_url": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "published_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "1cf05a5a269ab726cbba5ae5b115001203852089e74c97f9f37916e4a9e8e579"
+      }
     },
     {
       "id": "release.patch.releases_id",
@@ -37,7 +431,187 @@
       "scope": "release:write",
       "confirmation": true,
       "mcp": true,
-      "admin_only": true
+      "admin_only": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Kennung im Pfad."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "module": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:80"
+              ],
+              "maxLength": 80
+            },
+            "version": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:80"
+              ],
+              "maxLength": 80
+            },
+            "category": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "in:feature,improvement,fix,security"
+              ],
+              "enum": [
+                "feature",
+                "improvement",
+                "fix",
+                "security"
+              ]
+            },
+            "notes": {
+              "type": "string",
+              "x-validation": [
+                "required",
+                "string",
+                "max:10000"
+              ],
+              "maxLength": 10000
+            },
+            "git_url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "url:https",
+                "max:500"
+              ],
+              "format": "uri",
+              "maxLength": 500
+            },
+            "publish": {
+              "type": "boolean",
+              "x-validation": [
+                "required",
+                "boolean"
+              ]
+            },
+            "revision": {
+              "type": "integer",
+              "x-validation": [
+                "required",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [
+            "module",
+            "version",
+            "category",
+            "notes",
+            "publish",
+            "revision"
+          ],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {
+            "id": "Beispiel"
+          },
+          "query": {},
+          "body": {
+            "module": "Beispiel",
+            "version": "Beispiel",
+            "category": "feature",
+            "notes": "Beispiel",
+            "publish": true,
+            "revision": 1
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "module": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "category": {
+                      "type": "string"
+                    },
+                    "notes": {
+                      "type": "string"
+                    },
+                    "git_url": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "published_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "revision": {
+                      "type": "integer"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": true
+                },
+                "example": {}
+              }
+            }
+          }
+        },
+        "source_sha256": "1cf05a5a269ab726cbba5ae5b115001203852089e74c97f9f37916e4a9e8e579"
+      }
     }
   ]
 }

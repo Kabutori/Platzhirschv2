@@ -7,6 +7,7 @@ class ProvisioningServiceProvider extends ServiceProvider implements Module
 {
     public function register(): void
     {
+        $this->app->tag([Export\Servers::class], 'platzhirsch.export_sources');
         if (!$this->app->bound(ModuleRegistry::class)) {
             $this->app->singleton(ModuleRegistry::class);
         }

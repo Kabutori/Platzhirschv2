@@ -55,6 +55,18 @@ class Authenticate
             401,
             'Ungültiger API-Zugang.',
         );
+        if ($token->service_account_id) {
+            $service = $this->db->table('api_service_accounts')->find($token->service_account_id);
+            abort_unless(
+                $service &&
+                    $service->active &&
+                    (int) $service->user_id === (int) $token->user_id &&
+                    (string) $service->tenant_id === (string) $token->tenant_id,
+                401,
+                'Ungültiger API-Zugang.',
+            );
+            $r->attributes->set('api.service_account', $service->id);
+        }
         // Check tenant lifecycle even for shared resources which do not open a tenant database.
         if ($user->tenant_id) {
             abort_unless(

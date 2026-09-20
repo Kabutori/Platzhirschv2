@@ -1,3 +1,5 @@
+> Historisches Prüfprotokoll vom 17. September 2026. Aussagen zu offenen PRs, API oder Abnahme gelten nur für den damaligen Stand. Aktuelle Aufgaben und Grenzen: [RESTPUNKTE.md](RESTPUNKTE.md).
+
 # Prüfstand: Exporte, SMTP, Registrierung und Abrechnung
 
 Dieser Stand ergänzt die GitHub-Anwendung. Er ist über Draft-PRs zur Prüfung veröffentlicht, nicht automatisch auf `main` gemergt oder in Sites/auf einem Produktivserver ausgerollt. Die 15 zugehörigen Modul-PRs und Commit-Pins stehen in [MODULE-RELEASE-0.1.1.json](MODULE-RELEASE-0.1.1.json).
