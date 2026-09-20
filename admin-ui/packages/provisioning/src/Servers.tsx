@@ -1,3 +1,4 @@
+import { ExportButtons } from '@platzhirsch/ui-runtime/exports';
 import { Modal } from '@platzhirsch/ui-runtime/components';
 import { useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -104,6 +105,7 @@ export default function Servers() {
         </button>
       </div>
       <p>Primäre Datenbanken, Testsysteme und Mandantenserver zentral erfassen und prüfen.</p>
+      <ExportButtons path="v1/admin/server-exports" filename="server" background />
       {q.isPending && <p role="status">Server werden geladen …</p>}
       {q.error && <p role="alert">{q.error.message}</p>}
       {q.data && <p className="notice">{q.data.notice}</p>}

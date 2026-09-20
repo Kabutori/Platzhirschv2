@@ -31,11 +31,12 @@ class Catalog
         foreach ($this->router->getRoutes() as $route) {
             foreach ($route->methods() as $method) {
                 $routes[$method . ' ' . $route->uri()] = $route;
-            };
+            }
         }
         foreach ($sources as $source) {
             $manifest = json_decode(file_get_contents($source), true, flags: JSON_THROW_ON_ERROR);
-            foreach ($manifest['operations'] as $op) {
+            $original = json_decode(file_get_contents($source), flags: JSON_THROW_ON_ERROR);
+            foreach ($manifest['operations'] as $index => $op) {
                 if ($op['exposure'] !== 'external') {
                     continue;
                 }
@@ -45,6 +46,21 @@ class Catalog
                 }
                 if (isset($all[$op['id']])) {
                     throw new \LogicException('Duplicate API operation.');
+                }
+                foreach ($op['contract']['responses'] as $code => &$response) {
+                    foreach ($response['content'] ?? [] as $mime => $definition) {
+                        if (array_key_exists('example', $definition)) {
+                            $response['content'][$mime]['example'] =
+                                $original->operations[
+                                    $index
+                                ]->contract->responses->{(string) $code}->content->{$mime}->example;
+                        }
+                    }
+                }
+                unset($response);
+                foreach (['parameters', 'query', 'body'] as $part) {
+                    $op['contract']['example'][$part] =
+                        $original->operations[$index]->contract->example->{$part};
                 }
                 $op['module'] = $manifest['module'];
                 $op['path'] =
@@ -73,6 +89,24 @@ class Catalog
         if (!in_array($op['scope'], json_decode($token->scopes, true), true)) {
             return false;
         }
+        if (
+            ($token->operations ?? null) !== null &&
+            !in_array($op['id'], json_decode($token->operations, true), true)
+        ) {
+            return false;
+        }
+        if ($token->service_account_id ?? null) {
+            $account = $this->db->table('api_service_accounts')->find($token->service_account_id);
+            if (
+                !$account ||
+                !$account->active ||
+                (int) $account->user_id !== (int) $token->user_id ||
+                (string) $account->tenant_id !== (string) $token->tenant_id ||
+                !in_array($op['id'], json_decode($account->operations, true), true)
+            ) {
+                return false;
+            }
+        }
         foreach (['api', $op['module']] as $module) {
             $setting = $this->db->table('api_settings')->where('module', $module)->first();
             if ($setting && !$setting->enabled) {
@@ -99,8 +133,47 @@ class Catalog
         return array_values(
             array_map(function ($op) {
                 unset($op['route'], $op['action']);
+                $op['contract'] = self::schemaObjects($op['contract']);
                 return $op;
             }, array_filter($this->all(), fn($op) => $this->allowed($op, $token, $user))),
+        );
+    }
+    private static function schemaObjects(array $value): array
+    {
+        foreach ($value as $key => $item) {
+            if (is_array($item)) {
+                $value[$key] = self::schemaObjects($item);
+                if (
+                    in_array(
+                        $key,
+                        [
+                            'properties',
+                            'items',
+                            'not',
+                            'additionalProperties',
+                            'patternProperties',
+                            '$defs',
+                            'schema',
+                        ],
+                        true,
+                    ) &&
+                    $item === []
+                ) {
+                    $value[$key] = (object) [];
+                }
+            }
+        }
+        return $value;
+    }
+    public function manageable(object $user): array
+    {
+        return array_values(
+            array_filter(
+                $this->all(),
+                fn($op) => (!($op['admin_only'] ?? false) || $user->isSystem()) &&
+                    ($op['context'] === 'shared' ||
+                        ($user->isSystem() ? $op['context'] === 'admin' : $op['context'] === 'restaurant')),
+            ),
         );
     }
     public function scopes(object $user): array

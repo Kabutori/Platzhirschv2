@@ -12,7 +12,280 @@
       "exposure": "external",
       "scope": "audit:read",
       "confirmation": false,
-      "mcp": true
+      "mcp": true,
+      "contract": {
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "query": {
+          "type": "object",
+          "properties": {
+            "scope": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "in:all,platform,tenant"
+              ],
+              "enum": [
+                "all",
+                "platform",
+                "tenant",
+                null
+              ]
+            },
+            "tenant_id": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            },
+            "search": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "string",
+                "max:120"
+              ],
+              "maxLength": 120
+            },
+            "page": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "x-validation": [
+                "nullable",
+                "integer",
+                "min:1"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [],
+          "additionalProperties": true
+        },
+        "body": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": true
+        },
+        "example": {
+          "parameters": {},
+          "query": {},
+          "body": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Fachantwort; zusätzliche additive Felder sind möglich.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "tenant_id": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "user_id": {
+                            "anyOf": [
+                              {
+                                "type": "integer"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "event": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "target": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "ip": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "created_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    },
+                    "current_page": {
+                      "type": "integer"
+                    },
+                    "last_page": {
+                      "type": "integer"
+                    },
+                    "per_page": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "from": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "to": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "first_page_url": {
+                      "type": "string"
+                    },
+                    "last_page_url": {
+                      "type": "string"
+                    },
+                    "next_page_url": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "prev_page_url": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "active": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "current_page",
+                    "last_page",
+                    "per_page",
+                    "total",
+                    "from",
+                    "to",
+                    "first_page_url",
+                    "last_page_url",
+                    "next_page_url",
+                    "prev_page_url",
+                    "path",
+                    "links"
+                  ],
+                  "additionalProperties": true
+                },
+                "example": {
+                  "data": [],
+                  "current_page": 1,
+                  "last_page": 1,
+                  "per_page": 1,
+                  "total": 1,
+                  "from": 1,
+                  "to": 1,
+                  "first_page_url": "Beispiel",
+                  "last_page_url": "Beispiel",
+                  "next_page_url": "Beispiel",
+                  "prev_page_url": "Beispiel",
+                  "path": "Beispiel",
+                  "links": []
+                }
+              }
+            }
+          }
+        },
+        "source_sha256": "5dfb724847e8bf962a817d2afdd3a313700a58978f7c1a09fcc1046638033e71"
+      }
     }
   ]
 }

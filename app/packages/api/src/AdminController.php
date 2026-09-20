@@ -34,6 +34,9 @@ class AdminController
                 ->where('user_id', $r->user()->id)
                 ->select(
                     'id',
+                    'service_account_id',
+                    'operations',
+                    'rotated_to',
                     'name',
                     'scopes',
                     'audience',
@@ -46,6 +49,20 @@ class AdminController
                 ->latest('created_at')
                 ->limit(100)
                 ->get(),
+            'service_accounts' => $this->db
+                ->table('api_service_accounts')
+                ->where('user_id', $r->user()->id)
+                ->orderBy('name')
+                ->get(),
+            'operations' => array_map(
+                fn($op) => [
+                    'id' => $op['id'],
+                    'scope' => $op['scope'],
+                    'method' => $op['method'],
+                    'path' => $op['path'],
+                ],
+                $this->catalog->manageable($r->user()),
+            ),
             'scopes' => $this->catalog->scopes($r->user()),
             'modules' => [
                 'mcp',
@@ -75,6 +92,9 @@ class AdminController
     {
         $this->authorize($r, true);
         $d = $r->validate([
+            'service_account_id' => 'nullable|uuid',
+            'operations' => 'sometimes|array|max:300',
+            'operations.*' => 'required|string|distinct',
             'name' => 'required|string|max:100',
             'scopes' => 'required|array|min:1|max:100',
             'scopes.*' => 'required|string|distinct',
@@ -88,6 +108,26 @@ class AdminController
             422,
             'Unbekannte oder unzulässige Berechtigung.',
         );
+        $operations = $d['operations'] ?? null;
+        if ($operations !== null) {
+            $this->validateOperations($r, $operations);
+        }
+        if ($d['service_account_id'] ?? null) {
+            $service = $this->db
+                ->table('api_service_accounts')
+                ->where('id', $d['service_account_id'])
+                ->where('user_id', $r->user()->id)
+                ->where('active', true)
+                ->first();
+            abort_unless($service && (string) $service->tenant_id === (string) $r->user()->tenant_id, 404);
+            $allowed = json_decode($service->operations, true);
+            $operations = $operations ?? $allowed;
+            abort_if(
+                array_diff($operations, $allowed),
+                422,
+                'Aktionen überschreiten die Rechte des technischen Kontos.',
+            );
+        }
         foreach ($d['cidrs'] as $cidr) {
             [$ip, $bits] = array_pad(explode('/', $cidr, 2), 2, null);
             abort_unless(
@@ -110,21 +150,21 @@ class AdminController
         );
         $id = (string) Str::uuid();
         $secret = bin2hex(random_bytes(32));
-        $this->db
-            ->table('api_tokens')
-            ->insert([
-                'id' => $id,
-                'user_id' => $r->user()->id,
-                'tenant_id' => $r->user()->tenant_id,
-                'name' => $d['name'],
-                'scopes' => json_encode($d['scopes']),
-                'audience' => $d['audience'],
-                'cidrs' => json_encode($d['cidrs']),
-                'secret_hash' => hash('sha256', $secret),
-                'expires_at' => now()->addDays($d['days']),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+        $this->db->table('api_tokens')->insert([
+            'id' => $id,
+            'user_id' => $r->user()->id,
+            'tenant_id' => $r->user()->tenant_id,
+            'service_account_id' => $d['service_account_id'] ?? null,
+            'operations' => $operations === null ? null : json_encode($operations),
+            'name' => $d['name'],
+            'scopes' => json_encode($d['scopes']),
+            'audience' => $d['audience'],
+            'cidrs' => json_encode($d['cidrs']),
+            'secret_hash' => hash('sha256', $secret),
+            'expires_at' => now()->addDays($d['days']),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
         $this->audit->record('api.token_created', $id, $r->user()->tenant_id);
         return [
             'id' => $id,
@@ -190,5 +230,153 @@ class AdminController
         });
         $this->audit->record('api.module_configured', $module);
         return ['status' => 'saved'];
+    }
+
+    private function validateOperations(Request $r, array $operations): void
+    {
+        abort_if(
+            array_diff($operations, array_column($this->catalog->manageable($r->user()), 'id')),
+            422,
+            'Unzulässige API-Aktion.',
+        );
+    }
+    public function createService(Request $r): array
+    {
+        $this->authorize($r, true);
+        $d = $r->validate([
+            'name' => 'required|string|max:100',
+            'operations' => 'required|array|min:1|max:300',
+            'operations.*' => 'required|string|distinct',
+        ]);
+        $this->validateOperations($r, $d['operations']);
+        abort_if(
+            $this->db->table('api_service_accounts')->where('user_id', $r->user()->id)->count() >= 50,
+            422,
+        );
+        $id = (string) Str::uuid();
+        $this->db
+            ->table('api_service_accounts')
+            ->insert([
+                'id' => $id,
+                'user_id' => $r->user()->id,
+                'tenant_id' => $r->user()->tenant_id,
+                'name' => $d['name'],
+                'operations' => json_encode($d['operations']),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        $this->audit->record('api.service_created', $id, $r->user()->tenant_id);
+        return ['id' => $id];
+    }
+    public function updateService(Request $r, string $id): array
+    {
+        $this->authorize($r, true);
+        $d = $r->validate([
+            'name' => 'required|string|max:100',
+            'operations' => 'present|array|max:300',
+            'operations.*' => 'required|string|distinct',
+            'active' => 'required|boolean',
+            'revision' => 'required|integer|min:0',
+        ]);
+        $this->validateOperations($r, $d['operations']);
+        $owned = $this->db
+            ->table('api_service_accounts')
+            ->where('id', $id)
+            ->where('user_id', $r->user()->id)
+            ->exists();
+        abort_unless($owned, 404);
+        $changed = $this->db
+            ->table('api_service_accounts')
+            ->where('id', $id)
+            ->where('user_id', $r->user()->id)
+            ->where('revision', $d['revision'])
+            ->update([
+                'name' => $d['name'],
+                'active' => $d['active'],
+                'operations' => json_encode($d['operations']),
+                'revision' => $d['revision'] + 1,
+                'updated_at' => now(),
+            ]);
+        abort_unless($changed, 409, 'Technisches Konto wurde inzwischen geändert.');
+        $this->audit->record('api.service_updated', $id, $r->user()->tenant_id);
+        return ['status' => 'saved'];
+    }
+    public function rotate(Request $r, string $id): array
+    {
+        $this->authorize($r, true);
+        $d = $r->validate([
+            'days' => 'required|integer|min:1|max:90',
+            'overlap_hours' => 'required|integer|min:0|max:24',
+        ]);
+        $result = $this->db->transaction(function () use ($r, $id, $d) {
+            $old = $this->db
+                ->table('api_tokens')
+                ->where('id', $id)
+                ->where('user_id', $r->user()->id)
+                ->lockForUpdate()
+                ->first();
+            abort_unless($old, 404);
+            abort_if(
+                $old->revoked_at || $old->rotated_to || $old->expires_at <= now()->toDateTimeString(),
+                409,
+                'Dieser Zugang kann nicht mehr rotiert werden.',
+            );
+            abort_unless((string) $old->tenant_id === (string) $r->user()->tenant_id, 403);
+            if ($old->service_account_id) {
+                abort_unless(
+                    $this->db
+                        ->table('api_service_accounts')
+                        ->where('id', $old->service_account_id)
+                        ->where('user_id', $r->user()->id)
+                        ->where('active', true)
+                        ->exists(),
+                    409,
+                );
+            }
+            $this->db->table('users')->where('id', $r->user()->id)->lockForUpdate()->first();
+            abort_if(
+                $d['overlap_hours'] > 0 &&
+                    $this->db
+                        ->table('api_tokens')
+                        ->where('user_id', $r->user()->id)
+                        ->whereNull('revoked_at')
+                        ->where('expires_at', '>', now())
+                        ->count() >= 50,
+                422,
+                'Für Übergangszeiten höchstens 50 aktive Zugänge.',
+            );
+            $new = (string) Str::uuid();
+            $secret = bin2hex(random_bytes(32));
+            $data = (array) $old;
+            unset($data['id']);
+            $this->db
+                ->table('api_tokens')
+                ->insert([
+                    ...$data,
+                    'id' => $new,
+                    'secret_hash' => hash('sha256', $secret),
+                    'expires_at' => now()->addDays($d['days']),
+                    'last_used_at' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            $deadline = min($old->expires_at, now()->addHours($d['overlap_hours'])->toDateTimeString());
+            $this->db
+                ->table('api_tokens')
+                ->where('id', $id)
+                ->update([
+                    'rotated_to' => $new,
+                    'expires_at' => $deadline,
+                    'revoked_at' => $d['overlap_hours'] === 0 ? now() : null,
+                    'updated_at' => now(),
+                ]);
+            return [
+                'id' => $new,
+                'token' => 'ph_' . $new . '.' . $secret,
+                'previous_valid_until' => $deadline,
+            ];
+        });
+        $this->audit->record('api.token_rotated', $id, $r->user()->tenant_id);
+        return $result;
     }
 }

@@ -23,7 +23,7 @@ class McpServiceProvider extends ServiceProvider implements Module
     }
     public function dependencies(): array
     {
-        return ['api' => '0.1.2'];
+        return ['api' => '0.1.3'];
     }
     public function optionalDependencies(): array
     {

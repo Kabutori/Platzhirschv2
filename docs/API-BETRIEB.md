@@ -1,10 +1,10 @@
 # Modul-API und MCP
 
-Stand: 17. September 2026. Implementierte externe API v1, Paketstand 0.1.2.
+Stand: 20. September 2026. Externe API v1 mit Feldverträgen, Paketstand 0.1.3.
 
 ## Zugang und Rechte
 
-Systemadministratoren verwalten eigene Zugänge unter Infrastruktur → API & MCP; Restaurantadministratoren im Profil. Ein Token gehört genau diesem Konto und dessen Mandanten. Erstellung, Widerruf, Modulkonfiguration und Freigaben benötigen die angemeldete Sitzung, CSRF-Schutz, das aktuelle Kennwort und eine ausdrückliche Bestätigung. Tokens werden einmal angezeigt, nur als SHA-256-Hash gespeichert und laufen spätestens nach 90 Tagen ab. Für Rotation einen neuen Zugang erstellen, Verbraucher umstellen, alten Zugang widerrufen.
+Systemadministratoren verwalten eigene Zugänge unter Infrastruktur → API & MCP; Restaurantadministratoren im Profil. Ein Token gehört genau diesem Konto und dessen Mandanten. Erstellung, Widerruf, Modulkonfiguration und Freigaben benötigen die angemeldete Sitzung, CSRF-Schutz, das aktuelle Kennwort und eine ausdrückliche Bestätigung. Tokens werden einmal angezeigt, nur als SHA-256-Hash gespeichert und laufen spätestens nach 90 Tagen ab. Die Oberfläche führt durch die Tokenrotation mit begrenzter Übergangszeit.
 
 Pro Modul gibt es getrennte `:read`- und `:write`-Scopes. Es gibt keine Wildcards. Aktuelle Kontorechte, aktiver Mandant und gebuchte Wetter-/Reportingmodule werden bei jedem Aufruf erneut geprüft. Plattformkonten können keinen Restaurantkontext über einen Header übernehmen. Restauranttokens können nicht auf einen anderen Mandanten umgeschaltet werden. Rollenentzug oder Kontosperre invalidieren den Zugang. Zusätzlich sind IP-/CIDR-Beschränkungen möglich.
 
@@ -22,7 +22,7 @@ Alle Maschinenaufrufe benötigen HTTPS und `Authorization: Bearer <token>`. Brow
 
 Die Allowlist verweist auf die bestehenden Controller und führt deren Rollen-, Mandanten-, Fach- und Eingabeprüfungen weiter aus. Kein freier ORM-Zugriff, keine frei wählbaren Controller oder SQL-Abfragen. Neue Fachrouten müssen in einem Modulvertrag klassifiziert sein; der CI-Vertragstest verhindert unbemerkte Lücken.
 
-Die OpenAPI beschreibt derzeit die Transportverträge; Feldschemas der Fachobjekte sind generische Objekte. Die verbindlichen Detailvalidierungen bleiben in den jeweiligen Controllern. Daraus noch keinen vollständig typisierten Client generieren.
+OpenAPI beschreibt Feldschemas, Pflichtfelder, Beispiele, Antwortformen und Fehler aus denselben Modulverträgen wie MCP. Additive Antwortfelder bleiben zulässig; zusätzliche Fachvalidierungen sind mit `x-validation` dokumentiert und werden im Controller geprüft. Siehe [Verträge](api/VERTRAEGE.md).
 
 ## Schreibaktionen und Freigabe
 
@@ -66,3 +66,13 @@ Tabellen `api_requests`, `api_confirmations` und `api_access_events` in die Aufb
 Login, Registrierung, MFA und Tokenverwaltung bleiben bewusst interaktive Sitzungsabläufe. Öffentliche Widget-Endpunkte, Stripe-Webhooks und Paketdownloads behalten ihre eigene Authentifizierung. Odoo bleibt der vereinbarte Platzhalter: nur Statusabfrage, keine behauptete Synchronisierung.
 
 Referenz: [MCP-Transport](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports), [MCP-Tools](https://modelcontextprotocol.io/specification/2025-11-25/server/tools).
+
+## Technische Konten und Rotation
+
+API & MCP → Technische Konten erstellt Dienstidentitäten ohne Login. Sie sind an den verantwortlichen Administrator und dessen Mandanten gebunden. Die aktuellen Fachrechte dieses Kontos sind die Obergrenze; technische Konten und einzelne Tokens schränken zusätzlich auf konkrete Operation-IDs ein. Leere Aktionslisten erlauben keine Aktionen. Kontosperre, Tokenwiderruf oder Entzug der Administratorrechte wirken bei jeder Anfrage. Die getrennte Dienst-ID wird im API-Audit erfasst.
+
+„Token rotieren“ erzeugt einmalig einen Ersatz mit unveränderten Scopes, Aktionslisten, Zweck und IP-Bereichen. Gültigkeit maximal 90 Tage. Der bisherige Token wird sofort gesperrt oder erhält eine ausdrücklich gewählte Übergangszeit bis 24 Stunden. Ein bereits rotierter/abgelaufener/widerrufener Token ist nicht erneut rotierbar. Kennwort und Bestätigung sind erforderlich. Den Ersatz sicher im Client hinterlegen und die alte Nutzung im Zugriffsprotokoll prüfen.
+
+Die technische Konten-/Tokenverwaltung bleibt sitzungsgebunden. Tokeninhaber können sich über die externe API keine zusätzlichen Tokens oder Freigaben ausstellen. [Feldverträge und automatische Kompatibilitätsprüfung](api/VERTRAEGE.md).
+
+Rollenverteilung über API verwendet kurzlebige, an Benutzer und Token gebundene Vorschauen im gemeinsamen Cache. Sie benötigt keine Browser-Cookies. Vorschauverbrauch ist gesperrt und einmalig; Kennwort/TOTP und Portalbestätigung bleiben zusätzlich erforderlich.

@@ -18,6 +18,7 @@ class NotificationServiceProvider extends ServiceProvider implements Module
     }
     public function boot(): void
     {
+        $this->loadMigrationsFrom($this->platformMigrationsPath());
         $this->loadRoutesFrom(__DIR__ . '/routes.php');
     }
     public function name(): string
@@ -30,7 +31,7 @@ class NotificationServiceProvider extends ServiceProvider implements Module
     }
     public function dependencies(): array
     {
-        return ['reservation' => '0.1.2'];
+        return ['reservation' => '0.1.3'];
     }
     public function optionalDependencies(): array
     {
@@ -42,7 +43,7 @@ class NotificationServiceProvider extends ServiceProvider implements Module
     }
     public function platformMigrationsPath(): ?string
     {
-        return null;
+        return __DIR__ . '/migrations';
     }
     public function tenantMigrationsPath(): ?string
     {

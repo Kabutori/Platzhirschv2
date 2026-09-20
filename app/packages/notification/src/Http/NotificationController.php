@@ -15,6 +15,12 @@ class NotificationController
                 ->table('reservation_notification_settings')
                 ->find(1),
             'ready' => $service->readiness(),
+            'attempts' => $this->db
+                ->table('notification_attempts')
+                ->where('tenant_id', $r->attributes->get('tenant')->id)
+                ->latest('id')
+                ->limit(100)
+                ->get(['id', 'event_id', 'channel', 'status', 'created_at', 'updated_at']),
             'recent' => $this->db
                 ->connection('tenant')
                 ->table('reservation_notifications')
@@ -50,5 +56,78 @@ class NotificationController
             $r->attributes->get('tenant')->id,
         );
         return $this->index($r, $service);
+    }
+    public function retry(
+        Request $r,
+        int $id,
+        \Illuminate\Contracts\Hashing\Hasher $hash,
+        \App\Contracts\Module\ReservationReadModel $reservations,
+    ): array {
+        abort_unless($r->user()->hasPermission('restaurant.configure'), 403);
+        $d = $r->validate([
+            'password' => 'required|string',
+            'confirmed' => 'required|accepted',
+            'expected_attempt_id' => 'present|nullable|integer|min:1',
+            'expected_status' => 'required|string',
+            'acknowledge_duplicate' => 'required|accepted',
+        ]);
+        abort_unless($hash->check($d['password'], $r->user()->password), 403);
+        $tenantId = $r->attributes->get('tenant')->id;
+        $db = $this->db->connection('tenant');
+        $db->transaction(function () use ($db, $id, $d, $tenantId, $reservations) {
+            $event = $db->table('reservation_notifications')->where('id', $id)->lockForUpdate()->first();
+            abort_unless($event, 404);
+            $latest = $this->db
+                ->table('notification_attempts')
+                ->where('tenant_id', $tenantId)
+                ->where('event_id', $id)
+                ->max('id');
+            abort_unless(
+                (string) $latest === (string) $d['expected_attempt_id'],
+                409,
+                'Versandversuch wurde inzwischen geändert.',
+            );
+            abort_unless($event->status === $d['expected_status'], 409, 'Status wurde inzwischen geändert.');
+            abort_unless(
+                in_array($event->status, ['rejected', 'unknown', 'failed', 'undelivered', 'sending'], true),
+                409,
+                'Dieses Ereignis kann nicht wiederholt werden.',
+            );
+            abort_if(
+                $event->status === 'sending' &&
+                    $event->processed_at > now()->subMinutes(15)->toDateTimeString(),
+                409,
+                'Versand läuft noch.',
+            );
+            abort_if(
+                $this->db
+                    ->table('notification_attempts')
+                    ->where('tenant_id', $tenantId)
+                    ->where('event_id', $id)
+                    ->count() >= 5,
+                409,
+                'Maximal fünf Versandversuche.',
+            );
+            $reservation = $reservations->findForNotification((int) $event->reservation_id);
+            abort_unless(
+                $reservation &&
+                    (int) $reservation->version === (int) $event->version &&
+                    in_array($reservation->status, ['confirmed', 'cancelled'], true),
+                409,
+                'Buchungsereignis ist überholt.',
+            );
+            abort_if(
+                $event->kind === 'reminder' &&
+                    ($reservation->status !== 'confirmed' ||
+                        \Carbon\CarbonImmutable::parse($reservation->starts_at, 'UTC')->isPast()),
+                409,
+                'Erinnerung ist überholt.',
+            );
+            $db->table('reservation_notifications')
+                ->where('id', $id)
+                ->update(['status' => 'pending', 'due_at' => now()->utc(), 'processed_at' => null]);
+        });
+        app(\App\Contracts\Module\AuditSink::class)->record('notification.retry_queued', $id, $tenantId);
+        return ['status' => 'pending'];
     }
 }

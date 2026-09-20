@@ -1,36 +1,160 @@
 import { test, expect } from '@playwright/test';
 test('API management creates a scoped token once and submits exact portal approval', async ({ page }) => {
   let issued, approved;
-  const state={scopes:['support:read','support:write'],tokens:[],modules:['support','mcp'],settings:[],events:[],confirmations:[{id:'approval-1',operation:'support.post.support',preview:JSON.stringify({body:{subject:'Prüfanfrage'}}),expires_at:'2026-09-18',approved_at:null}]};
-  await page.route('**/api/**',async route=>{
-    const r=route.request(),p=new URL(r.url()).pathname;let body={};
-    if(p.endsWith('/auth/me'))body={id:1,name:'Admin',role:'system_admin',permissions:['*'],installed_modules:['api','mcp','support']};
-    else if(p.endsWith('/modules'))body=['api','mcp','support'].map(code=>({code,installed:true,version:'0.1.2',permissions:[],dependencies:{}}));
-    else if(p.endsWith('/dashboard'))body={recent_audit:[]};
-    else if(p.endsWith('/csrf'))body={token:'csrf'};
-    else if(p.endsWith('/access/tokens')){issued=r.postDataJSON();body={token:'ph_test-once'};}
-    else if(p.endsWith('/confirmations/approval-1/approve')){approved=r.postDataJSON();state.confirmations[0].approved_at='now';body={status:'approved'};}
-    else if(p.endsWith('/access'))body=state;
-    await route.fulfill({contentType:'application/json',body:JSON.stringify(body)});
+  const state = {
+    scopes: ['support:read', 'support:write'],
+    tokens: [],
+    modules: ['support', 'mcp'],
+    settings: [],
+    events: [],
+    confirmations: [
+      {
+        id: 'approval-1',
+        operation: 'support.post.support',
+        preview: JSON.stringify({ body: { subject: 'Prüfanfrage' } }),
+        expires_at: '2026-09-18',
+        approved_at: null,
+      },
+    ],
+  };
+  await page.route('**/api/**', async (route) => {
+    const r = route.request(),
+      p = new URL(r.url()).pathname;
+    let body = {};
+    if (p.endsWith('/auth/me'))
+      body = {
+        id: 1,
+        name: 'Admin',
+        role: 'system_admin',
+        permissions: ['*'],
+        installed_modules: ['api', 'mcp', 'support'],
+      };
+    else if (p.endsWith('/modules'))
+      body = ['api', 'mcp', 'support'].map((code) => ({
+        code,
+        installed: true,
+        version: '0.1.2',
+        permissions: [],
+        dependencies: {},
+      }));
+    else if (p.endsWith('/dashboard')) body = { recent_audit: [] };
+    else if (p.endsWith('/csrf')) body = { token: 'csrf' };
+    else if (p.endsWith('/access/tokens')) {
+      issued = r.postDataJSON();
+      body = { token: 'ph_test-once' };
+    } else if (p.endsWith('/confirmations/approval-1/approve')) {
+      approved = r.postDataJSON();
+      state.confirmations[0].approved_at = 'now';
+      body = { status: 'approved' };
+    } else if (p.endsWith('/access')) body = state;
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
   });
   await page.goto('/administration/login');
-  await page.getByRole('button',{name:'System-Einstellungen',exact:true}).click();
-  await page.getByRole('button',{name:'API & MCP',exact:true}).click();
-  const create=page.locator('form').filter({has:page.getByRole('heading',{name:'Neuen Zugang erstellen'})});
-  await expect(create.getByRole('button',{name:'Token erstellen'})).toBeDisabled();
-  await create.getByLabel('Name',{exact:true}).fill('Integration');
-  await create.getByLabel('support:read',{exact:true}).check();
+  await page.getByRole('button', { name: 'System-Einstellungen', exact: true }).click();
+  await page.getByRole('button', { name: 'API & MCP', exact: true }).click();
+  const create = page
+    .locator('form')
+    .filter({ has: page.getByRole('heading', { name: 'Neuen Zugang erstellen' }) });
+  await expect(create.getByRole('button', { name: 'Token erstellen' })).toBeDisabled();
+  await create.getByLabel('Name', { exact: true }).fill('Integration');
+  await create.getByLabel('support:read', { exact: true }).check();
   await create.getByLabel('Aktuelles Kennwort').fill('Test-password-123');
   await create.getByLabel('Aktion verbindlich bestätigen').check();
-  await create.getByRole('button',{name:'Token erstellen'}).click();
+  await create.getByRole('button', { name: 'Token erstellen' }).click();
   await expect(page.getByLabel('Neuer API-Token')).toHaveValue('ph_test-once');
   expect(issued.scopes).toEqual(['support:read']);
-  await page.getByRole('button',{name:'Gespeichert, ausblenden'}).click();
+  await page.getByRole('button', { name: 'Gespeichert, ausblenden' }).click();
   await expect(page.getByLabel('Neuer API-Token')).toHaveCount(0);
-  const approval=page.locator('article').filter({hasText:'support.post.support'});
+  const approval = page.locator('article').filter({ hasText: 'support.post.support' });
   await approval.getByLabel('Aktuelles Kennwort').fill('Test-password-123');
   await approval.getByLabel('Aktion verbindlich bestätigen').check();
-  await approval.getByRole('button',{name:'Diese Aktion freigeben'}).click();
+  await approval.getByRole('button', { name: 'Diese Aktion freigeben' }).click();
   await expect(approval).toContainText('Freigegeben, wartet auf Ausführung.');
   expect(approved.confirmed).toBe(true);
+});
+test('technical account rights and token rotation are managed in the interface', async ({ page }) => {
+  let created, rotated;
+  const state = {
+    scopes: ['support:read'],
+    operations: [{ id: 'support.get.support', method: 'GET', path: '/api/external/v1/support/support' }],
+    service_accounts: [],
+    tokens: [
+      {
+        id: 'token-1',
+        name: 'Service Token',
+        audience: 'api',
+        scopes: '["support:read"]',
+        operations: '["support.get.support"]',
+        expires_at: '2099-01-01 00:00:00',
+        revoked_at: null,
+        rotated_to: null,
+      },
+    ],
+    modules: [],
+    settings: [],
+    events: [],
+    confirmations: [],
+  };
+  await page.route('**/api/**', async (route) => {
+    const r = route.request(),
+      p = new URL(r.url()).pathname;
+    let body = {};
+    if (p.endsWith('/auth/me'))
+      body = {
+        id: 1,
+        name: 'Admin',
+        role: 'system_admin',
+        permissions: ['*'],
+        installed_modules: ['api', 'mcp', 'support'],
+      };
+    else if (p.endsWith('/modules'))
+      body = ['api', 'mcp', 'support'].map((code) => ({
+        code,
+        installed: true,
+        version: '0.1.3',
+        permissions: [],
+        dependencies: {},
+      }));
+    else if (p.endsWith('/dashboard')) body = { recent_audit: [] };
+    else if (p.endsWith('/csrf')) body = { token: 'csrf' };
+    else if (p.endsWith('/service-accounts')) {
+      created = r.postDataJSON();
+      body = { id: 'service-1' };
+      state.service_accounts.push({
+        id: 'service-1',
+        name: created.name,
+        operations: JSON.stringify(created.operations),
+        revision: 0,
+        active: true,
+      });
+    } else if (p.endsWith('/tokens/token-1/rotate')) {
+      rotated = r.postDataJSON();
+      body = { token: 'ph_replacement-once' };
+      state.tokens[0].rotated_to = 'token-2';
+    } else if (p.endsWith('/access')) body = state;
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(body) });
+  });
+  await page.goto('/administration/login');
+  await page.getByRole('button', { name: 'System-Einstellungen', exact: true }).click();
+  await page.getByRole('button', { name: 'API & MCP', exact: true }).click();
+  const form = page
+    .locator('form')
+    .filter({ has: page.getByRole('button', { name: 'Technisches Konto erstellen', exact: true }) });
+  await form.getByLabel('Kontoname', { exact: true }).fill('Nachtimport');
+  await form.getByLabel('Erlaubte Konto-Aktionen').selectOption('support.get.support');
+  await form.getByLabel('Aktuelles Kennwort').fill('Test-password-123');
+  await form.getByLabel('Aktion verbindlich bestätigen').check();
+  await form.getByRole('button', { name: 'Technisches Konto erstellen' }).click();
+  await expect(page.getByLabel('Identität')).toContainText('Nachtimport');
+  expect(created.operations).toEqual(['support.get.support']);
+  const rotation = page
+    .locator('form')
+    .filter({ has: page.getByRole('button', { name: 'Token rotieren', exact: true }) });
+  await rotation.getByLabel('Übergangszeit in Stunden').fill('2');
+  await rotation.getByLabel('Aktuelles Kennwort').fill('Test-password-123');
+  await rotation.getByLabel('Aktion verbindlich bestätigen').check();
+  await rotation.getByRole('button', { name: 'Token rotieren' }).click();
+  await expect(page.getByLabel('Neuer API-Token')).toHaveValue('ph_replacement-once');
+  expect(rotated.overlap_hours).toBe(2);
+  await expect(page.getByRole('button', { name: 'Token rotieren', exact: true })).toHaveCount(0);
 });

@@ -62,8 +62,12 @@ class ReservationNotifications implements \App\Contracts\Module\ReservationNotif
             }
         }
     }
-    public function dispatch(string $restaurant, string $timezone, int $limit = 20): void
-    {
+    public function dispatch(
+        string $restaurant,
+        string $timezone,
+        int $limit = 20,
+        ?int $tenantId = null,
+    ): void {
         $db = $this->db->connection('tenant');
         $settings = $db->table('reservation_notification_settings')->find(1);
         if (!$settings) {
@@ -110,6 +114,19 @@ class ReservationNotifications implements \App\Contracts\Module\ReservationNotif
                 continue;
             }
             [$e, $r] = $event;
+            $attempt = null;
+            if ($tenantId !== null) {
+                $publicId = (string) \Illuminate\Support\Str::uuid();
+                $attempt = $this->db->table('notification_attempts')->insertGetId([
+                    'public_id' => $publicId,
+                    'tenant_id' => $tenantId,
+                    'event_id' => $id,
+                    'channel' => $e->channel,
+                    'status' => 'sending',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
             $recipient = $e->channel === 'email' ? $r->email : $r->phone;
             $valid =
                 $e->channel === 'email'
@@ -154,21 +171,48 @@ class ReservationNotifications implements \App\Contracts\Module\ReservationNotif
                                 'From' => config('reservation_notifications.sms.from'),
                                 'To' => $recipient,
                                 'Body' => $text,
+                                ...$attempt && str_starts_with(config('app.url'), 'https://')
+                                    ? [
+                                        'StatusCallback' =>
+                                            rtrim(config('app.url'), '/') .
+                                            '/api/notification/status/' .
+                                            $publicId,
+                                    ]
+                                    : [],
                             ]);
                         if (!$response->successful()) {
-                            $db->table('reservation_notifications')
-                                ->where('id', $id)
-                                ->update(['status' => 'rejected']);
-                            continue;
+                            $status = 'rejected';
+                        } else {
+                            $status = 'accepted';
+                            if (
+                                $attempt &&
+                                preg_match('/^SM[0-9a-f]{32}$/i', (string) $response->json('sid'))
+                            ) {
+                                $this->db
+                                    ->table('notification_attempts')
+                                    ->where('id', $attempt)
+                                    ->whereNull('provider_sid')
+                                    ->update(['provider_sid' => $response->json('sid')]);
+                            }
                         }
                     }
-                    $status = 'accepted';
+                    if ($e->channel === 'email') {
+                        $status = 'accepted';
+                    }
                 } catch (\Throwable) {
                     $status = 'unknown';
                 }
             }
+            if ($attempt) {
+                $this->db
+                    ->table('notification_attempts')
+                    ->where('id', $attempt)
+                    ->where('status', 'sending')
+                    ->update(['status' => $status, 'updated_at' => now()]);
+            }
             $db->table('reservation_notifications')
                 ->where('id', $id)
+                ->where('status', 'sending')
                 ->update(['status' => $status, 'processed_at' => now()->utc()]);
         }
     }

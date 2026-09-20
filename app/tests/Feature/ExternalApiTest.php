@@ -72,6 +72,97 @@ class ExternalApiTest extends TestCase
     {
         return $this->withHeader('Authorization', 'Bearer ' . $token);
     }
+
+    public function json($method, $uri, array $data = [], array $headers = [], $options = 0)
+    {
+        $response = parent::json($method, $uri, $data, $headers, $options);
+        $file = getenv('PLATZHIRSCH_API_OBSERVATIONS');
+        if (
+            $file &&
+            str_contains($uri, '/api/external/v1/') &&
+            $response->getStatusCode() < 300 &&
+            str_contains($response->headers->get('Content-Type', ''), 'application/json')
+        ) {
+            $path = parse_url($uri, PHP_URL_PATH);
+            if (str_ends_with($path, '/openapi.json')) {
+                file_put_contents(
+                    $file,
+                    json_encode(
+                        ['operation' => '@openapi', 'body' => json_decode($response->getContent())],
+                        JSON_THROW_ON_ERROR,
+                    ) . "\n",
+                    FILE_APPEND | LOCK_EX,
+                );
+                return $response;
+            }
+            foreach (app(Catalog::class)->all() as $op) {
+                $prefix = '/api/external/v1/' . $op['module'] . '/';
+                if ($op['method'] !== $method || !str_starts_with($path, $prefix)) {
+                    continue;
+                }
+                $request = \Illuminate\Http\Request::create(
+                    '/api/v1/' . substr($path, strlen($prefix)),
+                    $method,
+                );
+                if (!$op['route']->matches($request)) {
+                    continue;
+                }
+                file_put_contents(
+                    $file,
+                    json_encode(
+                        [
+                            'operation' => $op['id'],
+                            'status' => (string) $response->getStatusCode(),
+                            'body' => json_decode($response->getContent()),
+                        ],
+                        JSON_THROW_ON_ERROR,
+                    ) . "\n",
+                    FILE_APPEND | LOCK_EX,
+                );
+                break;
+            }
+        }
+        return $response;
+    }
+    public function test_read_contracts_cover_both_portals_and_concrete_route_variants(): void
+    {
+        \Illuminate\Support\Facades\Http::fake();
+        $this->mock(TenantDatabase::class, function ($m) {
+            $m->shouldReceive('connect', 'disconnect')->andReturnNull();
+            $m->shouldReceive('configuration')->andReturn(['host' => 'db.example.test', 'port' => '3306']);
+        });
+        foreach ([$this->admin, $this->owner] as $user) {
+            $this->flushHeaders();
+            $token = $this->token($user, app(Catalog::class)->scopes($user));
+            $this->bearer($token);
+            $this->getJson('https://localhost/api/external/v1/openapi.json')->assertOk();
+            foreach (app(Catalog::class)->manageable($user) as $op) {
+                if ($op['method'] !== 'GET') {
+                    continue;
+                }
+                $path = $op['path'];
+                $skip = false;
+                foreach ($op['parameters'] as $name) {
+                    $values = $op['contract']['parameters']['properties'][$name]['enum'] ?? null;
+                    if (!$values) {
+                        $skip = true;
+                        break;
+                    }
+                    $path = str_replace('{' . $name . '}', rawurlencode($values[0]), $path);
+                }
+                if ($skip) {
+                    continue;
+                }
+                $query = http_build_query($op['contract']['example']['query']);
+                $response = $this->getJson('https://localhost' . $path . ($query ? '?' . $query : ''));
+                $this->assertContains(
+                    $response->getStatusCode(),
+                    [200, 403, 422],
+                    $op['id'] . ' ' . $response->getContent(),
+                );
+            }
+        }
+    }
     public function test_tokens_are_hashed_once_scoped_and_revoked_immediately(): void
     {
         $token = $this->token($this->owner, ['support:read']);
@@ -250,34 +341,123 @@ class ExternalApiTest extends TestCase
     }
     public function test_remaining_module_reads_and_weather_write_use_real_controllers(): void
     {
-        $token = $this->token($this->admin, ['billing:read','customer:read','release:read','platform:read']);
+        $token = $this->token($this->admin, [
+            'billing:read',
+            'customer:read',
+            'release:read',
+            'platform:read',
+        ]);
         $this->bearer($token);
-        foreach (['billing/admin/billing','customer/admin/tenants','release/releases','platform/admin/dashboard'] as $path) {
-            $this->getJson('https://localhost/api/external/v1/'.$path)->assertOk();
+        foreach (
+            [
+                'billing/admin/billing',
+                'customer/admin/tenants',
+                'release/releases',
+                'platform/admin/dashboard',
+            ]
+            as $path
+        ) {
+            $this->getJson('https://localhost/api/external/v1/' . $path)->assertOk();
         }
         $this->flushHeaders();
-        $token = $this->token($this->owner, ['notification:read','widget:read','weather:read','weather:write']);
+        $token = $this->token($this->owner, [
+            'notification:read',
+            'widget:read',
+            'weather:read',
+            'weather:write',
+        ]);
         $this->bearer($token);
-        DB::table('billing_entitlements')->insert(['tenant_id'=>$this->tenant->id,'module_code'=>'weather','paid_until'=>now()->addMonth(),'status'=>'active']);
-        foreach (['notification/restaurant/notifications','widget/restaurant/widget','weather/restaurant/weather/settings'] as $path) {
-            $this->getJson('https://localhost/api/external/v1/'.$path)->assertOk();
+        DB::table('billing_entitlements')->insert([
+            'tenant_id' => $this->tenant->id,
+            'module_code' => 'weather',
+            'paid_until' => now()->addMonth(),
+            'status' => 'active',
+        ]);
+        foreach (
+            [
+                'notification/restaurant/notifications',
+                'widget/restaurant/widget',
+                'weather/restaurant/weather/settings',
+            ]
+            as $path
+        ) {
+            $this->getJson('https://localhost/api/external/v1/' . $path)->assertOk();
         }
-        $this->withHeader('Idempotency-Key',(string)\Illuminate\Support\Str::uuid())->putJson('https://localhost/api/external/v1/weather/restaurant/weather/settings',[
-            'enabled'=>true,'latitude'=>52.5,'longitude'=>13.4,'mode'=>'evaluation','rain_threshold'=>50,'version'=>0,
-        ])->assertOk()->assertJsonPath('saved',true);
-        $this->assertSame(1,(int)DB::connection('tenant')->table('weather_settings')->value('version'));
+        $this->withHeader('Idempotency-Key', (string) \Illuminate\Support\Str::uuid())
+            ->putJson('https://localhost/api/external/v1/weather/restaurant/weather/settings', [
+                'enabled' => true,
+                'latitude' => 52.5,
+                'longitude' => 13.4,
+                'mode' => 'evaluation',
+                'rain_threshold' => 50,
+                'version' => 0,
+            ])
+            ->assertOk()
+            ->assertJsonPath('saved', true);
+        $this->assertSame(1, (int) DB::connection('tenant')->table('weather_settings')->value('version'));
     }
     public function test_portal_token_management_and_mcp_switch_cannot_be_bypassed(): void
     {
-        $token=$this->token($this->owner,['support:read'],'mcp');
+        $token = $this->token($this->owner, ['support:read'], 'mcp');
         $this->bearer($token);
-        DB::table('api_settings')->insert(['module'=>'mcp','enabled'=>false]);
+        DB::table('api_settings')->insert(['module' => 'mcp', 'enabled' => false]);
         $this->getJson('https://localhost/api/external/v1/catalog')->assertForbidden();
         DB::table('api_settings')->delete();
-        $this->putJson('https://localhost/api/v1/access/modules/api',['enabled'=>false,'mcp_enabled'=>false,'revision'=>0,'password'=>'Test-password-123','confirmed'=>true])->assertForbidden();
-        $this->postJson('https://localhost/api/v1/access/tokens',['password'=>'incorrect','confirmed'=>true])->assertForbidden();
+        $this->putJson('https://localhost/api/v1/access/modules/api', [
+            'enabled' => false,
+            'mcp_enabled' => false,
+            'revision' => 0,
+            'password' => 'Test-password-123',
+            'confirmed' => true,
+        ])->assertForbidden();
+        $this->postJson('https://localhost/api/v1/access/tokens', [
+            'password' => 'incorrect',
+            'confirmed' => true,
+        ])->assertForbidden();
         $this->flushHeaders();
-        $this->actingAs($this->admin)->postJson('https://localhost/api/v1/access/tokens/'.DB::table('api_tokens')->value('id').'/revoke',['password'=>'Test-password-123','confirmed'=>true])->assertNotFound();
+        $this->actingAs($this->admin)
+            ->postJson(
+                'https://localhost/api/v1/access/tokens/' . DB::table('api_tokens')->value('id') . '/revoke',
+                ['password' => 'Test-password-123', 'confirmed' => true],
+            )
+            ->assertNotFound();
         $this->bearer($token)->getJson('https://localhost/api/external/v1/catalog')->assertOk();
+    }
+    public function test_role_rollout_preview_works_without_browser_session_and_is_token_bound(): void
+    {
+        $token = $this->token($this->admin, ['identity:write']);
+        $this->bearer($token);
+        $body = [
+            'name' => 'API-Rolle',
+            'permissions' => ['reservation.read'],
+            'tenant_ids' => [$this->tenant->id],
+        ];
+        $confirmation = $this->postJson('https://localhost/api/external/v1/confirmations', [
+            'operation' => 'identity.post.admin_role_rollout_preview',
+            'parameters' => [],
+            'query' => [],
+            'body' => $body,
+        ])
+            ->assertOk()
+            ->json('id');
+        $this->postJson('https://localhost/api/v1/access/confirmations/' . $confirmation . '/approve', [
+            'password' => 'Test-password-123',
+            'confirmed' => true,
+        ])->assertOk();
+        $preview = $this->withHeaders([
+            'X-Api-Confirmation' => $confirmation,
+            'Idempotency-Key' => (string) \Illuminate\Support\Str::uuid(),
+        ])
+            ->postJson('https://localhost/api/external/v1/identity/admin/role-rollout/preview', $body)
+            ->assertOk()
+            ->json();
+        $this->assertSame('API-Rolle', $preview['preview']['name']);
+        $cache = app(\Illuminate\Contracts\Cache\Factory::class)->store();
+        $id = DB::table('api_tokens')->value('id');
+        $this->assertSame(
+            $preview['token'],
+            $cache->get('identity:rollout:' . $this->admin->id . ':' . $id)['token'],
+        );
+        $this->assertNull($cache->get('identity:rollout:' . $this->admin->id . ':other-token'));
     }
 }

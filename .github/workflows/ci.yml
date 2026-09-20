@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
@@ -23,10 +25,28 @@ jobs:
         run: mkdir -p app/storage/logs app/storage/framework/{sessions,views,cache} app/bootstrap/cache
       - run: composer install --no-interaction --prefer-dist
         working-directory: app
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: API schemas, examples and backward compatibility
+        env:
+          API_BASE_COMMIT: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          python -m pip install jsonschema==4.26.0
+          python tools/api/test_contracts.py
+          if [ -n "$API_BASE_COMMIT" ]; then
+            python tools/api/check.py --base "$API_BASE_COMMIT"
+          else
+            python tools/api/check.py
+          fi
       - name: PHP syntax
         run: find app/app app/packages app/config app/database app/routes app/tests installer -name '*.php' -print0 | xargs -0 -n1 php -l
       - run: composer test
         working-directory: app
+        env:
+          PLATZHIRSCH_API_OBSERVATIONS: /tmp/platzhirsch-api-observations.jsonl
+      - name: Validate observed API responses
+        run: python tools/api/check.py --observations /tmp/platzhirsch-api-observations.jsonl
       - name: Real SMTP STARTTLS delivery, registration and invoice flow
         env:
           PLATZHIRSCH_SMTP_TEST_DIRECTORY: /tmp/platzhirsch-smtp-test

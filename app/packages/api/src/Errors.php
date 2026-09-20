@@ -47,15 +47,14 @@ class Errors
             $response->headers->set('Retry-After', '60');
         }
         if ($token = $r->attributes->get('api.token')) {
-            $this->db
-                ->table('api_access_events')
-                ->insert([
-                    'request_id' => $id,
-                    'token_id' => $token->id,
-                    'operation' => $r->attributes->get('api.operation', 'api.discovery'),
-                    'http_status' => $response->getStatusCode(),
-                    'created_at' => now(),
-                ]);
+            $this->db->table('api_access_events')->insert([
+                'request_id' => $id,
+                'token_id' => $token->id,
+                'service_account_id' => $token->service_account_id ?? null,
+                'operation' => $r->attributes->get('api.operation', 'api.discovery'),
+                'http_status' => $response->getStatusCode(),
+                'created_at' => now(),
+            ]);
         }
         return $response;
     }
